@@ -154,3 +154,11 @@ mode" renderer from smol-vm. Remaining work to do
    is color, fg + 16 * bg.
 
  - Made webgl consume a texture instead of a big uniform
+
+=== 2022.11.24 META: (:id bc25c232-1939-4ed7-a346-2d6f5870a782)
+
+From above:
+
+Q: If executables send a file up, how is it communicated effectively
+to the player that this has happened?
+A: Maybe have the ".." entry blink?
