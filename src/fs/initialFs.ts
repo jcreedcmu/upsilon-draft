@@ -1,6 +1,6 @@
 import { errorCodes, errorCodeText } from '../core/error-codes';
 import { Resources } from './resources';
-import { Fs, insertPlans, ItemPlan, mkFs } from './fs';
+import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
 import { KeyAction } from '../core/model';
 
 export enum SpecialId {
@@ -91,7 +91,7 @@ function binDir(): ItemPlan {
   };
 }
 
-function initialPlans(): ItemPlan[] {
+function initialPlans(): VirtualItemPlan[] {
   return [
     {
       t: 'dir', name: 'sys',
@@ -102,6 +102,7 @@ function initialPlans(): ItemPlan[] {
       ]
     },
     binDir(),
+    { t: 'virtual', id: 'dir' },
     {
       t: 'dir', name: 'home', contents: [
         { t: 'file', name: 'foo', resources: { cpu: 5 } },

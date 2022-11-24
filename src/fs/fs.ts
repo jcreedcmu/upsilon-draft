@@ -4,6 +4,11 @@ import { SpecialId } from "./initialFs";
 import { canOpen } from '../core/lines';
 import { Hook, Ident, Item, Location } from '../core/model';
 
+/// Constants
+
+const VIRTUAL_ITEM_PATTERN = /^_gen_/;
+const VIRTUAL_ITEM_PREFIX = '_gen_';
+
 /// Types
 
 export type Fs = {
@@ -16,10 +21,13 @@ export type Fs = {
 };
 
 export type ItemPlan =
-  | { t: 'dir', name: string, contents: ItemPlan[], forceId?: Ident, hooks?: Hook[] }
+  | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[] }
   | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, numTargets?: number, resources?: Resources }
   | { t: 'file', name: string, text?: string, size?: number, resources?: Resources }
   | { t: 'instr', name: string };
+
+export type VirtualItemPlan = ItemPlan
+  | { t: 'virtual', id: Ident };
 
 /// Fs Read Utilities
 
@@ -32,9 +40,21 @@ export function getFullContents(fs: Fs, ident: Ident): Item[] {
   return getContents(fs, ident).map(id => getItem(fs, id));
 }
 
+export function getVirtualItem(fs: Fs, ident: Ident): Item {
+  if (ident == 'file') {
+    return planItem({ t: 'file', name: 'foobar', text: 'blah' });
+  }
+  else {
+    return planItem({ t: 'dir', name: 'virtual', contents: [{ t: 'virtual', id: 'file' }] });
+  }
+}
+
 export function getItem(fs: Fs, ident: Ident): Item {
   const item = fs.idToItem[ident];
-  if (item == undefined) {
+  if (item === undefined) {
+    if (ident.match(VIRTUAL_ITEM_PATTERN)) {
+      return getVirtualItem(fs, ident.replace(VIRTUAL_ITEM_PATTERN, ''));
+    }
     throw new Error(`Couldn't find ident ${ident}`);
   }
   return item;
@@ -96,12 +116,11 @@ export function mkFs(): Fs {
   return fs;
 }
 
-export function insertPlan(fs: Fs, loc: Ident, plan: ItemPlan): [Fs, Ident] {
+function planItem(plan: ItemPlan): Item {
   switch (plan.t) {
 
     case 'dir': {
-      let ident;
-      const dirItem: Item = {
+      return {
         name: plan.name,
         acls: { open: true },
         contents: [],
@@ -109,48 +128,57 @@ export function insertPlan(fs: Fs, loc: Ident, plan: ItemPlan): [Fs, Ident] {
         size: 1,
         hooks: plan.hooks,
       };
-      [fs, ident] = insertItem(fs, loc, dirItem, plan.forceId);
-      let idents;
-      [fs, idents] = insertPlans(fs, ident, plan.contents);
-      return [fs, ident];
     }
 
     case 'exec': {
-      let ident;
-      const item: Item = {
+      return {
         name: plan.name,
         acls: { exec: true, pickup: true },
         contents: [],
         resources: plan.resources ?? {},
         size: 1,
       };
-
-      [fs, ident] = insertItem(fs, loc, item, plan.forceId);
-      let idents;
-      [fs, idents] = insertPlans(fs, ident, plan.contents);
-      return [fs, ident];
     }
 
-    case 'file': return insertItem(fs, loc, {
+    case 'file': return {
       name: plan.name,
       acls: { pickup: true },
       contents: [],
       text: plan.text,
       resources: {},
       size: 1,
-    });
+    };
 
-    case 'instr': return insertItem(fs, loc, {
+    case 'instr': return {
       name: plan.name,
       acls: { instr: true, pickup: true },
       contents: [],
       resources: {},
       size: 1,
-    });
+    };
   }
 }
 
-export function insertPlans(fs: Fs, loc: Ident, plans: ItemPlan[]): [Fs, Ident[]] {
+export function insertPlan(fs: Fs, loc: Ident, plan: VirtualItemPlan): [Fs, Ident] {
+  let ident;
+  if (plan.t == 'virtual') {
+    ident = `${VIRTUAL_ITEM_PREFIX}${plan.id}`;
+    // XXX factor this out as insertIdLast?
+    const ix = getContents(fs, loc).length; // ignore hooks during init
+    [fs,] = insertId(fs, loc, ix, ident);
+  }
+  else {
+    [fs, ident] = insertItem(fs, loc, planItem(plan),
+      'forceId' in plan ? plan.forceId : undefined);
+
+    if (plan.t == 'dir' || plan.t == 'exec') {
+      [fs,] = insertPlans(fs, ident, plan.contents);
+    }
+  }
+  return [fs, ident];
+}
+
+export function insertPlans(fs: Fs, loc: Ident, plans: VirtualItemPlan[]): [Fs, Ident[]] {
   const idents: Ident[] = [];
   for (const plan of plans) {
     let ident;
@@ -178,7 +206,8 @@ export function insertItem(fs: Fs, loc: Ident, item: Item, forceId?: Ident): [Fs
       fsd.counter++;
     fsd.idToItem[id] = item; // create the item itself
   });
-  const ix = fs.idToItem[loc].contents.length;
+  const ix = getContents(fs, loc).length;
+  // XXX factor this out as insertIdLast?
   [fs,] = insertId(fs, loc, ix, id); // ignore hooks during init
   return [fs, id];
 }
@@ -192,7 +221,10 @@ export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]
   fs = produce(fs, fsd => {
     const contents = fsd.idToItem[loc].contents;
     contents.splice(ix, 0, id); // insert id at index ix
+
     // recache the position of every item in the dir
+    // XXX There is some annoying quadratic time-wasting during
+    // initialization updating _cached_locmap a lot, oh well.
     contents.forEach((id, ix) => {
       fsd._cached_locmap[id] = { t: 'at', id: loc, pos: ix };
     });
