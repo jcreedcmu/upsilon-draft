@@ -7,6 +7,13 @@ This is a prototype of a game idea drawing some inspiration from
  - TIS-100 & other zachtronics games
  - smalltalk-style reflection
 
+Demo
+----
+
+Demo available here: https://jcreedcmu.github.io/upsilon-draft/
+
+This is built and deployed by [this github actions workflow](https://github.com/jcreedcmu/upsilon-draft/blob/main/.github/workflows/static.yml).
+
 Development
 ----------
 
