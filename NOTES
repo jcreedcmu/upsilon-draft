@@ -197,3 +197,16 @@ A: It expects a message to specify which binary to build.
 Q: What does the end of the game look like?
 A: Maybe gaining root access on some remote machine, being able to
 turn it off?
+
+Q: A thing I've noticed while trying to implement virtual/procgen'ned files is
+that there is a slight conflict with my cache of item locations. What should I do?
+A: For a minute I thought I should embark on a big refactor to make locations part
+of items, but now I think that's unnecessary, maybe.
+
+Perhaps I just need to wrap querying the fs for the location of an
+item, and intercept any requests for yet- unreified virtual ids, and
+compute their location lazily instead. This will mean continuing to
+wait for actual fs changes to reify anything. As a consequence, if I
+do an insert/remove inside a virtual container, I will need to reify:
+ - the container, because its state (i.e. its contents) has changed.
+ - the subsequent siblings, because their induced state (i.e. their location) has changed.
