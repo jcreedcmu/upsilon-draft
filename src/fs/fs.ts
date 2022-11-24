@@ -25,11 +25,7 @@ export type ItemPlan =
 
 export function getContents(fs: Fs, ident: Ident): Ident[] {
   const item = getItem(fs, ident);
-  const contents = item.contents;
-  switch (contents.t) {
-    case 'normal':
-      return contents.idents;
-  }
+  return item.contents;
 }
 
 export function getFullContents(fs: Fs, ident: Ident): Item[] {
@@ -82,7 +78,7 @@ function makeInsertRootItem(fs: Fs, name: SpecialId): Fs {
   [fs,] = insertRootItem(fs, name, {
     name,
     acls: {},
-    contents: { t: 'normal', idents: [] },
+    contents: [],
     resources: {},
     size: 0
   });
@@ -108,7 +104,7 @@ export function insertPlan(fs: Fs, loc: Ident, plan: ItemPlan): [Fs, Ident] {
       const dirItem: Item = {
         name: plan.name,
         acls: { open: true },
-        contents: { t: 'normal', idents: [] },
+        contents: [],
         resources: {},
         size: 1,
         hooks: plan.hooks,
@@ -124,7 +120,7 @@ export function insertPlan(fs: Fs, loc: Ident, plan: ItemPlan): [Fs, Ident] {
       const item: Item = {
         name: plan.name,
         acls: { exec: true, pickup: true },
-        contents: { t: 'normal', idents: [] },
+        contents: [],
         resources: plan.resources ?? {},
         size: 1,
       };
@@ -138,7 +134,7 @@ export function insertPlan(fs: Fs, loc: Ident, plan: ItemPlan): [Fs, Ident] {
     case 'file': return insertItem(fs, loc, {
       name: plan.name,
       acls: { pickup: true },
-      contents: { t: 'normal', idents: [] },
+      contents: [],
       text: plan.text,
       resources: {},
       size: 1,
@@ -147,7 +143,7 @@ export function insertPlan(fs: Fs, loc: Ident, plan: ItemPlan): [Fs, Ident] {
     case 'instr': return insertItem(fs, loc, {
       name: plan.name,
       acls: { instr: true, pickup: true },
-      contents: { t: 'normal', idents: [] },
+      contents: [],
       resources: {},
       size: 1,
     });
@@ -182,7 +178,7 @@ export function insertItem(fs: Fs, loc: Ident, item: Item, forceId?: Ident): [Fs
       fsd.counter++;
     fsd.idToItem[id] = item; // create the item itself
   });
-  const ix = fs.idToItem[loc].contents.idents.length;
+  const ix = fs.idToItem[loc].contents.length;
   [fs,] = insertId(fs, loc, ix, id); // ignore hooks during init
   return [fs, id];
 }
@@ -194,7 +190,7 @@ export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]
     throw new Error(`Invariant violation: trying to insert item in unknown location ${loc}`);
   }
   fs = produce(fs, fsd => {
-    const contents = fsd.idToItem[loc].contents.idents;
+    const contents = fsd.idToItem[loc].contents;
     contents.splice(ix, 0, id); // insert id at index ix
     // recache the position of every item in the dir
     contents.forEach((id, ix) => {
@@ -209,10 +205,10 @@ export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
   if (parent == undefined) {
     throw new Error(`Invariant violation: trying to remove item from unknown location ${loc}`);
   }
-  const id = fs.idToItem[loc].contents.idents[ix];
+  const id = fs.idToItem[loc].contents[ix];
 
   fs = produce(fs, fsd => {
-    const contents = fsd.idToItem[loc].contents.idents;
+    const contents = fsd.idToItem[loc].contents;
 
     contents.splice(ix, 1); // remove id at index ix
     // recache the position of every item in the dir

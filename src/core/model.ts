@@ -31,8 +31,6 @@ export type Location =
   | { t: 'at', id: Ident, pos: number }
   | { t: 'is_root' };
 
-export type Contents = { t: 'normal', idents: Ident[] };
-
 // A hook is an extra piece of code that should be run any time a
 // directory has its contents changed.
 export type Hook =
@@ -42,10 +40,7 @@ export type Hook =
 export type Item = {
   name: string; // displayable name
 
-  // Contents of a container item. if `contents` is undefined, it
-  // means we should lazily generate contents by calling
-  // `content_generator`.
-  contents: Contents;
+  contents: Ident[];
 
   // Other game-relevant attributes
   acls: Acls; // Permissions bits
@@ -112,8 +107,8 @@ export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
   const cont = getFullContents(fs, SpecialId.keys);
   const rv: Record<string, KeyAction> = {};
   cont.forEach(item => {
-    if (item.contents.idents.length == 1) {
-      const inner = getItem(fs, item.contents.idents[0]);
+    if (item.contents.length == 1) {
+      const inner = getItem(fs, item.contents[0]);
       if (Object.values(KeyAction).includes(inner.name as KeyAction)) {
         rv[item.name] = inner.name as KeyAction;
       }
