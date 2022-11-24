@@ -1,14 +1,14 @@
-import { produce } from "../util/produce";
-import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs } from "./model";
-import { getContents, getItem, getItemIdsAfter, getLocation, removeId } from "../fs/fs";
+import { produce } from '../util/produce';
+import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs } from './model';
+import { getContents, getItem, getItemIdsAfter, getLocation, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes } from './error-codes';
 import { nowTicks } from './clock';
 import { logger } from '../util/debug';
-import { insertId } from "../fs/fs";
+import { insertId } from '../fs/fs';
 import { getResource, modifyResource } from '../fs/resources';
 import { executeInstructions } from './executeInstructions';
-import { SpecialId } from "../fs/initialFs";
+import { SpecialId } from '../fs/initialFs';
 
 export const EXEC_TICKS = 6;
 
