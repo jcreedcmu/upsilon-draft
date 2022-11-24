@@ -1,0 +1,156 @@
+=== 2020.02.01
+
+# lazy evaluation of file tree
+# pick up and drop files
+# inspect file contents
+# executables
+# attribute markup
+# error codes
+
+=== 2020.02.02
+
+# locked files
+
+=== 2020.02.06
+
+maybe 'executables' operate on adjacent files, when triggered?
+
+the other alternative I thought of and partly implemented was files
+that themselves take up multiple slots, and dropping files on 'parts'
+other than the first drop into the slots.
+
+=== 2020.02.13
+
+What is the timing regimen?
+
+When you perform an action, generally speaking, the state is updated
+and redisplayed immediately. Asynchronous scheduled actions happen
+once per tick, which lasts something like 100-300ms or so. The
+intention is that ticks happen on a schedule independent of user
+input, tied to the time the program was initialized at. This means
+that the first progress-bar update on a long running action might
+occur as late as one full tick from the time of user action, and as
+early as immediately after the action. The user interface state should
+nonetheless change immediately following the user-initiated action to
+indicate that the progress bar *exists*, even though it may stay at
+value 0 for a full tick.
+
+=== 2020.02.18
+
+What do I want gameplay to look like? It's going to consist of
+deciding what sort of obstacles exist, which automation, building,
+arrangement, etc. remove.
+
+I could make it more difficult to move around 'heavy' files, or, well,
+the natural thing that fits with the filesystem metaphor is to make
+'heavy' mean 'large in bytes'. There is also the possibility of
+security levels.
+
+How is moving around heavy files accomplished, if not by mere
+picking-up and putting-down? I had some thoughts about the idea of
+creating paired markers, where maybe if you feed one as an argument to
+an executable, it can send a file to the other. But this is a fairly
+strong mechanism, assuming the idea is that you can carry one marker
+arbitrarily far away. Something that better respects the 'spatiality'
+of the tree structure of the filesystem is making you transport it one
+step at a time. Maybe executables can send a file up the hierarchy, or
+forward and back inside a directory.
+
+Does this create a bottleneck on the way up? Perhaps there are two
+distinct operations, (1) and (2):
+<<<
+move this file up to the parent dir, so that it is
+ (1) before
+ (2) after
+the directory in which it was formerly contained
+>>>
+and then maybe nearby executables can be triggered by that.
+
+That suggests that executables should
+ (a) be able to consume files from either side, and
+ (b) be able to be 'woken up' by files appearing next to them
+
+Some care might need to be taken about the ordering of execution of
+such wakeups.
+
+=== 2020.02.19
+
+Are there like piles of undifferentiated items, where attempting to
+pick it up gives you one of the many items? How do drops work? Do they
+coalesce if dropped adjacent to the pile?
+
+If executables send a file up, how is it communicated effectively to
+the player that this has happened?
+
+Should there be some way of cancelling long-running executables?
+
+How could I get extra inventory slots? What does picking up in that
+case mean? Use it like a stack or something? Should I already be using
+z/x instead of space for pickup and drop?
+
+different subdirectories have different color themes/music?
+
+Where does charge go if a file is divided? Or is that part of the
+puzzle, maybe --- maybe forbid a nonzero charge file from being
+divided. This makes some pragmatic sense, since probably executables
+have charge, and it's 'data files' that are going to be sharded or
+whatever.
+
+Brainstorm opaque mysterious vague file types?
+ link
+ address
+ contact
+ medical
+ rating
+ review
+ invoice
+ payment
+ art
+ image
+ photo
+ vector
+ music
+ script
+ savegame
+ model
+ mesh
+ graph
+ archive
+ backup
+
+=== 2020.02.22
+
+Should I make charging/uncharging free?
+
+How does one go about synthesizing instructions?
+
+Are there maybe 'typed' directories with schemas, where appropriately
+typed files go in certain slots?
+
+=== 2022.11.06 META: (:id e426f5af-a7ab-4a61-9179-a5b514959150)
+
+Brainstorming resource flavors and/or names:
+cpu cycle --- cycle, comp, iter, instruction
+ram space --- cell, file, byte
+filesystem space --- inode, node, byte, file
+text space --- glyph, letter, char
+graphics/UX space --- pixel, rect, sprite
+network byte --- transmit, bandwidth, packet
+permissions capability juice --- power, perm, acl, status, cap
+
+=== 2022.11.13 META: (:id 5618a941-08e0-4321-afb7-8ea2458cd75d)
+
+Doing some refactoring. Copied over some code from the webgl "text
+mode" renderer from smol-vm. Remaining work to do
+ - Make it so that we don't recompute the text page every time from Screen's
+   internal representation, but instead have Screen's representation be what
+   the webgl wants to consume.
+ - Make webgl consume a texture instead of a big uniform, maybe?
+
+=== 2022.11.14 META: (:id beb46451-4ced-4447-ba78-a893592a1cf4)
+
+ - Made it so that Screen's representation is what the webgl wants to consume.
+   That is: list of pairs of bytes, first byte is character code, second byte
+   is color, fg + 16 * bg.
+
+ - Made webgl consume a texture instead of a big uniform
