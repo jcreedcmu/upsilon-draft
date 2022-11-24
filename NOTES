@@ -88,7 +88,8 @@ How could I get extra inventory slots? What does picking up in that
 case mean? Use it like a stack or something? Should I already be using
 z/x instead of space for pickup and drop?
 
-different subdirectories have different color themes/music?
+different subdirectories (or network hosts) have different color
+themes/fonts/background music/sound?
 
 Where does charge go if a file is divided? Or is that part of the
 puzzle, maybe --- maybe forbid a nonzero charge file from being
@@ -162,3 +163,37 @@ From above:
 Q: If executables send a file up, how is it communicated effectively
 to the player that this has happened?
 A: Maybe have the ".." entry blink?
+
+Thinking about obstacles to automation that need to be overcome.
+
+What are some basic operations?
+
+- Moving files around
+- Moving resources around
+- Creating/destroying files that can do operations automatically
+- Obtaining documentation
+- unlocking files (if you have enough permissions)
+- triggering execution of other binaries
+- view hidden files (if you have enough permissions)
+
+So what are some "binaries" I can imagine the player obtaining?
+
+- miner/charger
+- move-up
+- run
+- compiler
+- unlock
+
+Q: What if binaries can send messages to one another, and the player
+triggering execution is just one such message?
+A: The code for handlers for messages would be stored in specially
+named subdirectories of the binary. One could imagine at some later
+stage figuring out how to insert primitive message-sends into the
+keybinding directory.
+
+Q: How does the "compiler" work?
+A: It expects a message to specify which binary to build.
+
+Q: What does the end of the game look like?
+A: Maybe gaining root access on some remote machine, being able to
+turn it off?
