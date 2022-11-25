@@ -42,10 +42,23 @@ export function getFullContents(fs: Fs, ident: Ident): Item[] {
 
 export function getVirtualItem(fs: Fs, ident: Ident): Item {
   if (ident == 'file') {
-    return planItem({ t: 'file', name: 'foobar', text: 'blah' });
+    return itemOfPlan({ t: 'file', name: 'foobar', text: 'blah' });
   }
   else {
-    return planItem({ t: 'dir', name: 'virtual', contents: [{ t: 'virtual', id: 'file' }] });
+    return itemOfPlan({ t: 'dir', name: 'virtual', contents: [{ t: 'virtual', id: 'file' }] });
+  }
+}
+
+function virtualId(ident: Ident): Ident {
+  return `${VIRTUAL_ITEM_PREFIX}${ident}`;
+}
+
+export function getVirtualItemLocation(fs: Fs, ident: Ident): Location {
+  if (ident == 'file') {
+    return { t: 'at', id: virtualId('dir'), pos: 0 }
+  }
+  else {
+    return { t: 'is_root' };
   }
 }
 
@@ -60,17 +73,16 @@ export function getItem(fs: Fs, ident: Ident): Item {
   return item;
 }
 
-export function getLocation(fs: Fs, ident: Ident): Location | undefined {
-  return fs._cached_locmap[ident];
+export function getLocation(fs: Fs, ident: Ident): Location {
+  const location = fs._cached_locmap[ident];
+  if (location === undefined) {
+    if (ident.match(VIRTUAL_ITEM_PATTERN)) {
+      return getVirtualItemLocation(fs, ident.replace(VIRTUAL_ITEM_PATTERN, ''));
+    }
+    throw new Error(`Couldn't find location of ident ${ident}`);
+  }
+  return location;
 }
-
-//// FIXME: dead code?
-//
-// export function getDirMaybe(fs: Fs, ident: Ident): Item | undefined {
-//   const cand = fs.idToItem[ident];
-//   if (!canOpen(cand)) return undefined;
-//   return cand;
-// }
 
 export function getItemIdsAfter(fs: Fs, ident: Ident, howMany: number): Ident[] | undefined {
   const rv: Item[] = [];
@@ -116,14 +128,14 @@ export function mkFs(): Fs {
   return fs;
 }
 
-function planItem(plan: ItemPlan): Item {
+function itemOfPlan(plan: ItemPlan): Item {
   switch (plan.t) {
 
     case 'dir': {
       return {
         name: plan.name,
         acls: { open: true },
-        contents: [],
+        contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []),
         resources: {},
         size: 1,
         hooks: plan.hooks,
@@ -162,13 +174,13 @@ function planItem(plan: ItemPlan): Item {
 export function insertPlan(fs: Fs, loc: Ident, plan: VirtualItemPlan): [Fs, Ident] {
   let ident;
   if (plan.t == 'virtual') {
-    ident = `${VIRTUAL_ITEM_PREFIX}${plan.id}`;
+    ident = virtualId(plan.id);
     // XXX factor this out as insertIdLast?
     const ix = getContents(fs, loc).length; // ignore hooks during init
     [fs,] = insertId(fs, loc, ix, ident);
   }
   else {
-    [fs, ident] = insertItem(fs, loc, planItem(plan),
+    [fs, ident] = insertItem(fs, loc, itemOfPlan(plan),
       'forceId' in plan ? plan.forceId : undefined);
 
     if (plan.t == 'dir' || plan.t == 'exec') {
