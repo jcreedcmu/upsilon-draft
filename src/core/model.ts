@@ -37,14 +37,18 @@ export type Hook =
   | 'LENS'
   | 'KEY';
 
-export type Item = {
-  name: string; // displayable name
+export type Value = number | string;
 
-  contents: Ident[];
+export type Item = {
+  name: string, // displayable name
+
+  contents: Ident[],
 
   // Other game-relevant attributes
-  acls: Acls; // Permissions bits
-  resources: Resources; // "resources" stored in this item
+  acls: Acls, // Permissions bits
+  resources: Resources, // "resources" stored in this item
+
+  stack?: Value[], // some stack-machine values
 
   // This becomes defined when item is a currently-executing
   // executable.
@@ -54,8 +58,8 @@ export type Item = {
   // should be interpreted as default 1 if absent.
   numTargets?: number,
 
-  size: number;
-  text?: string;
+  size: number,
+  text?: string,
 
   hooks?: Hook[],
 };
