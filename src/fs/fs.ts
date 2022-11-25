@@ -23,7 +23,7 @@ export type Fs = {
 export type ItemPlan =
   | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[] }
   | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, numTargets?: number, resources?: Resources }
-  | { t: 'file', name: string, text?: string, size?: number, resources?: Resources }
+  | { t: 'file', name: string, text?: string, size?: number, resources?: Resources, forceId?: Ident }
   | { t: 'instr', name: string };
 
 export type VirtualItemPlan = ItemPlan
@@ -224,32 +224,10 @@ export function insertItem(fs: Fs, loc: Ident, item: Item, forceId?: Ident): [Fs
   return [fs, id];
 }
 
-// This doesn't create the item itself, just inserts the id in the right place
-export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]] {
-  const parent = fs.idToItem[loc];
-  if (parent == undefined) {
-    throw new Error(`Invariant violation: trying to insert item in unknown location ${loc}`);
-  }
-  fs = produce(fs, fsd => {
-    const contents = fsd.idToItem[loc].contents;
-    contents.splice(ix, 0, id); // insert id at index ix
-
-    // recache the position of every item in the dir
-    // XXX There is some annoying quadratic time-wasting during
-    // initialization updating _cached_locmap a lot, oh well.
-    contents.forEach((id, ix) => {
-      fsd._cached_locmap[id] = { t: 'at', id: loc, pos: ix };
-    });
-  });
-  return [fs, parent.hooks ?? []];
-}
-
-function spliced<T>(list: T[], ix: number, length: number): T[] {
-  const tmp = [...list];
-  tmp.slice(ix, length);
-  return tmp;
-}
-
+// Takes an fs and a pure function modifying an item (ok if it uses
+// produce) and returns an fs with item `ident` so modified.
+// Crucially, if ident is a virtual id, we still do the right thing,
+// that is, we reify the virtual item in the course of modifying it.
 function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
   const newItem = f(getItem(fs, ident));
   return produce(fs, fsd => {
@@ -257,16 +235,40 @@ function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
   });
 }
 
+// This doesn't create the item itself, just inserts the id in the right place
+export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]] {
+  const parent = getItem(fs, loc);
+  const contents = [...parent.contents];
+
+  fs = modifyItem(fs, loc, item => produce(item, it => { it.contents.splice(ix, 0, id) }));
+
+  fs = produce(fs, fsd => {
+    fsd._cached_locmap[id] = { t: 'at', id: loc, pos: ix };
+    for (let i = ix; i < contents.length; i++) {
+      fsd._cached_locmap[contents[i]] = { t: 'at', id: loc, pos: i + 1 };
+    }
+  });
+  return [fs, parent.hooks ?? []];
+}
+
+//// Dead code?
+// function spliced<T>(list: T[], ix: number, length: number): T[] {
+//   const tmp = [...list];
+//   tmp.slice(ix, length);
+//   return tmp;
+// }
+
 export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
   const parent = getItem(fs, loc);
-  const contents = parent.contents;
+  const contents = [...parent.contents];
   const id = contents[ix];
 
   fs = modifyItem(fs, loc, item => produce(item, it => { it.contents.splice(ix, 1) }));
 
   fs = produce(fs, fsd => {
+    fsd._cached_locmap[id] = { t: 'is_root' };
     for (let i = ix + 1; i < contents.length; i++) {
-      fsd._cached_locmap[contents[i]] = { t: 'at', id: loc, pos: i };
+      fsd._cached_locmap[contents[i]] = { t: 'at', id: loc, pos: i - 1 };
     }
   });
   return [fs, id, parent.hooks ?? []];
