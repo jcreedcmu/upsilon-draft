@@ -1,9 +1,10 @@
 import { Fs, getContents, insertId, insertPlans, ItemPlan, mkFs, removeId } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
 
-function testFile(name: string): ItemPlan {
+export function testFile(name: string): ItemPlan {
   return { t: 'file', name: name, forceId: name };
 }
+
 const fs = (() => {
   let fs = mkFs();
   [fs,] = insertPlans(fs, SpecialId.root, [

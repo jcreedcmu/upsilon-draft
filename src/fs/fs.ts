@@ -50,7 +50,7 @@ export function getItem(fs: Fs, ident: Ident): Item {
   const item = fs.idToItem[ident];
   if (item === undefined) {
     if (ident.match(VIRTUAL_ITEM_PATTERN)) {
-      return getVirtualItem(fs, ident.replace(VIRTUAL_ITEM_PATTERN, ''));
+      return getVirtualItem(ident.replace(VIRTUAL_ITEM_PATTERN, ''));
     }
     throw new Error(`Couldn't find ident ${ident}`);
   }
@@ -61,7 +61,7 @@ export function getLocation(fs: Fs, ident: Ident): Location {
   const location = fs._cached_locmap[ident];
   if (location === undefined) {
     if (ident.match(VIRTUAL_ITEM_PATTERN)) {
-      return getVirtualItemLocation(fs, ident.replace(VIRTUAL_ITEM_PATTERN, ''));
+      return getVirtualItemLocation(ident.replace(VIRTUAL_ITEM_PATTERN, ''));
     }
     throw new Error(`Couldn't find location of ident ${ident}`);
   }

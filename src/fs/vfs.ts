@@ -3,37 +3,43 @@ import { Fs, itemOfPlan, ItemPlan, virtualId } from "./fs";
 
 
 // a virtual id looks like
-// root
-// root/0
-// root/0/3
-// root/0/3/2/4/0
+// vroot
+// vroot/foo1
+// vroot/foo1/foo2
+// vroot/foo1/foo3
 // etc.
 
-export function getVirtualItem(fs: Fs, ident: Ident): Item {
-  return itemOfPlan(getVirtualItemPlan(fs, ident));
-}
+type VirtualItemPlan =
+  | { t: 'file', name: string }
+  | { t: 'dir', name: string, contents: Ident[] };
 
-function itemPlanOfIndices(parts: number[]): ItemPlan {
-  if (parts.length == 0 || parts[parts.length - 1] == 0) {
-    return {
-      t: 'dir',
-      name: 'virtual' + parts.join("."),
-      contents: [0, 1, 2].map(x => ({ t: 'virtual', id: ['vroot', ...parts, x].join('/') }))
-    }
-  }
-  else {
-    return { t: 'file', name: parts[parts.length - 1] == 1 ? 'foo' : 'bar', text: 'blah' };
+function planOfVirtualPlan(ident: Ident, vip: VirtualItemPlan): ItemPlan {
+  switch (vip.t) {
+    case 'file': return { t: 'file', name: vip.name };
+    case 'dir': return {
+      t: 'dir', name: vip.name,
+      contents: vip.contents.map(id => ({ t: 'virtual', id: `${ident}/${id}` }))
+    };
   }
 }
-
-export function getVirtualItemPlan(fs: Fs, ident: Ident): ItemPlan {
-  const parts = ident.split('/');
-  parts.shift();
-  return itemPlanOfIndices(parts.map(x => parseInt(x)));
+export function getVirtualItem(ident: Ident): Item {
+  return itemOfPlan(planOfVirtualPlan(ident, getVirtualItemPlan(ident)));
 }
 
-export function getVirtualItemLocation(fs: Fs, ident: Ident): Location {
+export function getVirtualItemPlan(ident: Ident): VirtualItemPlan {
   const parts = ident.split('/');
+  const last = parts.pop()!;
+  switch (last) {
+    case 'vroot': return { t: 'dir', name: 'virtual', contents: ['foo', 'bar'] };
+    case 'foo': return { t: 'dir', name: 'foo', contents: ['baz'] };
+    case 'bar': return { t: 'dir', name: 'bar', contents: ['baz'] };
+    default: return { t: 'file', name: last };
+  }
+}
+
+export function getVirtualItemLocation(ident: Ident): Location {
+  const parts = ident.split('/');
+  const last = parts[parts.length - 1];
   if (parts.length == 1) {
     // It's ok to advertise the root of the virtual filesystem as
     // being a root. During initialization we actually move it to
@@ -41,8 +47,13 @@ export function getVirtualItemLocation(fs: Fs, ident: Ident): Location {
     return { t: 'is_root' };
   }
   else {
-    console.log('child, parent', ident, virtualId(parts.slice(0, -1).join('/')));
-    return { t: 'at', id: virtualId(parts.slice(0, -1).join('/')), pos: parseInt(parts[parts.length - 1]) }
+    const dirId = parts.slice(0, -1).join('/');
+    const vip = getVirtualItemPlan(dirId);
+    if (vip.t != 'dir') {
+      throw new Error(`invariant violation: ${dirId} should be a dir`);
+    }
+    const pos = vip.contents.findIndex(t => t == last);
+    return { t: 'at', pos, id: virtualId(dirId) };
   }
 
 }
