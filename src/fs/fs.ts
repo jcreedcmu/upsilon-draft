@@ -3,6 +3,7 @@ import { Resources } from './resources';
 import { SpecialId } from "./initialFs";
 import { canOpen } from '../core/lines';
 import { Hook, Ident, Item, Location } from '../core/model';
+import { getVirtualItem, getVirtualItemLocation } from "./vfs";
 
 /// Constants
 
@@ -40,27 +41,10 @@ export function getFullContents(fs: Fs, ident: Ident): Item[] {
   return getContents(fs, ident).map(id => getItem(fs, id));
 }
 
-export function getVirtualItem(fs: Fs, ident: Ident): Item {
-  if (ident == 'file') {
-    return itemOfPlan({ t: 'file', name: 'foobar', text: 'blah' });
-  }
-  else {
-    return itemOfPlan({ t: 'dir', name: 'virtual', contents: [{ t: 'virtual', id: 'file' }] });
-  }
-}
-
-function virtualId(ident: Ident): Ident {
+export function virtualId(ident: Ident): Ident {
   return `${VIRTUAL_ITEM_PREFIX}${ident}`;
 }
 
-export function getVirtualItemLocation(fs: Fs, ident: Ident): Location {
-  if (ident == 'file') {
-    return { t: 'at', id: virtualId('dir'), pos: 0 }
-  }
-  else {
-    return { t: 'is_root' };
-  }
-}
 
 export function getItem(fs: Fs, ident: Ident): Item {
   const item = fs.idToItem[ident];
@@ -128,7 +112,7 @@ export function mkFs(): Fs {
   return fs;
 }
 
-function itemOfPlan(plan: ItemPlan): Item {
+export function itemOfPlan(plan: ItemPlan): Item {
   switch (plan.t) {
 
     case 'dir': {

@@ -102,7 +102,7 @@ function initialPlans(): VirtualItemPlan[] {
       ]
     },
     binDir(),
-    { t: 'virtual', id: 'dir' },
+    { t: 'virtual', id: 'vroot' },
     {
       t: 'dir', name: 'home', contents: [
         { t: 'file', name: 'foo', resources: { cpu: 5 } },
