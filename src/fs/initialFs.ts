@@ -2,6 +2,7 @@ import { errorCodes, errorCodeText } from '../core/error-codes';
 import { Resources } from './resources';
 import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
 import { KeyAction } from '../core/model';
+import { arrowChars } from '../ui/screen';
 
 export enum SpecialId {
   keys = '_keys',
@@ -93,6 +94,10 @@ function binDir(): ItemPlan {
 
 function initialPlans(): VirtualItemPlan[] {
   return [
+    {
+      t: 'file', name: 'README', text: `{white}${arrowChars} wasd: navigate
+<enter>: interact
+<space>: pickup/drop` },
     {
       t: 'dir', name: 'sys',
       contents: [

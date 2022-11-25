@@ -19,6 +19,8 @@ export const Chars = {
   SHADE4: '\x00',
 }
 
+export const arrowChars = '\xa0\xa1\xa2\xa3';
+
 export const BOXN = 1;
 export const BOXE = 2;
 export const BOXS = 4;
