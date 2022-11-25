@@ -1,6 +1,6 @@
 import { produce } from '../util/produce';
 import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs } from './model';
-import { getContents, getItem, getItemIdsAfter, getLocation, removeId } from '../fs/fs';
+import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes } from './error-codes';
 import { nowTicks } from './clock';
@@ -63,6 +63,7 @@ function startExecutable(state: GameState, targetIds: Ident[], actorId: Ident): 
   addFuture(state, now + EXEC_TICKS, { t: 'finishExecution', actorId, targetIds }, true);
 }
 
+
 function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
   switch (action.t) {
     case 'descend': return [produce(state, s => {
@@ -99,19 +100,26 @@ function reduceExecAction(state: GameState, action: ExecLineAction): [GameState,
         return withError(state, 'noCharge');
       }
 
-      state = produce(state, s => {
-        modifyResource(s.fs.idToItem[actorId], 'cpu', x => x - 1);
-        startExecutable(s, targetIds, actorId);
-      });
+      const contents = getFullContents(state.fs, actorId);
+      if (contents.length > 0 && contents[0].name == 'cpu100') {
 
-      return [
-        state,
-        [
-          { t: 'redraw' },
-          { t: 'playSound', effect: 'rising' },
-          { t: 'reschedule' },
-        ],
-      ];
+        state = produce(state, s => {
+          modifyResource(s.fs.idToItem[actorId], 'cpu', x => x - 1);
+          startExecutable(s, targetIds, actorId);
+        });
+
+        return [
+          state,
+          [
+            { t: 'redraw' },
+            { t: 'playSound', effect: 'rising' },
+            { t: 'reschedule' },
+          ],
+        ];
+      }
+      else {
+        return withError(state, 'badExecutable');
+      }
     }
     case 'back': return reduceKeyAction(state, KeyAction.back);
   }

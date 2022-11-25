@@ -11,6 +11,7 @@ export const errorCodes = {
   noCharge: 109,
   notExecutable: 110,
   badInputs: 111,
+  badExecutable: 112,
 };
 
 export type ErrorCode = keyof (typeof errorCodes);
@@ -29,5 +30,6 @@ export function errorCodeText(k: ErrorCode): string {
     case 'noCharge': return `No quota`;
     case 'notExecutable': return `Not executable`;
     case 'badInputs': return `Bad inputs`;
+    case 'badExecutable': return `Bad executable`;
   }
 }

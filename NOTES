@@ -210,3 +210,26 @@ wait for actual fs changes to reify anything. As a consequence, if I
 do an insert/remove inside a virtual container, I will need to reify:
  - the container, because its state (i.e. its contents) has changed.
  - the subsequent siblings, because their induced state (i.e. their location) has changed.
+
+=== 2022.11.25 META: (:id 7d13be6b-1a26-410a-a712-c7e81f9bc736)
+
+Some ideas about execution.
+
+I considered the idea that binaries don't directly operate on files in
+their environment, but rather have to slurp up files, operate on them,
+then spit them back out.
+
+For this I might imagine that binaries come with subdirectories, like
+code/ and data/. All instructions would be in code/ and slurped
+arguments would temporarily go in data/.
+
+Or do I want a wide variety of different "cpu"s each with their own
+instruction sets, maybe? That might give some grist for the
+factorio-esque production treadmill.
+
+What kind of specializations can I imagine?
+
+- resource-transfer
+- large-file motion
+- file creation with arbitrary name
+- file copying

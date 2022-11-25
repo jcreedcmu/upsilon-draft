@@ -7,11 +7,13 @@ import { withError } from "./reduce";
 export function executeInstructions(state: GameState, targets: Ident[], actor: Ident): [GameState, Effect[]] {
   const actCont = getContents(state.fs, actor);
 
-  if (actCont.length <= 0) {
+  // first item in contents of executable is a plain file naming the "cpu type"
+
+  if (actCont.length <= 1) {
     return withError(state, 'noInstr');
   }
 
-  const first = getItem(state.fs, actCont[0]);
+  const first = getItem(state.fs, actCont[1]);
   const target = getItem(state.fs, targets[0]);
 
   function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[]] {

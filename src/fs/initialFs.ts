@@ -15,7 +15,7 @@ function singleExec(name: string, opts?: { numTargets?: number, resources?: Reso
   return {
     t: 'exec',
     name,
-    contents: [{ t: 'instr', name }],
+    contents: [{ t: 'file', name: 'cpu100' }, { t: 'instr', name }],
     numTargets: opts?.numTargets,
     resources: opts?.resources
   };
