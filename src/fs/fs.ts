@@ -135,6 +135,10 @@ function itemOfPlan(plan: ItemPlan): Item {
       return {
         name: plan.name,
         acls: { open: true },
+        // XXX This is a little sketchy.
+        //
+        // I think it depends on the invariant that virtual
+        // directories only have virtual contents.
         contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []),
         resources: {},
         size: 1,
