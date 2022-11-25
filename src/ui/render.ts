@@ -13,6 +13,10 @@ const CHARGE_COL_SIZE = 3;
 const SIZE_COL_SIZE = 3;
 const MARGIN = 1;
 
+// Everything with "Renderable" in its name is a sort of convenience
+// representation a bit closer in form (compared to the raw state
+// data) to what we need to render.
+
 export type RenderableLine = {
   str: string,
   text?: string,
@@ -22,14 +26,20 @@ export type RenderableLine = {
   attr: Attr,
 }
 
-export type RenderableState = {
+export type FsRenderable = {
   curLine: number,
   lines: RenderableLine[],
   show: Show,
   path: string[],
   error: UserError | undefined,
-  invLine?: RenderableLine,
-}
+  invLine?: RenderableLine
+};
+
+export type TextDialogRenderable = {};
+
+export type Renderable =
+  | { t: 'fsView' } & FsRenderable
+  | { t: 'textDialogView' } & TextDialogRenderable;
 
 function defaultLine(name: string): RenderableLine {
   return {
@@ -50,16 +60,23 @@ function getInventoryLine(state: GameState): RenderableLine | undefined {
   return getRenderableLineOfItem(id, invItem);
 }
 
-function getRenderableState(state: GameState): RenderableState {
-  const lines = getLines(state, state.curId);
-  return {
-    curLine: state.curLine,
-    error: state.error,
-    lines,
-    path: state.path,
-    show: state._cached_show,
-    invLine: getInventoryLine(state),
-  };
+function getRenderable(state: GameState): Renderable {
+  switch (state.viewState.t) {
+    case 'fsView': {
+      const lines = getLines(state, state.curId);
+      return {
+        t: 'fsView',
+        curLine: state.curLine,
+        error: state.error,
+        lines,
+        path: state.path,
+        show: state._cached_show,
+        invLine: getInventoryLine(state),
+      };
+    }
+    case 'textDialogView':
+      return { t: 'textDialogView' };
+  }
 }
 
 const CHARGE_ATTR = { fg: ColorCode.bblue, bg: ColorCode.black };
@@ -113,16 +130,14 @@ function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine,
   }
 }
 
-export function renderGame(state: RenderableState): Screen {
-  logger('rendering', 'rendering');
-
+export function renderFsView(rend: FsRenderable): Screen {
   const screen = new Screen();
 
   const len = int(screen.cols / 2) - 1;
-  const lines = state.lines;
+  const lines = rend.lines;
   lines.forEach((line, i) => {
-    const selected = i == state.curLine;
-    if (state.show.info) {
+    const selected = i == rend.curLine;
+    if (rend.show.info) {
       if (line.text && selected) {
         screen.drawTagStr(screen.at(len + 1, 3, len), line.text, INV_ATTR);
       }
@@ -135,17 +150,17 @@ export function renderGame(state: RenderableState): Screen {
         screen.drawTagStr(screen.at(len + 5, screen.rows - 4), repeat(Chars.SQR, line.resources.network), NETWORK_ATTR);
       }
     }
-    renderLine(screen, { x: 0, y: i }, len, line, state.show, selected);
+    renderLine(screen, { x: 0, y: i }, len, line, rend.show, selected);
   });
 
-  if (state.show.inventory) {
-    if (state.invLine != undefined) {
-      renderLine(screen, { x: len + 1, y: 1 }, len, state.invLine, state.show);
+  if (rend.show.inventory) {
+    if (rend.invLine != undefined) {
+      renderLine(screen, { x: len + 1, y: 1 }, len, rend.invLine, rend.show);
     }
   }
 
-  if (state.show.cwd) {
-    let modestring = '/ ' + state.path.join(' / ');
+  if (rend.show.cwd) {
+    let modestring = '/ ' + rend.path.join(' / ');
     if (modestring.length > screen.cols) {
       modestring = '... ' + modestring.substr(modestring.length - screen.cols + 5, screen.cols - 5);
     }
@@ -155,24 +170,39 @@ export function renderGame(state: RenderableState): Screen {
     );
   }
 
-  if (state.error !== undefined) {
+  if (rend.error !== undefined) {
     screen.drawTagLine(screen.at(0, screen.rows - 1), screen.cols,
-      'E ' + state.error.code,
+      'E ' + rend.error.code,
       ERROR_ATTR
     );
   }
 
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   const boxe = String.fromCharCode(boxify(BOXE)(0));
-  if (state.show.inventory) {
+  if (rend.show.inventory) {
     screen.drawRect({ x: len, y: 0, w: len + 1, h: 2 }, INV_ATTR);
     screen.drawTagStr(screen.at(len + 2, 0), `${boxw}Holding${boxe}`, INV_ATTR);
   }
-  if (state.show.info) {
+  if (rend.show.info) {
     screen.drawRect({ x: len, y: 2, w: len + 1, h: screen.rows - 4 }, INV_ATTR);
     screen.drawTagStr(screen.at(len + 2, 2), `${boxw}Info${boxe}`, INV_ATTR);
   }
   return screen;
+}
+
+export function renderTextDialogView(state: Renderable): Screen {
+  const screen = new Screen();
+  screen.drawRect({ h: 3, w: 3, x: 0, y: 0 }, { fg: ColorCode.white, bg: ColorCode.black });
+  return screen;
+}
+
+export function finalRender(state: Renderable): Screen {
+  logger('rendering', 'rendering');
+
+  switch (state.t) {
+    case 'fsView': return renderFsView(state);
+    case 'textDialogView': return renderTextDialogView(state);
+  }
 }
 
 export function render(state: State): Screen {
@@ -184,7 +214,7 @@ export function render(state: State): Screen {
       return screen;
 
     case 'game': {
-      return renderGame(getRenderableState(state.gameState));
+      return finalRender(getRenderable(state.gameState));
     }
   }
 }

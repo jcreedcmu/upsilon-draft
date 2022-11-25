@@ -85,13 +85,22 @@ export type Effect =
   | { t: 'reschedule' }
   ;
 
+// If I need to add more state around settings, menus, saving, etc.,
+// it might go here.
 export type State =
   | { t: 'title' }
   | { t: 'game', gameState: GameState };
 
 export type Future = { whenTicks: number, action: Action, live?: boolean };
 
+// This is for alternate modal states within the game interface, which
+// are triggered by "diagetic" controls.
+export type ViewState =
+  | { t: 'fsView' }
+  | { t: 'textDialogView', back: ViewState };
+
 export type GameState = {
+  viewState: ViewState,
   curId: Ident,
   curLine: number,
   fs: Fs,
@@ -137,6 +146,7 @@ export function mkGameState(): State {
   const fs = initialFs();
   return {
     t: 'game', gameState: {
+      viewState: { t: 'fsView' },
       clock: mkClockState(),
       error: undefined,
       curId: SpecialId.root,

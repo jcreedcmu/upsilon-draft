@@ -79,6 +79,7 @@ function errorDir(): ItemPlan {
 function binDir(): ItemPlan {
   return {
     t: 'dir', name: 'bin', contents: [
+      singleExec('text-dialog', { resources: { cpu: 4 } }),
       singleExec('combine', { numTargets: 2 }),
       singleExec('toggle-open'),
       singleExec('toggle-pickup'),

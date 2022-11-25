@@ -84,6 +84,12 @@ function reduceExecAction(state: GameState, action: ExecLineAction): [GameState,
         return withError(state, 'alreadyExecuting');
       }
 
+      if (actor.name == 'text-dialog') {
+        return [produce(state, s => {
+          s.viewState = { t: 'textDialogView', back: state.viewState };
+        }), [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }]];
+      }
+
       const targetIds = getItemIdsAfter(state.fs, actorId, numTargetsOfExecutable(actor));
       if (targetIds == undefined) {
         return withError(state, 'noArgument');
