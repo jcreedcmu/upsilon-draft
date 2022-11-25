@@ -145,7 +145,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
       acls: { pickup: true },
       contents: [],
       text: plan.text,
-      resources: {},
+      resources: plan.resources ?? {},
       size: 1,
     };
 
