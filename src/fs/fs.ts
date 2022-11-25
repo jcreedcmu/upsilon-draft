@@ -244,21 +244,30 @@ export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]
   return [fs, parent.hooks ?? []];
 }
 
+function spliced<T>(list: T[], ix: number, length: number): T[] {
+  const tmp = [...list];
+  tmp.slice(ix, length);
+  return tmp;
+}
+
+function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
+  const newItem = f(getItem(fs, ident));
+  return produce(fs, fsd => {
+    fsd.idToItem[ident] = newItem;
+  });
+}
+
 export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
-  const parent = fs.idToItem[loc];
-  if (parent == undefined) {
-    throw new Error(`Invariant violation: trying to remove item from unknown location ${loc}`);
-  }
-  const id = fs.idToItem[loc].contents[ix];
+  const parent = getItem(fs, loc);
+  const contents = parent.contents;
+  const id = contents[ix];
+
+  fs = modifyItem(fs, loc, item => produce(item, it => { it.contents.splice(ix, 1) }));
 
   fs = produce(fs, fsd => {
-    const contents = fsd.idToItem[loc].contents;
-
-    contents.splice(ix, 1); // remove id at index ix
-    // recache the position of every item in the dir
-    contents.forEach((id, ix) => {
-      fsd._cached_locmap[id] = { t: 'at', id: loc, pos: ix };
-    });
+    for (let i = ix + 1; i < contents.length; i++) {
+      fsd._cached_locmap[contents[i]] = { t: 'at', id: loc, pos: i };
+    }
   });
   return [fs, id, parent.hooks ?? []];
 }
