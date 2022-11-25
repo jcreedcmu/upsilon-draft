@@ -47,6 +47,39 @@ function codeOfAttr(attr: Attr): number {
   return attr.fg + 16 * attr.bg;
 }
 
+export function parseStr(str: string, init: Attr): AttrString[] {
+  let attr = init;
+  const rv: AttrString[] = [];
+  while (str.length >= 0) {
+    if (!str.match(/{/)) {
+      rv.push({ str, attr });
+      break;
+    }
+    const bgMatch = str.match(/(.*?){bg-(.*?)}/);
+    if (bgMatch && ncolors.includes(bgMatch[2])) {
+      rv.push({ str: bgMatch[1], attr });
+      attr = { ...attr, bg: colorCodeOfName(bgMatch[2]) };
+      str = str.substr(bgMatch[0].length);
+      continue;
+    }
+    const match = str.match(/(.*?){(.*?)}/);
+    if (match && ncolors.includes(match[2])) {
+      rv.push({ str: match[1], attr });
+      attr = { ...attr, fg: colorCodeOfName(match[2]) };
+      str = str.substr(match[0].length);
+      continue;
+    }
+    if (match && match[2] == '/') {
+      rv.push({ str: match[1], attr });
+      attr = init;
+      str = str.substr(match[0].length);
+      continue;
+    }
+    throw `parse error: ${JSON.stringify(str)}`;
+  }
+  return rv;
+}
+
 export class Screen {
 /* private */ imdat: ImageData;
 
@@ -79,6 +112,15 @@ export class Screen {
     this.imdat.data[i + 1] = codeOfAttr(chr);
   }
 
+  getChar(x: number, y: number): Char {
+    const i = 4 * (y * TEXT_PAGE_W + x);
+    return {
+      charcode: this.imdat.data[i],
+      fg: this.imdat.data[i + 1] & 15,
+      bg: this.imdat.data[i + 1] >> 4,
+    };
+  }
+
   modChar(x: number, y: number, f: (c: number) => number, attr: Attr): void {
     const j = 4 * (y * TEXT_PAGE_W + x);
     this.imdat.data[j] = f(this.imdat.data[j]);
@@ -91,39 +133,6 @@ export class Screen {
     };
   }
 
-  parseStr(str: string, init: Attr): AttrString[] {
-    let attr = init;
-    const rv: AttrString[] = [];
-    while (str.length >= 0) {
-      if (!str.match(/{/)) {
-        rv.push({ str, attr });
-        break;
-      }
-      const bgMatch = str.match(/(.*?){bg-(.*?)}/);
-      if (bgMatch && ncolors.includes(bgMatch[2])) {
-        rv.push({ str: bgMatch[1], attr });
-        attr = { ...attr, bg: colorCodeOfName(bgMatch[2]) };
-        str = str.substr(bgMatch[0].length);
-        continue;
-      }
-      const match = str.match(/(.*?){(.*?)}/);
-      if (match && ncolors.includes(match[2])) {
-        rv.push({ str: match[1], attr });
-        attr = { ...attr, fg: colorCodeOfName(match[2]) };
-        str = str.substr(match[0].length);
-        continue;
-      }
-      if (match && match[2] == '/') {
-        rv.push({ str: match[1], attr });
-        attr = init;
-        str = str.substr(match[0].length);
-        continue;
-      }
-      throw `parse error: ${JSON.stringify(str)}`;
-    }
-    return rv;
-  }
-
   drawAttrStr(state: StrState, sa: AttrString[]) {
     sa.forEach(({ str, attr }) => {
       state = this.drawStr(state, str, attr);
@@ -131,7 +140,7 @@ export class Screen {
   }
 
   drawTagStr(state: StrState, str: string, attr: Attr) {
-    this.drawAttrStr(state, this.parseStr(str, attr));
+    this.drawAttrStr(state, parseStr(str, attr));
   }
 
   drawStr(state: StrState, str: string, attr: Attr): StrState {
@@ -165,7 +174,7 @@ export class Screen {
   }
 
   parseStrToLength(str: string, attr: Attr, len: number): AttrString[] {
-    const parsed = this.parseStr(str, attr);
+    const parsed = parseStr(str, attr);
     let total = 0;
     for (let i = 0; i < parsed.length; i++) {
       const nextTotal = total + parsed[i].str.length;
