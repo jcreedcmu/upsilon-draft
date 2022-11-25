@@ -95,9 +95,10 @@ function binDir(): ItemPlan {
 function initialPlans(): VirtualItemPlan[] {
   return [
     {
-      t: 'file', name: 'README', text: `{white}${arrowChars} wasd: navigate
-<enter>: interact
-<space>: pickup/drop` },
+      t: 'file', name: 'README', text: `
+{white}${arrowChars}{/}/{white}wasd{/}: navigate
+{white}<enter>{/}: interact
+{white}<space>{/}: pickup/drop` },
     {
       t: 'dir', name: 'sys',
       contents: [

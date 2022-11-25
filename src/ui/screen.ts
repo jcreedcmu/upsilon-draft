@@ -55,14 +55,14 @@ export function parseStr(str: string, init: Attr): AttrString[] {
       rv.push({ str, attr });
       break;
     }
-    const bgMatch = str.match(/(.*?){bg-(.*?)}/);
+    const bgMatch = str.match(/(.*?){bg-(.*?)}/s);
     if (bgMatch && ncolors.includes(bgMatch[2])) {
       rv.push({ str: bgMatch[1], attr });
       attr = { ...attr, bg: colorCodeOfName(bgMatch[2]) };
       str = str.substr(bgMatch[0].length);
       continue;
     }
-    const match = str.match(/(.*?){(.*?)}/);
+    const match = str.match(/(.*?){(.*?)}/s);
     if (match && ncolors.includes(match[2])) {
       rv.push({ str: match[1], attr });
       attr = { ...attr, fg: colorCodeOfName(match[2]) };
@@ -77,7 +77,7 @@ export function parseStr(str: string, init: Attr): AttrString[] {
     }
     throw `parse error: ${JSON.stringify(str)}`;
   }
-  return rv;
+  return rv.filter(x => x.str != '');
 }
 
 export class Screen {
