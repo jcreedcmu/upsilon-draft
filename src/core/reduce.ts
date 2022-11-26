@@ -1,5 +1,5 @@
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs } from './model';
+import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction } from './model';
 import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes } from './error-codes';
@@ -17,6 +17,7 @@ export function reduce(state: State, action: Action): [State, Effect[]] {
     case 'title':
       return [mkGameState(), [{ t: 'redraw' }, { t: 'playSound', effect: 'startup' }, { t: 'powerButton' }]];
     case 'game':
+      if (action.t == 'boot') return [{ t: 'title' }, [{ t: 'redraw' }, { t: 'powerButton' }]];
       const [gameState, effects] = reduceGameState(state.gameState, action);
       return [produce(state, s => { s.gameState = gameState; }), effects];
   }
@@ -41,7 +42,7 @@ export function withError(state: GameState, code: ErrorCode): [GameState, Effect
 }
 
 // imperatively updates state
-function addFuture(state: GameState, whenTicks: number, action: Action, live?: boolean) {
+function addFuture(state: GameState, whenTicks: number, action: GameAction, live?: boolean) {
   state.futures.push({
     whenTicks,
     action,
@@ -191,7 +192,7 @@ function reduceDropAction(state: GameState, action: DropLineAction): [GameState,
   }
 }
 
-function reduceActions(state: GameState, actions: Action[]): [GameState, Effect[]] {
+function reduceActions(state: GameState, actions: GameAction[]): [GameState, Effect[]] {
   let effects: Effect[] = [];
   for (const action of actions) {
     let moreEffects;
@@ -246,7 +247,7 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
   }
 }
 
-export function reduceGameState(state: GameState, action: Action): [GameState, Effect[]] {
+export function reduceGameState(state: GameState, action: GameAction): [GameState, Effect[]] {
   const vs = state.viewState;
   switch (vs.t) {
     case 'fsView': return reduceGameStateFs(state, action);
@@ -256,7 +257,7 @@ export function reduceGameState(state: GameState, action: Action): [GameState, E
   }
 }
 
-export function reduceGameStateFs(state: GameState, action: Action): [GameState, Effect[]] {
+export function reduceGameStateFs(state: GameState, action: GameAction): [GameState, Effect[]] {
   switch (action.t) {
     case 'key': {
       const keyAction = actionOfKey(state, action.code);

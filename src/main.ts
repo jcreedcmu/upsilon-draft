@@ -87,7 +87,7 @@ async function go() {
   const powerButton = document.getElementById('power-button')! as HTMLImageElement;
   powerButton.className = 'button';
   powerButton.src = 'assets/button-up.png';
-  powerButton.onclick = () => dispatch({ t: 'clockUpdate', tick: 0 });
+  powerButton.onclick = () => dispatch({ t: 'boot' });
 
   const state: NewState[] = [mkState()];
 
@@ -109,7 +109,8 @@ async function go() {
         }
         else return state;
       case 'powerButton':
-        (document.getElementById('power-button')! as HTMLImageElement).src = 'assets/button-down.png';
+        (document.getElementById('power-button')! as HTMLImageElement).src = state.t == 'title' ?
+          'assets/button-up.png' : 'assets/button-down.png';
         return state;
     }
   }

@@ -64,11 +64,16 @@ export type Item = {
   hooks?: Hook[],
 };
 
-export type Action =
+export type GameAction =
   | { t: 'key', code: string }
   | { t: 'clockUpdate', tick: number }
   | { t: 'finishExecution', actorId: Ident, targetIds: Ident[] }
   | { t: 'clearError' }
+  ;
+
+export type Action =
+  | GameAction
+  | { t: 'boot' }
   ;
 
 export enum KeyAction {
@@ -92,7 +97,7 @@ export type State =
   | { t: 'title' }
   | { t: 'game', gameState: GameState };
 
-export type Future = { whenTicks: number, action: Action, live?: boolean };
+export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
 // This is for alternate modal states within the game interface, which
 // are triggered by "diagetic" controls.
