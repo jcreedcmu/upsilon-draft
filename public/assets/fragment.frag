@@ -81,6 +81,12 @@ vec4 getColor() {
   }
 }
 
+const float SHADE_SIZE = 7.0;
+
+float shade_of(float d) {
+  return (d < SHADE_SIZE ? d / SHADE_SIZE : 1.0);
+}
+
 void main() {
   vec4 color = getColor();
   vec2 pixel_pos = getPixelPos();
@@ -88,10 +94,12 @@ void main() {
   if (rel.x < 0.0 || rel.y < 0.0 || rel.x >= 1.0 || rel.y >= 1.0)
 	 outputColor = color;
   else {
-	 float shadex = (1.0 - 4.0 * (rel.x - rel.x * rel.x)) / 3.0;
-	 float shadey = (1.0 - 4.0 * (rel.y - rel.y * rel.y)) / 3.0;
-	 float shade = shadex + shadey;
-//	 outputColor = color * (1.0-shade) + shade * vec4(0,0,0,1);
-	 outputColor = color;
+	 // float shadex = (1.0 - 4.0 * (rel.x - rel.x * rel.x)) / 3.0;
+	 // float shadey = (1.0 - 4.0 * (rel.y - rel.y * rel.y)) / 3.0;
+	 // float shade = shadex + shadey;
+    float shade =shade_of(pixel_pos.x) * shade_of(pixel_pos.y)
+      * shade_of(u_canvasSize.x - pixel_pos.x) * shade_of(u_canvasSize.y - pixel_pos.y);
+	 outputColor = vec4((0.3 + 0.7 * shade) * color.rgb, 1.0);
+	// outputColor = color;
   }
 }
