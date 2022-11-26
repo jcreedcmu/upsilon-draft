@@ -71,11 +71,15 @@ function makeStartupSound(): AudioBuffer {
       const f = 100 + freq[i] * (0.5 + 3 * (frame / samples));
       phase[i] += 2 * Math.PI * f / SAMPLE_RATE;
       sample += adsr(frame / SAMPLE_RATE, len, 0.1, 0, 1, len - 0.1) *
-        0.1 / FREQS * Math.sin(phase[i]);
+        0.1 / FREQS * square(phase[i]);
     }
     data[frame] = sample;
   }
   return buf;
+}
+
+function square(phase: number) {
+  return 0.5 * ((phase % (2 * Math.PI) < Math.PI) ? 1 : -1);
 }
 
 function makeBeep(partialSpec: Partial<SoundEffectSpec>): AudioBuffer {
@@ -87,7 +91,7 @@ function makeBeep(partialSpec: Partial<SoundEffectSpec>): AudioBuffer {
   for (let i = 0; i < dur_frame; i++) {
     const freq = mlerp(spec.startFreq, spec.endFreq, i / dur_frame);
     phase += 2 * Math.PI * freq / SAMPLE_RATE;
-    const base = Math.sin(phase);
+    const base = square(phase);
     data[i] = 0.1 * base * adsr(i / SAMPLE_RATE, dur_frame / SAMPLE_RATE, spec.attack_s, spec.decay_s, spec.sustain, spec.release_s);
   }
   return beep;
