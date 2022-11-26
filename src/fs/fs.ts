@@ -22,7 +22,7 @@ export type Fs = {
 };
 
 export type ItemPlan =
-  | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[] }
+  | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[], resources?: Resources }
   | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, numTargets?: number, resources?: Resources }
   | { t: 'file', name: string, text?: string, size?: number, resources?: Resources, forceId?: Ident }
   | { t: 'instr', name: string };
@@ -124,7 +124,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
         // I think it depends on the invariant that virtual
         // directories only have virtual contents.
         contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []),
-        resources: {},
+        resources: plan.resources ?? {},
         size: 1,
         hooks: plan.hooks,
       };

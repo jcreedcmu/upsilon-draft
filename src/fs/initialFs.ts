@@ -42,6 +42,7 @@ function keysDir(): ItemPlan {
     t: 'dir', name: 'key',
     contents: keys.map(keyDir),
     forceId: SpecialId.keys,
+    resources: { data: 4 }
   };
 }
 

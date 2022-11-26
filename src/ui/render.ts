@@ -149,6 +149,11 @@ export function renderFsView(rend: FsRenderable): Screen {
         screen.drawTagStr(screen.at(len + 1, screen.rows - 4), "NET:", INV_ATTR);
         screen.drawTagStr(screen.at(len + 5, screen.rows - 4), repeat(Chars.SQR, line.resources.network), NETWORK_ATTR);
       }
+      if (selected && line.resources.data) {
+        screen.drawTagStr(screen.at(len + 1, screen.rows - 5), "DAT:", INV_ATTR);
+        screen.drawTagStr(screen.at(len + 5, screen.rows - 5), repeat(Chars.SQR, line.resources.data), DATA_ATTR);
+
+      }
     }
     renderLine(screen, { x: 0, y: i }, len, line, rend.show, selected);
   });
