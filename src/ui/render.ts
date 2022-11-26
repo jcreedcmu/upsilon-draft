@@ -79,14 +79,14 @@ function getRenderable(state: GameState): Renderable {
   }
 }
 
-const CHARGE_ATTR = { fg: ColorCode.bblue, bg: ColorCode.black };
-const NETWORK_ATTR = { fg: ColorCode.byellow, bg: ColorCode.black };
-const DATA_ATTR = { fg: ColorCode.bgreen, bg: ColorCode.black };
+const CHARGE_ATTR = { fg: ColorCode.bblue, bg: ColorCode.blue };
+const NETWORK_ATTR = { fg: ColorCode.byellow, bg: ColorCode.blue };
+const DATA_ATTR = { fg: ColorCode.bgreen, bg: ColorCode.blue };
 
-const MODELINE_ATTR = { fg: ColorCode.yellow, bg: ColorCode.blue };
+const MODELINE_ATTR = { fg: ColorCode.yellow, bg: ColorCode.black };
 const ERROR_ATTR = { fg: ColorCode.yellow, bg: ColorCode.red };
-const INV_ATTR = { fg: ColorCode.yellow, bg: ColorCode.black };
-const GRAY_ATTR = { fg: ColorCode.bblack, bg: ColorCode.black };
+const INV_ATTR = { fg: ColorCode.yellow, bg: ColorCode.blue };
+const GRAY_ATTR = { fg: ColorCode.bblack, bg: ColorCode.blue };
 
 function invertAttrText(x: AttrString): AttrString {
   return { ...x, attr: invertAttr(x.attr) };
@@ -125,13 +125,13 @@ function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine,
 
   if (show.size) {
     const sizeStr = line.size ? zeropad(line.size + '', SIZE_COL_SIZE) : '';
-    const sizeAttr = (line.size < 2 && !invert) ? { fg: ColorCode.bblack, bg: ColorCode.black } : attrs.base;
+    const sizeAttr = (line.size < 2 && !invert) ? { fg: ColorCode.bblack, bg: ColorCode.blue } : attrs.base;
     screen.drawTagStr(screen.at(sizeCol, y), sizeStr, sizeAttr);
   }
 }
 
 export function renderFsView(rend: FsRenderable): Screen {
-  const screen = new Screen();
+  const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
 
   const len = int(screen.cols / 2) - 1;
   const lines = rend.lines;

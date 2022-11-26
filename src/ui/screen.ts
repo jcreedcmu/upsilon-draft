@@ -86,7 +86,7 @@ export class Screen {
   rows: number = ROWS;
   cols: number = COLS;
 
-  constructor() {
+  constructor(attr?: Attr) {
     this.imdat = new ImageData(TEXT_PAGE_W, TEXT_PAGE_H);
     {
       for (let n = 0; n < TEXT_PAGE_W * TEXT_PAGE_H; n++) {
@@ -99,7 +99,8 @@ export class Screen {
     {
       for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
-          this.putChar(x, y, { fg: ColorCode.black, bg: ColorCode.black, charcode: 0 });
+          const char = { ...(attr ?? { fg: ColorCode.black, bg: ColorCode.black }), charcode: 0 };
+          this.putChar(x, y, char);
         }
       }
     }

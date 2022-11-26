@@ -15,7 +15,7 @@ export type Action =
   | { t: 'error', code: ErrorCode }
   | { t: 'exec', item: Ident }
 
-export const defaultAttr: Attr = { fg: ColorCode.white, bg: ColorCode.black };
+export const defaultAttr: Attr = { fg: ColorCode.white, bg: ColorCode.blue };
 
 export function canExec(item: Item): boolean {
   return !!item.acls.exec;
