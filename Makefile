@@ -19,3 +19,6 @@ check:
 # run tests
 test:
 	npm test
+
+deploy:
+	git push origin "main:deploy"
