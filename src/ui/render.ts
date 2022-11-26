@@ -192,7 +192,8 @@ export function renderFsView(rend: FsRenderable): Screen {
 
 export function renderTextDialogView(state: Renderable): Screen {
   const screen = new Screen();
-  screen.drawRect({ h: 3, w: 3, x: 0, y: 0 }, { fg: ColorCode.white, bg: ColorCode.black });
+  screen.fillRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, { fg: ColorCode.white, bg: ColorCode.blue }, 32);
+  screen.drawRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, { fg: ColorCode.white, bg: ColorCode.blue });
   return screen;
 }
 

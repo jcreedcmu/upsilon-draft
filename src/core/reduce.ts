@@ -247,6 +247,16 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
 }
 
 export function reduceGameState(state: GameState, action: Action): [GameState, Effect[]] {
+  const vs = state.viewState;
+  switch (vs.t) {
+    case 'fsView': return reduceGameStateFs(state, action);
+    case 'textDialogView': return [produce(state, s => {
+      s.viewState = vs.back;
+    }), [{ t: 'redraw' }, { t: 'playSound', effect: 'falling' }]];
+  }
+}
+
+export function reduceGameStateFs(state: GameState, action: Action): [GameState, Effect[]] {
   switch (action.t) {
     case 'key': {
       const keyAction = actionOfKey(state, action.code);

@@ -195,6 +195,15 @@ export class Screen {
     this.drawAttrStr(state, this.parseStrToLength(str, attr, len));
   }
 
+  fillRect(rect: Rect, attr: Attr, char: number) {
+    const { x, y, w, h } = rect;
+    for (let i = 0; i < w; i++) {
+      for (let j = 0; j < h; j++) {
+        this.modChar(x + i, y + j, x => char, attr)
+      }
+    }
+  }
+
   drawRect(rect: Rect, attr: Attr) {
     const { x, y, w, h } = rect;
 
