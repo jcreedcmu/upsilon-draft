@@ -15,7 +15,7 @@ export const EXEC_TICKS = 6;
 export function reduce(state: State, action: Action): [State, Effect[]] {
   switch (state.t) {
     case 'title':
-      return [mkGameState(), [{ t: 'redraw' }]];
+      return [mkGameState(), [{ t: 'redraw' }, { t: 'playSound', effect: 'startup' }]];
     case 'game':
       const [gameState, effects] = reduceGameState(state.gameState, action);
       return [produce(state, s => { s.gameState = gameState; }), effects];

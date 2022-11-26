@@ -4,7 +4,8 @@ const SAMPLE_RATE = 44100; // samples/s
 const BEEP_LENGTH = 30000; // samples
 
 export type SoundEffect =
-  | 'rising' | 'falling' | 'high' | 'low' | 'med' | 'pickup' | 'drop' | 'error';
+  | 'rising' | 'falling' | 'high' | 'low' | 'med' | 'pickup' | 'drop' | 'error'
+  | 'startup';
 
 type SoundEffectSpec = {
   startFreq: number, // Hz
@@ -31,7 +32,7 @@ function specWithDefaults(spec: Partial<SoundEffectSpec>): SoundEffectSpec {
 
 export type Sound = {
   d: AudioContext,
-  beeps: { [K in SoundEffect]: AudioBuffer },
+  sounds: { [K in SoundEffect]: AudioBuffer },
 }
 
 function adsr(t: number, len: number, attack: number, decay: number, sustain: number, release: number): number {
@@ -47,6 +48,34 @@ function adsr(t: number, len: number, attack: number, decay: number, sustain: nu
   else {
     return sustain;
   }
+}
+
+function makeStartupSound(): AudioBuffer {
+  const len = 5; // seconds
+  const samples = len * SAMPLE_RATE;
+  const buf = new AudioBuffer({
+    length: samples, sampleRate: SAMPLE_RATE, numberOfChannels: 1
+  });
+  const data = buf.getChannelData(0);
+  const FREQS = 30;
+  const freq: number[] = [];
+  const phase: number[] = [];
+  for (let i = 0; i < FREQS; i++) {
+    freq[i] = 40 * i + Math.random() * 50;
+    phase[i] = 0;
+  }
+
+  for (let frame = 0; frame < samples; frame++) {
+    let sample = 0.0;
+    for (let i = 0; i < FREQS; i++) {
+      const f = 100 + freq[i] * (0.5 + 3 * (frame / samples));
+      phase[i] += 2 * Math.PI * f / SAMPLE_RATE;
+      sample += adsr(frame / SAMPLE_RATE, len, 0.1, 0, 1, len - 0.1) *
+        0.1 / FREQS * Math.sin(phase[i]);
+    }
+    data[frame] = sample;
+  }
+  return buf;
 }
 
 function makeBeep(partialSpec: Partial<SoundEffectSpec>): AudioBuffer {
@@ -68,7 +97,8 @@ export function initSound(): Sound {
   const context = new AudioContext({ sampleRate: SAMPLE_RATE });
   return {
     d: context,
-    beeps: {
+    sounds: {
+      startup: makeStartupSound(),
       rising: makeBeep({ startFreq: 220, endFreq: 440 }),
       falling: makeBeep({ startFreq: 440, endFreq: 220 }),
       high: makeBeep({ startFreq: 440 }),
@@ -82,9 +112,9 @@ export function initSound(): Sound {
 }
 
 export function playBeep(sound: Sound, which: SoundEffect) {
-  const { d, beeps } = sound;
+  const { d, sounds } = sound;
   const beepSrc = d.createBufferSource();
-  beepSrc.buffer = beeps[which];
+  beepSrc.buffer = sounds[which];
   beepSrc.connect(d.destination); // connect the source to the context's destination (the speakers)
   beepSrc.start();
 }

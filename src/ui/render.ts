@@ -210,8 +210,10 @@ export function render(state: State): Screen {
   switch (state.t) {
     case 'title':
       const screen = new Screen();
-      screen.drawAttrStr(screen.at(3, 3), [{ str: 'initializing...', attr: { fg: 15, bg: 4 } }]);
-      screen.drawAttrStr(screen.at(3, 4), [{ str: 'press any key', attr: { fg: 0, bg: 15 } }]);
+      const str1 = '* * \x03 UpsilonDraft \x02 * *';
+      screen.drawAttrStr(screen.at(Math.floor((screen.cols - str1.length) / 2), 3), [{ str: str1, attr: { fg: 15, bg: 4 } }]);
+      const str2 = 'press any key to start';
+      screen.drawAttrStr(screen.at(Math.floor((screen.cols - str2.length) / 2), 5), [{ str: str2, attr: { fg: 0, bg: 15 } }]);
       return screen;
 
     case 'game': {
