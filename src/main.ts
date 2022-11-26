@@ -80,9 +80,14 @@ function reschedule(dispatch: (a: NewAction) => void, state: GameState): ClockSt
 
 async function go() {
 
+  const sound = initSound();
+
   const pane = await make_pane(document.getElementById('c') as HTMLCanvasElement);
 
-  const sound = initSound();
+  const powerButton = document.getElementById('power-button')! as HTMLImageElement;
+  powerButton.className = 'button';
+  powerButton.src = 'assets/button-up.png';
+  powerButton.onclick = () => dispatch({ t: 'clockUpdate', tick: 0 });
 
   const state: NewState[] = [mkState()];
 
@@ -103,6 +108,9 @@ async function go() {
           });
         }
         else return state;
+      case 'powerButton':
+        (document.getElementById('power-button')! as HTMLImageElement).src = 'assets/button-down.png';
+        return state;
     }
   }
 

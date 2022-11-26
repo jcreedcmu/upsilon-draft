@@ -83,6 +83,7 @@ export type Effect =
   | { t: 'redraw' }
   | { t: 'playSound', effect: SoundEffect }
   | { t: 'reschedule' }
+  | { t: 'powerButton' }
   ;
 
 // If I need to add more state around settings, menus, saving, etc.,

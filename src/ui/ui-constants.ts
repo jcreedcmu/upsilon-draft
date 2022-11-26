@@ -1,7 +1,11 @@
+import { Point } from "../util/types";
+
 // These need to be the same values as those that occur in
 // public/assets/fragment.frag
+export const SCALE = 3;
 export const ROWS = 18;
 export const COLS = 48;
+export const char_size: Point = { x: 6, y: 12 };
 export const TEXT_PAGE_W = 48;  // Could instead do: smallest power of 2 >= COLS
 export const TEXT_PAGE_H = 18;  // Could instead do: Smallest power of 2 >= COLS
 

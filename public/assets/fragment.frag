@@ -36,8 +36,7 @@ const vec4 bg = vec4(0.15,0.15,0.1,1.0);
 
 
 vec2 getPixelPos() {
-  vec2 windowOffset = -floor((u_canvasSize - windowSize) / 2.0);
-  return vec2(windowOffset.x + gl_FragCoord.x, windowOffset.y + u_canvasSize.y - gl_FragCoord.y); // x ∈ [0.0, COLS * char_size.x * SCALE], y ∈ [0.0, ROWS * char_size.y * SCALE]
+  return vec2( gl_FragCoord.x, windowSize.y -gl_FragCoord.y); // x ∈ [0.0, COLS * char_size.x * SCALE], y ∈ [0.0, ROWS * char_size.y * SCALE]
 }
 
 ivec2 getChar(ivec2 char_pos) {

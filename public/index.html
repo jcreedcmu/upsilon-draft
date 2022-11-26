@@ -7,15 +7,43 @@
         overflow: hidden;
       }
       * { margin: 0px; }
-      #c {
-        /* cursor: none; */
+      .container {
+        background-color: #69695a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
         position: absolute;
         top: 0px;
         left: 0px;
+        right: 0px;
+        bottom: 0px;
+      }
+      canvas {
+      }
+      .button-row {
+        image-rendering: pixelated;
+        margin-top: 4px;
+        width: 864px;
+        height: 50px;
+        display: flex;
+        justify-content: right;
+        flex-direction: row;
+      }
+      img.button {
+        height: 50px;
+        width: 50px;
+        cursor: pointer;
+      }
+      .hidden {
+        display: none;
       }
     </style>
   </head>
   <body>
-	 <canvas id="c"></canvas>
+    <div class="container">
+      <canvas id="c"></canvas>
+      <div class="button-row"><img id="power-button" class="button hidden"></img></div>
+    </div>
   </body>
 </html>

@@ -1,6 +1,6 @@
 import { DEBUG } from '../util/debug';
 import { Screen } from './screen';
-import { rawPalette } from './ui-constants';
+import { char_size, COLS, rawPalette, ROWS, SCALE } from './ui-constants';
 
 // returns an array of 16 * 4 floats, which are the rgba values for
 // the 16 palette entries.
@@ -168,8 +168,8 @@ export class Pane {
   }
 
   constructor(vert: string, frag: string, font: HTMLImageElement, private c: HTMLCanvasElement) {
-    c.width = window.innerWidth;
-    c.height = window.innerHeight;
+    c.width = char_size.x * COLS * SCALE;
+    c.height = char_size.y * ROWS * SCALE;
     this.env = getEnv(c, vert, frag, font);
   }
 
