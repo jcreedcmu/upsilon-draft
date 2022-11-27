@@ -111,16 +111,8 @@ function startExecutableName(state: GameState, id: Ident, name: ExecutableName):
       };
       addFuture(s, now + cycles, action, true);
     });
-    return [state, [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }]];
+    return [state, [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }, { t: 'reschedule' }]];
   }
-
-  switch (name) {
-    case 'text-dialog':
-    case 'combine':
-  }
-  [produce(state, s => {
-    s.viewState = { t: 'textDialogView', back: state.viewState };
-  }), [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }]];
 }
 
 function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
@@ -347,6 +339,7 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
         s.fs.idToItem[action.actorId].progress = undefined;
       }), [...effects, { t: 'redraw' }]];
     }
+
     case 'finishNamedExecution': {
       let effects;
       [state, effects] = executeNamedInstructions(state, action.instr, action.targetIds, action.actorId);

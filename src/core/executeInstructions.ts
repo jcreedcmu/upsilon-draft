@@ -12,7 +12,7 @@ export type ExecutableSpec = {
 
 const _executableNameMap = {
   'text-dialog': { cycles: 0, cpuCost: 0, numTargets: 0 },
-  'combine': { cycles: 3, cpuCost: 1, numTargets: 2 },
+  'combine': { cycles: 10, cpuCost: 1, numTargets: 2 },
 }
 
 export type ExecutableName = keyof (typeof _executableNameMap);
