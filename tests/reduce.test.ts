@@ -18,11 +18,12 @@ const fs = (() => {
 })();
 
 describe('reduce', () => {
-  test(`shouldn't duplicate sounds for named executable`, () => {
+  test(`shouldn't duplicate effects for 0-cycle named executable`, () => {
 
     const state = gameStateOfFs(fs);
     const [, effects] = reduceExecAction(state, { t: 'exec', ident: 'text-dialog' });
     expect(effects.filter(x => x.t == 'playSound').length).toEqual(1);
+    expect(effects.filter(x => x.t == 'redraw').length).toEqual(1);
   });
 
 });

@@ -28,7 +28,7 @@ export function executeNamedInstructions(state: GameState, instr: ExecutableName
     case 'text-dialog':
       return [produce(state, s => {
         s.viewState = { t: 'textDialogView', back: state.viewState };
-      }), [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }]];
+      }), [{ t: 'redraw' }]];
     case 'combine':
       return [state, []];
   }
