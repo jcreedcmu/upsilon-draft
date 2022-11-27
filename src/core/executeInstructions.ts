@@ -48,7 +48,7 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
 
 // These effects don't need to include redraw. Do they need reschedule?
 // Wait, maybe they do need a redraw if they're zero-cycle.
-export function executeNamedInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[]] {
+export function executeInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[]] {
 
 
   function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[]] {
@@ -92,36 +92,6 @@ export function executeNamedInstructions(state: GameState, instr: ExecutableName
       return withModifiedTarget(tgt => { tgt.acls.open = !tgt.acls.open; });
     case 'prefix':
       return withModifiedTarget(tgt => { tgt.name = "." + tgt.name; });
-
-  }
-}
-
-export function executeInstructions(state: GameState, targets: Ident[], actor: Ident): [GameState, Effect[]] {
-  const actCont = getContents(state.fs, actor);
-
-  // first item in contents of executable is a plain file naming the "cpu type"
-
-  if (actCont.length <= 1) {
-    return withError(state, 'noInstr');
-  }
-
-  const first = getItem(state.fs, actCont[1]);
-  const target = getItem(state.fs, targets[0]);
-
-  function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[]] {
-    const ftgt = produce(target, t => { f(t); });
-    return [produce(state, s => {
-      s.fs.idToItem[targets[0]] = ftgt;
-    }), []];
-  }
-
-  if (!first.acls.instr) {
-    return withError(state, 'illegalInstr');
-  }
-
-  switch (first.name) {
-    default:
-      return withError(state, 'illegalInstr');
 
   }
 }

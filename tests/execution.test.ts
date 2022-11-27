@@ -43,7 +43,7 @@ describe('mov-cpu-5', () => {
 
     expect(state.futures.length).toEqual(1);
     expect(state.futures[0].action).toEqual({
-      actorId: "mov-cpu-5", instr: "mov-cpu-5", t: "finishNamedExecution",
+      actorId: "mov-cpu-5", instr: "mov-cpu-5", t: "finishExecution",
       targetIds: ["_gen_vroot/\x81\x95\x83\x9D\x95", "receiver"]
     });
 

@@ -68,8 +68,7 @@ export type Item = {
 export type GameAction =
   | { t: 'key', code: string }
   | { t: 'clockUpdate', tick: number }
-  | { t: 'finishExecution', actorId: Ident, targetIds: Ident[] }
-  | { t: 'finishNamedExecution', actorId: Ident, targetIds: Ident[], instr: ExecutableName }
+  | { t: 'finishExecution', actorId: Ident, targetIds: Ident[], instr: ExecutableName }
   | { t: 'clearError' }
   ;
 

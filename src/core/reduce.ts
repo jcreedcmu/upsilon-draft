@@ -7,7 +7,7 @@ import { nowTicks } from './clock';
 import { logger } from '../util/debug';
 import { insertId } from '../fs/fs';
 import { getResource, modifyResource } from '../fs/resources';
-import { ExecutableName, executableNameMap, ExecutableSpec, executeInstructions, executeNamedInstructions, isExecutable } from './executeInstructions';
+import { ExecutableName, executableNameMap, ExecutableSpec, executeInstructions, isExecutable } from './executeInstructions';
 import { SpecialId } from '../fs/initialFs';
 
 export const EXEC_TICKS = 6;
@@ -52,20 +52,7 @@ function addFuture(state: GameState, whenTicks: number, action: GameAction, live
   state.futures.sort((a, b) => a.whenTicks - b.whenTicks);
 }
 
-// imperatively updates state
-function startExecutable(state: GameState, targetIds: Ident[], actorId: Ident): void {
-  const actor = getItem(state.fs, actorId);
-  const now = nowTicks(state.clock);
-  actor.progress = {
-    startTicks: now,
-    targetIds,
-    totalTicks: EXEC_TICKS
-  };
-  addFuture(state, now + EXEC_TICKS, { t: 'finishExecution', actorId, targetIds }, true);
-}
-
-function startExecutableName(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
-
+function startExecutable(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
 
   const { cycles, cpuCost, numTargets } = executableNameMap[name];
 
@@ -90,7 +77,7 @@ function startExecutableName(state: GameState, id: Ident, name: ExecutableName):
   });
 
   const action: GameAction = {
-    t: 'finishNamedExecution',
+    t: 'finishExecution',
     actorId: id,
     targetIds,
     instr: name,
@@ -143,45 +130,10 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): [Gam
       }
 
       if (isExecutable(actor.name)) {
-        return startExecutableName(state, actorId, actor.name);
+        return startExecutable(state, actorId, actor.name);
       }
 
-      const targetIds = getItemIdsAfter(state.fs, actorId, numTargetsOfExecutable(actor));
-      if (targetIds == undefined) {
-        return withError(state, 'noArgument');
-      }
-
-      const targets = targetIds.map(id => getItem(state.fs, id));
-
-      if (!targets.every(target => canPickup(target, actor))) {
-        return withError(state, 'itemLocked');
-        break;
-      }
-
-      if (getResource(actor, 'cpu') <= 0) {
-        return withError(state, 'noCharge');
-      }
-
-      const contents = getFullContents(state.fs, actorId);
-      if (contents.length > 0 && contents[0].name == 'cpu100') {
-
-        state = produce(state, s => {
-          modifyResource(s.fs.idToItem[actorId], 'cpu', x => x - 1);
-          startExecutable(s, targetIds, actorId);
-        });
-
-        return [
-          state,
-          [
-            { t: 'redraw' },
-            { t: 'playSound', effect: 'rising' },
-            { t: 'reschedule' },
-          ],
-        ];
-      }
-      else {
-        return withError(state, 'badExecutable');
-      }
+      return withError(state, 'badExecutable');
     }
     case 'back': return reduceKeyAction(state, KeyAction.back);
   }
@@ -341,15 +293,7 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
 
     case 'finishExecution': {
       let effects;
-      [state, effects] = executeInstructions(state, action.targetIds, action.actorId);
-      return [produce(state, s => {
-        s.fs.idToItem[action.actorId].progress = undefined;
-      }), [...effects, { t: 'redraw' }]];
-    }
-
-    case 'finishNamedExecution': {
-      let effects;
-      [state, effects] = executeNamedInstructions(state, action.instr, action.targetIds, action.actorId);
+      [state, effects] = executeInstructions(state, action.instr, action.targetIds, action.actorId);
       return [produce(state, s => {
         getItem(s.fs, action.actorId).progress = undefined;
       }), effects];
