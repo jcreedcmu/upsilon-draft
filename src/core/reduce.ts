@@ -66,6 +66,7 @@ function startExecutable(state: GameState, targetIds: Ident[], actorId: Ident): 
 
 function startExecutableName(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
 
+
   const { cycles, cpuCost, numTargets } = executableNameMap[name];
 
   const targetIds = getItemIdsAfter(state.fs, id, numTargets);
@@ -85,7 +86,7 @@ function startExecutableName(state: GameState, id: Ident, name: ExecutableName):
   }
 
   state = produce(state, s => {
-    modifyResource(s.fs.idToItem[id], 'cpu', x => x - cpuCost);
+    modifyResource(getItem(s.fs, id), 'cpu', x => x - cpuCost);
   });
 
   const action: GameAction = {

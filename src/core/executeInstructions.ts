@@ -1,6 +1,6 @@
 import { produce } from "../util/produce";
 import { getResource, modifyResource, Resource } from "../fs/resources";
-import { getContents, getItem } from "../fs/fs";
+import { getContents, getItem, reifyId } from "../fs/fs";
 import { Effect, GameState, Ident, Item } from "./model";
 import { withError } from "./reduce";
 
@@ -13,7 +13,7 @@ export type ExecutableSpec = {
 const _executableNameMap = {
   'text-dialog': { cycles: 3, cpuCost: 0, numTargets: 0 },
   'combine': { cycles: 10, cpuCost: 1, numTargets: 2 },
-  'mov-cpu-5': { cycles: 5, cpuCost: 1, numTargets: 2 },
+  'mov-cpu-5': { cycles: 0, cpuCost: 1, numTargets: 2 },
   'mov-cpu-1': { cycles: 5, cpuCost: 1, numTargets: 2 },
 }
 
@@ -27,6 +27,11 @@ export function isExecutable(k: string): k is ExecutableName {
 
 function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number): [GameState, Effect[]] {
   const actualAmount = Math.min(amount, getResource(getItem(state.fs, targets[0]), 'cpu'));
+
+  let fs = state.fs;
+  fs = reifyId(fs, targets[0]);
+  fs = reifyId(fs, targets[1]);
+  state = produce(state, s => { s.fs = fs; });
   return [produce(state, s => {
     modifyResource(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
     modifyResource(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);

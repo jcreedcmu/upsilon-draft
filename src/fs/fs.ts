@@ -218,6 +218,7 @@ export function insertItem(fs: Fs, loc: Ident, item: Item, forceId?: Ident): [Fs
 // Crucially, if ident is a virtual id, we still do the right thing,
 // that is, we reify the virtual item in the course of modifying it.
 function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
+  fs = reifyId(fs, ident);
   const newItem = f(getItem(fs, ident));
   return produce(fs, fsd => {
     fsd.idToItem[ident] = newItem;
@@ -271,4 +272,19 @@ export function moveId(fs: Fs, fromLoc: Location, toLoc: Location): [Fs, Hook[]]
   const [fs2, ident, hooks2] = removeId(fs, fromLoc.id, fromLoc.pos);
   const [fs3, hooks3] = insertId(fs2, toLoc.id, toLoc.pos, ident);
   return [fs3, [...hooks2, ...hooks3]];
+}
+
+// ensures ident is really mapped to a real item
+export function reifyId(fs: Fs, ident: Ident): Fs {
+  if (fs.idToItem[ident] == undefined) {
+    const item = getItem(fs, ident);
+    const loc = getLocation(fs, ident);
+    return produce(fs, fsd => {
+      fsd.idToItem[ident] = item;
+      fsd._cached_locmap[ident] = loc;
+    });
+  }
+  else {
+    return fs;
+  }
 }

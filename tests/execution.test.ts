@@ -10,7 +10,7 @@ const fs = (() => {
   let fs = mkFs();
   [fs,] = insertPlans(fs, SpecialId.root, [
     { t: 'virtual', id: 'vroot' },
-    testFile('mov-cpu-5'),
+    testFile('mov-cpu-5', { cpu: 10 }),
     testFile('receiver'),
   ]);
   return fs;
@@ -26,7 +26,6 @@ describe('mov-cpu-5', () => {
 
 
     state = produce(state, s => { s.fs = fs_; });
-    console.log(getFullContents(state.fs, '_root').map(x => x.name));
 
     expect(getFullContents(state.fs, '_gen_vroot').map(x => x.name))
       .toEqual([
