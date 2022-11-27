@@ -233,3 +233,14 @@ What kind of specializations can I imagine?
 - large-file motion
 - file creation with arbitrary name
 - file copying
+
+=== 2022.11.27 META: (:id 4dc9a488-c596-4955-a81f-7a390ab1fe2a)
+
+Two outstanding bugs/infelicities that might require some rethink:
+
+ - 'mounting' the virtual file system at any place other than the root
+   leads to it being mounted twice accidentally.
+
+ - Operations that modify items don't automatically reify virtual
+   things. I fixed known bugs with calls to reifyId, but this is
+   error-prone and bad.
