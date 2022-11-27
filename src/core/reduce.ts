@@ -115,6 +115,11 @@ function startExecutableName(state: GameState, id: Ident, name: ExecutableName):
   }
 }
 
+// Something to note is that we're not checking the executability acl
+// *here*; it's being checked in execActionForItem already when we
+// construct lines for a directory. May want to reconsider this,
+// although it is in some way convenient knowing whether a file is
+// executable very early.
 export function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
 
   switch (action.t) {
