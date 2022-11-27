@@ -150,22 +150,23 @@ export function showOfFs(fs: Fs): Show {
   }
 }
 
-export function mkGameState(): State {
-  const fs = initialFs();
+export function gameStateOfFs(fs: Fs): GameState {
   return {
-    t: 'game', gameState: {
-      viewState: { t: 'fsView' },
-      clock: mkClockState(),
-      error: undefined,
-      curId: SpecialId.root,
-      curLine: 0,
-      fs,
-      path: [],
-      futures: [],
-      _cached_keybindings: keybindingsOfFs(fs),
-      _cached_show: showOfFs(fs),
-    }
+    viewState: { t: 'fsView' },
+    clock: mkClockState(),
+    error: undefined,
+    curId: SpecialId.root,
+    curLine: 0,
+    fs,
+    path: [],
+    futures: [],
+    _cached_keybindings: keybindingsOfFs(fs),
+    _cached_show: showOfFs(fs),
   };
+}
+
+export function mkInGameState(): State {
+  return { t: 'game', gameState: gameStateOfFs(initialFs()) };
 }
 
 export function getSelectedId(state: GameState): Ident {

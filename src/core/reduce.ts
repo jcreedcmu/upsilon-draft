@@ -1,5 +1,5 @@
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction } from './model';
+import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction } from './model';
 import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes } from './error-codes';
@@ -15,7 +15,7 @@ export const EXEC_TICKS = 6;
 export function reduce(state: State, action: Action): [State, Effect[]] {
   switch (state.t) {
     case 'title':
-      return [mkGameState(), [{ t: 'redraw' }, { t: 'playSound', effect: 'startup' }, { t: 'powerButton' }]];
+      return [mkInGameState(), [{ t: 'redraw' }, { t: 'playSound', effect: 'startup' }, { t: 'powerButton' }]];
     case 'game':
       if (action.t == 'boot') return [{ t: 'title' }, [{ t: 'redraw' }, { t: 'powerButton' }]];
       const [gameState, effects] = reduceGameState(state.gameState, action);
