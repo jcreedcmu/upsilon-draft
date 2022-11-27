@@ -46,8 +46,8 @@ export function prefixForItem(item: Item): string {
 }
 
 function attrForItem(item: Item): Attr {
-  const locked = { fg: ColorCode.bblack, bg: ColorCode.black };
-  const instr = { fg: ColorCode.cyan, bg: ColorCode.black };
+  const locked = { fg: ColorCode.bblack, bg: ColorCode.blue };
+  const instr = { fg: ColorCode.cyan, bg: ColorCode.blue };
   if (item.acls.instr)
     return instr;
   if (!canPickup(item) && !canOpen(item))
