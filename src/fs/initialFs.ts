@@ -94,14 +94,14 @@ function binDir(): ItemPlan {
       namedExec('mov-cpu-5', { resources: { cpu: 5 } }),
       namedExec('mov-cpu-1', { resources: { cpu: 5 } }),
       namedExec('combine'),
-      singleExec('toggle-open'),
-      singleExec('toggle-pickup'),
-      singleExec('toggle-instr', { resources: { cpu: 8 } }),
-      singleExec('toggle-exec'),
-      singleExec('toggle-unlock'),
-      singleExec('toggle-caps'),
-      singleExec('prefix'),
-      singleExec('charge', { resources: { cpu: 4, network: 3 } }),
+      namedExec('toggle-open'),
+      namedExec('toggle-pickup'),
+      namedExec('toggle-instr', { resources: { cpu: 8 } }),
+      namedExec('toggle-exec'),
+      namedExec('toggle-unlock'),
+      namedExec('toggle-caps'),
+      namedExec('prefix'),
+      namedExec('charge', { resources: { cpu: 4, network: 3 } }),
     ]
   };
 }

@@ -69,7 +69,7 @@ function startExecutableName(state: GameState, id: Ident, name: ExecutableName):
 
   const { cycles, cpuCost, numTargets } = executableNameMap[name];
 
-  const targetIds = getItemIdsAfter(state.fs, id, numTargets);
+  const targetIds = getItemIdsAfter(state.fs, id, numTargets ?? 1);
   if (targetIds == undefined) {
     return withError(state, 'noArgument');
   }

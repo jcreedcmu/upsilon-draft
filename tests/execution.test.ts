@@ -1,5 +1,5 @@
 import { gameStateOfFs } from '../src/core/model';
-import { reduceExecAction } from '../src/core/reduce';
+import { reduceExecAction, reduceGameStateFs } from '../src/core/reduce';
 import { getFullContents, insertPlans, mkFs, moveId } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
 import { getResource } from '../src/fs/resources';
@@ -40,6 +40,14 @@ describe('mov-cpu-5', () => {
 
     let effects;
     [state, effects] = reduceExecAction(state, { t: 'exec', ident: 'mov-cpu-5' });
+
+    expect(state.futures.length).toEqual(1);
+    expect(state.futures[0].action).toEqual({
+      actorId: "mov-cpu-5", instr: "mov-cpu-5", t: "finishNamedExecution",
+      targetIds: ["_gen_vroot/\x81\x95\x83\x9D\x95", "receiver"]
+    });
+
+    [state, effects] = reduceGameStateFs(state, state.futures[0].action);
 
     expect(getResource(getFullContents(state.fs, '_root')[2], 'cpu')).toEqual(0);
 
