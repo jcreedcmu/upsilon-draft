@@ -125,7 +125,13 @@ export function mkState(): State {
 }
 
 export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
-  const cont = getFullContents(fs, SpecialId.keys);
+  let cont;
+  try {
+    cont = getFullContents(fs, SpecialId.keys);
+  }
+  catch (e) {
+    return {};
+  }
   const rv: Record<string, KeyAction> = {};
   cont.forEach(item => {
     if (item.contents.length == 1) {
@@ -139,7 +145,13 @@ export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
 }
 
 export function showOfFs(fs: Fs): Show {
-  const cont = getFullContents(fs, SpecialId.lens);
+  let cont;
+  try {
+    cont = getFullContents(fs, SpecialId.lens);
+  }
+  catch (e) {
+    return showAll();
+  }
   return {
     size: cont.some(x => x.name == 'show-size'),
     charge: cont.some(x => x.name == 'show-charge'),
