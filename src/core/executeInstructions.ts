@@ -1,5 +1,5 @@
 import { produce } from "../util/produce";
-import { modifyResource } from "../fs/resources";
+import { getResource, modifyResource, Resource } from "../fs/resources";
 import { getContents, getItem } from "../fs/fs";
 import { Effect, GameState, Ident, Item } from "./model";
 import { withError } from "./reduce";
@@ -11,8 +11,10 @@ export type ExecutableSpec = {
 }
 
 const _executableNameMap = {
-  'text-dialog': { cycles: 0, cpuCost: 0, numTargets: 0 },
+  'text-dialog': { cycles: 3, cpuCost: 0, numTargets: 0 },
   'combine': { cycles: 10, cpuCost: 1, numTargets: 2 },
+  'mov-cpu-5': { cycles: 5, cpuCost: 1, numTargets: 2 },
+  'mov-cpu-1': { cycles: 5, cpuCost: 1, numTargets: 2 },
 }
 
 export type ExecutableName = keyof (typeof _executableNameMap);
@@ -23,6 +25,15 @@ export function isExecutable(k: string): k is ExecutableName {
   return k in executableNameMap;
 }
 
+function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number): [GameState, Effect[]] {
+  const actualAmount = Math.min(amount, getResource(getItem(state.fs, targets[0]), 'cpu'));
+  return [produce(state, s => {
+    modifyResource(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
+    modifyResource(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);
+  }), []];
+}
+
+// These effects don't need to include redraw. Cxu reschedule?
 export function executeNamedInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[]] {
   switch (instr) {
     case 'text-dialog':
@@ -31,6 +42,8 @@ export function executeNamedInstructions(state: GameState, instr: ExecutableName
       }), [{ t: 'redraw' }]];
     case 'combine':
       return [state, []];
+    case 'mov-cpu-5': return movResource(state, targets, 'cpu', 5);
+    case 'mov-cpu-1': return movResource(state, targets, 'cpu', 1);
   }
 }
 

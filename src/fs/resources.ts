@@ -10,6 +10,7 @@ export function getResource(item: Item, resource: Resource): number {
   return item.resources[resource] ?? 0;
 }
 
+// imperatively updates item
 export function modifyResource(item: Item, resource: Resource, f: (x: number) => number): void {
   item.resources[resource] = f(item.resources[resource] ?? 0);
 }

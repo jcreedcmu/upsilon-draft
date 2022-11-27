@@ -3,6 +3,7 @@ import { Resources } from './resources';
 import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
 import { KeyAction } from '../core/model';
 import { arrowChars } from '../ui/screen';
+import { ExecutableName } from '../core/executeInstructions';
 
 export enum SpecialId {
   keys = '_keys',
@@ -17,6 +18,15 @@ function singleExec(name: string, opts?: { numTargets?: number, resources?: Reso
     name,
     contents: [{ t: 'file', name: 'cpu100' }, { t: 'instr', name }],
     numTargets: opts?.numTargets,
+    resources: opts?.resources
+  };
+}
+
+function namedExec(name: ExecutableName, opts?: { resources?: Resources }): ItemPlan {
+  return {
+    t: 'exec',
+    name,
+    contents: [],
     resources: opts?.resources
   };
 }
@@ -80,8 +90,10 @@ function errorDir(): ItemPlan {
 function binDir(): ItemPlan {
   return {
     t: 'dir', name: 'bin', contents: [
-      singleExec('text-dialog', { resources: { cpu: 4 } }),
-      singleExec('combine', { numTargets: 2 }),
+      namedExec('text-dialog', { resources: { cpu: 4 } }),
+      namedExec('mov-cpu-5', { resources: { cpu: 5 } }),
+      namedExec('mov-cpu-1', { resources: { cpu: 5 } }),
+      namedExec('combine'),
       singleExec('toggle-open'),
       singleExec('toggle-pickup'),
       singleExec('toggle-instr', { resources: { cpu: 8 } }),
