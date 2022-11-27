@@ -261,3 +261,11 @@ export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
   });
   return [fs, id, parent.hooks ?? []];
 }
+
+export function moveId(fs: Fs, fromLoc: Location, toLoc: Location): [Fs, Hook[]] {
+  if (fromLoc.t != 'at') { throw new Error(`moveId only supports at right now`); }
+  if (toLoc.t != 'at') { throw new Error(`moveId only supports at right now`); }
+  const [fs2, ident, hooks2] = removeId(fs, fromLoc.id, fromLoc.pos);
+  const [fs3, hooks3] = insertId(fs2, toLoc.id, toLoc.pos, ident);
+  return [fs3, [...hooks2, ...hooks3]];
+}
