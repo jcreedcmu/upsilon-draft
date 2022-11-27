@@ -1,5 +1,5 @@
 import { produce } from "./util/produce";
-import { logger } from './util/debug';
+import { DEBUG, logger } from './util/debug';
 import { Buffer, buffer } from './util/dutil';
 import { make_pane } from './ui/gl-pane';
 import { key } from './ui/key';
@@ -118,6 +118,18 @@ async function go() {
   function dispatch(action: NewAction): void {
     const [newState, effects] = reduce(state[0], action);
     state[0] = newState;
+
+    if (DEBUG.duplicates) {
+      function checkDuplicates(name: Effect['t']) {
+        if (effects.filter(x => x.t == name).length > 1) {
+          console.log(`duplicate ${name}`);
+        }
+      }
+      checkDuplicates('playSound');
+      checkDuplicates('redraw');
+      checkDuplicates('reschedule');
+    }
+
     effects.forEach(e => {
       state[0] = handleEffect(state[0], e);
     });

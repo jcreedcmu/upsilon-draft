@@ -115,7 +115,8 @@ function startExecutableName(state: GameState, id: Ident, name: ExecutableName):
   }
 }
 
-function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
+export function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
+
   switch (action.t) {
     case 'descend': return [produce(state, s => {
       s.curId = getSelectedId(state);
@@ -345,7 +346,7 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
       [state, effects] = executeNamedInstructions(state, action.instr, action.targetIds, action.actorId);
       return [produce(state, s => {
         getItem(s.fs, action.actorId).progress = undefined;
-      }), [...effects, { t: 'redraw' }]];
+      }), effects];
     }
 
     case 'clearError':

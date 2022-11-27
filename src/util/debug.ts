@@ -4,6 +4,7 @@ export const DEBUG = {
   rendering: false,
   reschedule: false,
   produce: false,
+  duplicates: true,
 };
 
 export function logger(level: keyof (typeof DEBUG), ...args: any[]) {
