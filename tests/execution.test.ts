@@ -1,0 +1,49 @@
+import { gameStateOfFs } from '../src/core/model';
+import { reduceExecAction } from '../src/core/reduce';
+import { getFullContents, insertPlans, mkFs, moveId } from '../src/fs/fs';
+import { SpecialId } from '../src/fs/initialFs';
+import { getResource } from '../src/fs/resources';
+import { produce } from '../src/util/produce';
+import { testFile } from "./test-utils";
+
+const fs = (() => {
+  let fs = mkFs();
+  [fs,] = insertPlans(fs, SpecialId.root, [
+    { t: 'virtual', id: 'vroot' },
+    testFile('mov-cpu-5'),
+    testFile('receiver'),
+  ]);
+  return fs;
+})();
+
+describe('mov-cpu-5', () => {
+  test(`should be able to move cpu out of virtual file`, () => {
+
+    let state = gameStateOfFs(fs);
+
+
+    let [fs_,] = moveId(fs, { t: 'at', id: '_gen_vroot', pos: 5 }, { t: 'at', id: '_root', pos: 2 }); // ignore hooks
+
+
+    state = produce(state, s => { s.fs = fs_; });
+    console.log(getFullContents(state.fs, '_root').map(x => x.name));
+
+    expect(getFullContents(state.fs, '_gen_vroot').map(x => x.name))
+      .toEqual([
+        'dir-20',
+        'dir-1',
+        'dir-18',
+        'dir-9',
+        'dir-3',
+      ]);
+
+    expect(getResource(getFullContents(state.fs, '_root')[2], 'cpu')).toEqual(3);
+
+    let effects;
+    [state, effects] = reduceExecAction(state, { t: 'exec', ident: 'mov-cpu-5' });
+
+    expect(getResource(getFullContents(state.fs, '_root')[2], 'cpu')).toEqual(0);
+
+  });
+
+});

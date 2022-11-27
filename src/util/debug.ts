@@ -5,7 +5,7 @@ export const DEBUG = {
   reschedule: false,
   produce: false,
   duplicates: true,
-  movement: true,
+  movement: false,
 };
 
 export function logger(level: keyof (typeof DEBUG), ...args: any[]) {
