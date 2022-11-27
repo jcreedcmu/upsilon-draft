@@ -4,6 +4,7 @@ import { ClockState, mkClockState } from './clock';
 import { Fs, getContents, getFullContents, getItem, getLocation } from '../fs/fs';
 import { initialFs, SpecialId } from '../fs/initialFs';
 import { FullLine, getLines } from './lines';
+import { ExecutableName } from './executeInstructions';
 
 export type Acl =
   | 'open'
@@ -68,6 +69,7 @@ export type GameAction =
   | { t: 'key', code: string }
   | { t: 'clockUpdate', tick: number }
   | { t: 'finishExecution', actorId: Ident, targetIds: Ident[] }
+  | { t: 'finishNamedExecution', actorId: Ident, targetIds: Ident[], instr: ExecutableName }
   | { t: 'clearError' }
   ;
 

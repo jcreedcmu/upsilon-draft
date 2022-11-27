@@ -4,6 +4,36 @@ import { getContents, getItem } from "../fs/fs";
 import { Effect, GameState, Ident, Item } from "./model";
 import { withError } from "./reduce";
 
+export type ExecutableSpec = {
+  cycles: number,
+  cpuCost: number,
+  numTargets: number,
+}
+
+const _executableNameMap = {
+  'text-dialog': { cycles: 0, cpuCost: 0, numTargets: 0 },
+  'combine': { cycles: 3, cpuCost: 1, numTargets: 2 },
+}
+
+export type ExecutableName = keyof (typeof _executableNameMap);
+
+export const executableNameMap: Record<ExecutableName, ExecutableSpec> = _executableNameMap;
+
+export function isExecutable(k: string): k is ExecutableName {
+  return k in executableNameMap;
+}
+
+export function executeNamedInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[]] {
+  switch (instr) {
+    case 'text-dialog':
+      return [produce(state, s => {
+        s.viewState = { t: 'textDialogView', back: state.viewState };
+      }), [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }]];
+    case 'combine':
+      return [state, []];
+  }
+}
+
 export function executeInstructions(state: GameState, targets: Ident[], actor: Ident): [GameState, Effect[]] {
   const actCont = getContents(state.fs, actor);
 

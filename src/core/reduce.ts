@@ -7,7 +7,7 @@ import { nowTicks } from './clock';
 import { logger } from '../util/debug';
 import { insertId } from '../fs/fs';
 import { getResource, modifyResource } from '../fs/resources';
-import { executeInstructions } from './executeInstructions';
+import { ExecutableName, executableNameMap, ExecutableSpec, executeInstructions, executeNamedInstructions, isExecutable } from './executeInstructions';
 import { SpecialId } from '../fs/initialFs';
 
 export const EXEC_TICKS = 6;
@@ -64,6 +64,64 @@ function startExecutable(state: GameState, targetIds: Ident[], actorId: Ident): 
   addFuture(state, now + EXEC_TICKS, { t: 'finishExecution', actorId, targetIds }, true);
 }
 
+function startExecutableName(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
+
+  const { cycles, cpuCost, numTargets } = executableNameMap[name];
+
+  const targetIds = getItemIdsAfter(state.fs, id, numTargets);
+  if (targetIds == undefined) {
+    return withError(state, 'noArgument');
+  }
+
+  const targets = targetIds.map(tid => getItem(state.fs, tid));
+
+  const actor = getItem(state.fs, id);
+  if (!targets.every(target => canPickup(target, actor))) { // XXX not sure about this logic
+    return withError(state, 'itemLocked');
+  }
+
+  if (getResource(getItem(state.fs, id), 'cpu') < cpuCost) {
+    return withError(state, 'noCharge'); // XXX insufficient charge, really
+  }
+
+  state = produce(state, s => {
+    modifyResource(s.fs.idToItem[id], 'cpu', x => x - cpuCost);
+  });
+
+  const action: GameAction = {
+    t: 'finishNamedExecution',
+    actorId: id,
+    targetIds,
+    instr: name,
+  };
+
+  if (cycles == 0) {
+    let effects;
+    [state, effects] = reduceGameStateFs(state, action);
+    return [state, [...effects, { t: 'playSound', effect: 'rising' }]];
+  }
+  else {
+    // defer execution
+    const now = nowTicks(state.clock);
+    state = produce(state, s => {
+      getItem(s.fs, id).progress = {
+        startTicks: now,
+        targetIds,
+        totalTicks: cycles
+      };
+      addFuture(s, now + cycles, action, true);
+    });
+    return [state, [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }]];
+  }
+
+  switch (name) {
+    case 'text-dialog':
+    case 'combine':
+  }
+  [produce(state, s => {
+    s.viewState = { t: 'textDialogView', back: state.viewState };
+  }), [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }]];
+}
 
 function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
   switch (action.t) {
@@ -85,10 +143,8 @@ function reduceExecAction(state: GameState, action: ExecLineAction): [GameState,
         return withError(state, 'alreadyExecuting');
       }
 
-      if (actor.name == 'text-dialog') {
-        return [produce(state, s => {
-          s.viewState = { t: 'textDialogView', back: state.viewState };
-        }), [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }]];
+      if (isExecutable(actor.name)) {
+        return startExecutableName(state, actorId, actor.name);
       }
 
       const targetIds = getItemIdsAfter(state.fs, actorId, numTargetsOfExecutable(actor));
@@ -284,12 +340,21 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
         return [state, [{ t: 'reschedule' }]]; // FIXME: Is this reschedule right?
       }
 
-    case 'finishExecution':
+    case 'finishExecution': {
       let effects;
       [state, effects] = executeInstructions(state, action.targetIds, action.actorId);
       return [produce(state, s => {
         s.fs.idToItem[action.actorId].progress = undefined;
       }), [...effects, { t: 'redraw' }]];
+    }
+    case 'finishNamedExecution': {
+      let effects;
+      [state, effects] = executeNamedInstructions(state, action.instr, action.targetIds, action.actorId);
+      return [produce(state, s => {
+        getItem(s.fs, action.actorId).progress = undefined;
+      }), [...effects, { t: 'redraw' }]];
+    }
+
     case 'clearError':
       return [produce(state, s => {
         s.error = undefined;
