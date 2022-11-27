@@ -1,6 +1,6 @@
-import { Fs, getContents, getItem, insertId, insertPlans, ItemPlan, mkFs, removeId } from '../src/fs/fs';
+import { Fs, getContents, getFullContents, getItem, insertId, insertPlans, ItemPlan, mkFs, removeId } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
-import { testFile } from './fs.test';
+import { testFile } from "./test-utils";
 
 const fs = (() => {
   let fs = mkFs();
@@ -18,5 +18,14 @@ const fs = (() => {
 describe('virtual filesystem', () => {
   test('should work correctly', () => {
     expect(getItem(fs, '_gen_vroot').contents.length > 0).toBe(true);
+    expect(getFullContents(fs, '_gen_vroot').map(x => x.name))
+      .toEqual([
+        'dir-20',
+        'dir-1',
+        'dir-18',
+        'dir-9',
+        'dir-3',
+        '\x81\x95\x83\x9D\x95'
+      ]);
   });
 });

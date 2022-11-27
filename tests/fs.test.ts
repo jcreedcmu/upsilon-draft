@@ -1,9 +1,6 @@
-import { Fs, getContents, insertId, insertPlans, ItemPlan, mkFs, removeId } from '../src/fs/fs';
+import { Fs, getContents, insertId, insertPlans, mkFs, removeId } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
-
-export function testFile(name: string): ItemPlan {
-  return { t: 'file', name: name, forceId: name };
-}
+import { testFile } from './test-utils';
 
 const fs = (() => {
   let fs = mkFs();

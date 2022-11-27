@@ -3,7 +3,7 @@ import { reduceExecAction } from '../src/core/reduce';
 import { initialFs } from '../src/fs/initialFs';
 import { Fs, getContents, insertId, insertPlans, ItemPlan, mkFs, removeId } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
-import { testFile } from './fs.test';
+import { testFile } from "./test-utils";
 
 const fs = (() => {
   let fs = mkFs();

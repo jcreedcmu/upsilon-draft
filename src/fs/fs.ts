@@ -4,6 +4,7 @@ import { SpecialId } from "./initialFs";
 import { canOpen } from '../core/lines';
 import { Hook, Ident, Item, Location } from '../core/model';
 import { getVirtualItem, getVirtualItemLocation } from "./vfs";
+import { logger } from "../util/debug";
 
 /// Constants
 
@@ -225,6 +226,7 @@ function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
 
 // This doesn't create the item itself, just inserts the id in the right place
 export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]] {
+  logger('movement', `insertId ${loc}[${ix}] id ${id}`);
   const parent = getItem(fs, loc);
   const contents = [...parent.contents];
 
@@ -250,6 +252,7 @@ export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
   const parent = getItem(fs, loc);
   const contents = [...parent.contents];
   const id = contents[ix];
+  logger('movement', `removeId ${loc}[${ix}] = ${id}`);
 
   fs = modifyItem(fs, loc, item => produce(item, it => { it.contents.splice(ix, 1) }));
 
