@@ -23,6 +23,7 @@ const _executableNameMap = {
   'toggle-caps': { cycles: 5, cpuCost: 1 },
   'prefix': { cycles: 5, cpuCost: 1 },
   'charge': { cycles: 5, cpuCost: 1 },
+  'treadmill': { cycles: 50, cpuCost: 0 },
 }
 
 export type ExecutableName = keyof (typeof _executableNameMap);
@@ -74,6 +75,9 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
 
     case 'charge':
       return withModifiedTarget(tgt => { modifyResource(tgt, 'cpu', x => x + 1); });
+    case 'treadmill':
+      return withModifiedTarget(tgt => { modifyResource(tgt, 'cpu', x => x + 1); });
+
     case 'toggle-unlock':
       return withModifiedTarget(tgt => { tgt.acls.unlock = !tgt.acls.unlock; });
     case 'toggle-exec':

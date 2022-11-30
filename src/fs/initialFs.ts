@@ -102,6 +102,7 @@ function binDir(): ItemPlan {
       namedExec('toggle-caps'),
       namedExec('prefix'),
       namedExec('charge', { resources: { cpu: 4, network: 3 } }),
+      namedExec('treadmill', { resources: { cpu: 0, network: 0 } }),
     ]
   };
 }
