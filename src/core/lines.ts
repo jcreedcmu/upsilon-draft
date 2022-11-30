@@ -1,7 +1,7 @@
 import { ErrorCode } from './error-codes';
 import { Attr, Chars } from '../ui/screen';
 import { ColorCode, COLS } from '../ui/ui-constants';
-import { repeat } from '../util/util';
+import { invertAttr, repeat } from '../util/util';
 import { nowTicks } from './clock';
 import { getContents, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
@@ -104,21 +104,25 @@ function dropActionForItem(item: Item, loc: Ident, ix: number): DropLineAction {
   return { t: 'drop', loc, ix };
 }
 
-export function getRenderableLineOfItem(ident: Ident, item: Item): RenderableLine {
+export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): RenderableLine {
   const str = prefixForItem(item) + item.name;
+  const _attr = attrForItem(item);
+  // XXX Maybe something other than invertAttr for flash? Not sure.
+  const attr = (item.flashUntilTick != undefined && ticks < item.flashUntilTick) ? invertAttr(_attr) : _attr;
+
   return {
     str,
     text: item.text,
     size: item.size,
     resources: item.resources,
     chargeNeeded: item.acls.exec ? 1 : 0,
-    attr: attrForItem(item),
+    attr,
   }
 }
 
-export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number): FullLine {
+export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number): FullLine {
   return {
-    ...getRenderableLineOfItem(ident, item),
+    ...getRenderableLineOfItem(ident, item, ticks),
     actions: {
       exec: execActionForItem(ident, item),
       pickup: pickupActionForItem(item, loc, ix),
@@ -135,7 +139,8 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
   contents.forEach((ident, ix) => {
     const item = getItem(fs, ident);
     if (item.progress == undefined) {
-      lines.push(getLineOfItem(ident, item, loc, ix));
+      const line = getLineOfItem(ident, item, loc, ix, nowTicks(state.clock));
+      lines.push(line);
     }
     else {
       const elapsed = nowTicks(state.clock) - item.progress.startTicks;

@@ -62,6 +62,11 @@ export type Item = {
   size: number,
   text?: string,
 
+  // --- transient animation experiment ---
+  // When defined, and the current time is <= this value,
+  // highlight the item somehow.
+  flashUntilTick?: number,
+
   hooks?: Hook[],
 };
 
@@ -70,6 +75,7 @@ export type GameAction =
   | { t: 'clockUpdate', tick: number }
   | { t: 'finishExecution', actorId: Ident, targetIds: Ident[], instr: ExecutableName }
   | { t: 'clearError' }
+  | { t: 'none' }
   ;
 
 export type Action =

@@ -276,7 +276,6 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
     case 'clockUpdate':
       logger('clockUpdate', `clockUpdate ${action.tick}`);
       if (state.futures.length > 0) {
-
         const actions = state.futures.filter(f => f.whenTicks == action.tick).map(x => x.action);
         state = produce(state, s => {
           s.futures = state.futures.filter(f => f.whenTicks > action.tick);
@@ -284,6 +283,11 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
 
         // FIXME: Maybe I should be doing something smarter about merging
         // effects that I intend to be idempotent, like 'redraw' & 'reschedule'.
+
+        // ...In fact it occurs to me that it's also not even certain
+        // that I always want to redraw here, even though I suppose it's
+        // conservatively safe to do so if by "conservative" I mean
+        // "visual updates won't be lost".
         const [s, a] = reduceActions(state, actions);
         return [s, [...a, { t: 'reschedule' }, { t: 'redraw' }]];
       }
@@ -294,7 +298,13 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
     case 'finishExecution': {
       let effects;
       [state, effects] = executeInstructions(state, action.instr, action.targetIds, action.actorId);
+      const later = nowTicks(state.clock) + 1;
       return [produce(state, s => {
+        if (action.targetIds.length > 0)
+          addFuture(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
+        action.targetIds.forEach(targetId => {
+          getItem(s.fs, targetId).flashUntilTick = later;
+        });
         getItem(s.fs, action.actorId).progress = undefined;
       }), effects];
     }
@@ -303,5 +313,8 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
       return [produce(state, s => {
         s.error = undefined;
       }), [{ t: 'redraw' }]];
+
+    case 'none':
+      return [state, [{ t: 'redraw' }]];
   }
 }

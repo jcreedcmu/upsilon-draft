@@ -8,6 +8,7 @@ import { getContents, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
 import { GameState, Show, State, UserError } from '../core/model';
+import { nowTicks } from '../core/clock';
 
 const CHARGE_COL_SIZE = 3;
 const SIZE_COL_SIZE = 3;
@@ -57,7 +58,7 @@ function getInventoryLine(state: GameState): RenderableLine | undefined {
     return undefined;
   const id = inventory[0];
   const invItem = getItem(state.fs, id);
-  return getRenderableLineOfItem(id, invItem);
+  return getRenderableLineOfItem(id, invItem, nowTicks(state.clock));
 }
 
 function getRenderable(state: GameState): Renderable {
