@@ -59,7 +59,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
     // XXX this is wrong if idToItem doesn't already have a location
     return [produce(state, s => {
       s.fs.idToItem[targets[0]] = ftgt;
-    }), []];
+    }), [{ t: 'playSound', effect: 'ping' }]];
   }
 
   switch (instr) {

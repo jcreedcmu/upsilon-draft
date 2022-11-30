@@ -5,7 +5,7 @@ const BEEP_LENGTH = 30000; // samples
 
 export type SoundEffect =
   | 'rising' | 'falling' | 'high' | 'low' | 'med' | 'pickup' | 'drop' | 'error'
-  | 'startup';
+  | 'startup' | 'ping';
 
 type SoundEffectSpec = {
   startFreq: number, // Hz
@@ -103,6 +103,10 @@ export function initSound(): Sound {
     d: context,
     sounds: {
       startup: makeStartupSound(),
+      ping: makeBeep({
+        startFreq: 660, endFreq: 675,
+        attack_s: 0.05, decay_s: 0.05, sustain: 0.1, release_s: 0.25, duration_s: 0.5
+      }),
       rising: makeBeep({ startFreq: 220, endFreq: 440 }),
       falling: makeBeep({ startFreq: 440, endFreq: 220 }),
       high: makeBeep({ startFreq: 440 }),
