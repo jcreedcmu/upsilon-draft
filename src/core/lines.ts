@@ -138,8 +138,9 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
 
   contents.forEach((ident, ix) => {
     const item = getItem(fs, ident);
+    const line = getLineOfItem(ident, item, loc, ix, nowTicks(state.clock));
+
     if (item.progress == undefined) {
-      const line = getLineOfItem(ident, item, loc, ix, nowTicks(state.clock));
       lines.push(line);
     }
     else {
@@ -147,11 +148,12 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
       const numTargets = numTargetsOfExecutable(item);
       lines.push({
         str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
-        resources: {},
+        resources: line.resources,
         size: 0,
+        inProgress: true,
         attr: { bg: ColorCode.red, fg: ColorCode.yellow },
         actions: {
-          exec: { t: 'none' },
+          exec: { t: 'error', code: 'alreadyExecuting' },
           pickup: { t: 'error', code: 'cantPickUpLocked' },
           drop: { t: 'error', code: 'cantPickUpLocked' },
         }

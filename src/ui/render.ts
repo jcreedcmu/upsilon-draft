@@ -21,6 +21,7 @@ const MARGIN = 1;
 export type RenderableLine = {
   str: string,
   text?: string,
+  inProgress?: boolean,
   resources: Resources,
   size: number,
   chargeNeeded?: number,
@@ -113,7 +114,7 @@ function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine,
   const sizeCol = chargeCol - SIZE_COL_SIZE - MARGIN;
 
   // show cpu quota
-  if (show.charge) {
+  if (show.charge && !line.inProgress) {
     const resText: AttrString[] = [];
     if (needsResources && !line.resources.cpu) resText.push({ str: Chars.EMPTY_DIA, attr: GRAY_ATTR });
     if (line.resources.cpu) resText.push({ str: Chars.DIA, attr: CHARGE_ATTR });
@@ -131,6 +132,22 @@ function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine,
   }
 }
 
+type RenderableResources = { name: string, count: number, attr: Attr, symbol: string };
+
+export function getRenderableResources(line: RenderableLine): RenderableResources[] {
+  const rv: RenderableResources[] = [];
+  if (line.resources.cpu) {
+    rv.push({ name: 'CPU', count: line.resources.cpu, attr: CHARGE_ATTR, symbol: Chars.DIA });
+  }
+  if (line.resources.network) {
+    rv.push({ name: 'NET', count: line.resources.network, attr: NETWORK_ATTR, symbol: Chars.SQR });
+  }
+  if (line.resources.data) {
+    rv.push({ name: 'DAT', count: line.resources.data, attr: DATA_ATTR, symbol: Chars.SQR });
+  }
+  return rv;
+}
+
 export function renderFsView(rend: FsRenderable): Screen {
   const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
 
@@ -142,18 +159,19 @@ export function renderFsView(rend: FsRenderable): Screen {
       if (line.text && selected) {
         screen.drawTagStr(screen.at(len + 1, 3, len), line.text, INV_ATTR);
       }
-      if (selected && line.resources.cpu) {
-        screen.drawTagStr(screen.at(len + 1, screen.rows - 3), "CPU:", INV_ATTR);
-        screen.drawTagStr(screen.at(len + 5, screen.rows - 3), repeat(Chars.DIA, line.resources.cpu), CHARGE_ATTR);
-      }
-      if (selected && line.resources.network) {
-        screen.drawTagStr(screen.at(len + 1, screen.rows - 4), "NET:", INV_ATTR);
-        screen.drawTagStr(screen.at(len + 5, screen.rows - 4), repeat(Chars.SQR, line.resources.network), NETWORK_ATTR);
-      }
-      if (selected && line.resources.data) {
-        screen.drawTagStr(screen.at(len + 1, screen.rows - 5), "DAT:", INV_ATTR);
-        screen.drawTagStr(screen.at(len + 5, screen.rows - 5), repeat(Chars.SQR, line.resources.data), DATA_ATTR);
-
+      if (selected) {
+        const rrs = getRenderableResources(line);
+        rrs.forEach((rr, ix) => {
+          const nameStr = `${rr.name}:`;
+          screen.drawTagStr(screen.at(len + 1, screen.rows - 3 - ix), nameStr, INV_ATTR);
+          if (rr.count >= 5)
+            screen.drawAttrStr(
+              screen.at(len + nameStr.length + 1, screen.rows - 3 - ix),
+              [{ str: rr.count + '', attr: INV_ATTR }, { str: rr.symbol, attr: rr.attr }]
+            );
+          else
+            screen.drawTagStr(screen.at(len + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
+        });
       }
     }
     renderLine(screen, { x: 0, y: i }, len, line, rend.show, selected);

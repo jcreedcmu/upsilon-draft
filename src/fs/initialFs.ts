@@ -99,8 +99,8 @@ function binDir(): ItemPlan {
       namedExec('toggle-instr', { resources: { cpu: 8 } }),
       namedExec('toggle-exec'),
       namedExec('toggle-unlock'),
-      namedExec('toggle-caps'),
-      namedExec('prefix'),
+      namedExec('toggle-caps', { resources: { data: 1 } }),
+      namedExec('prefix', { resources: { network: 1 } }),
       namedExec('charge', { resources: { cpu: 4, network: 3 } }),
       namedExec('treadmill', { resources: { cpu: 0, network: 0 } }),
     ]
