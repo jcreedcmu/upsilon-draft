@@ -113,8 +113,9 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): [Gam
   switch (action.t) {
     case 'descend': return [produce(state, s => {
       s.curId = getSelectedId(state);
-      s.curLine = 0;
-      s.path.push(getItem(state.fs, s.curId).name);
+      const item = getItem(state.fs, s.curId);
+      s.curLine = item.stickyCurrentPos ?? 0;
+      s.path.push(item.name);
     }), [
       { t: 'redraw' },
       { t: 'playSound', effect: 'rising' }
@@ -242,6 +243,10 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
       }
       else {
         return [produce(state, s => {
+          // XXX Doesn't work for virtual, should have more general
+          // "modify item" interface that reifies virtual things as necessary
+          getItem(s.fs, state.curId).stickyCurrentPos = state.curLine;
+
           s.curId = loc.id;
           s.curLine = loc.pos;
           s.path.pop();

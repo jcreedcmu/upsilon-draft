@@ -68,6 +68,10 @@ export type Item = {
   flashUntilTick?: number,
 
   hooks?: Hook[],
+
+  // If we go up a directory and then back in here, preserve
+  // the selected line.
+  stickyCurrentPos?: number,
 };
 
 export type GameAction =
