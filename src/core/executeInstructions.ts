@@ -3,6 +3,7 @@ import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { createAndInsertItem, getContents, getItem, getLocation, maybeGetItem, moveId, moveIdTo, reifyId } from "../fs/fs";
 import { Effect, GameState, Ident, Item, nextLocation } from "./model";
 import { processHooks, withError } from "./reduce";
+import { modificationOrder } from "./modificationOrder";
 
 export type ExecutableSpec = {
   cycles: number,
@@ -26,6 +27,8 @@ export enum ExecutableName {
   treadmill = 'treadmill',
   extractId = 'extract-id',
   magnet = 'magnet',
+  modify = 'modify',
+  copy = 'copy',
 };
 
 export const executableNameMap: Record<ExecutableName, ExecutableSpec> = {
@@ -44,6 +47,8 @@ export const executableNameMap: Record<ExecutableName, ExecutableSpec> = {
   'treadmill': { cycles: 50, cpuCost: 0 },
   'extract-id': { cycles: 5, cpuCost: 1 },
   'magnet': { cycles: 5, cpuCost: 1 },
+  'modify': { cycles: 5, cpuCost: 1 },
+  'copy': { cycles: 5, cpuCost: 1 },
 }
 
 export function isExecutable(k: string): k is ExecutableName {
@@ -153,6 +158,37 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         state = processHooks(state, hooks);
         return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
       }
+    }
+
+    case ExecutableName.modify: {
+      let newName = getItem(state.fs, targets[0]).name;
+      const mo = modificationOrder();
+      const found = mo.findIndex(x => x == newName);
+      if (found != -1) {
+        newName = mo[(found + 1) % mo.length];
+      }
+      return withModifiedTarget(tgt => {
+        tgt.name = newName;
+      });
+    }
+
+    case ExecutableName.copy: {
+      // Takes one argument.
+      // Creates a new file whose name is the same as argument.
+      // Doesn't copy attributes or acls or anything.
+      const newItem: Item = {
+        name: getItem(state.fs, targets[0]).name,
+        contents: [], acls: { pickup: true }, resources: {}, size: 1
+      };
+      const newItemLoc = nextLocation(getLocation(state.fs, actor));
+      if (newItemLoc.t == 'is_root') {
+        return withError(state, 'badInputs');
+      }
+      const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
+      state = produce(state, s => { s.fs = newfs; });
+      state = processHooks(state, hooks);
+      return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
+
     }
   }
 }
