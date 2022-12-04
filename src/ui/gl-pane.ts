@@ -199,15 +199,20 @@ function getImage(url: string): Promise<HTMLImageElement> {
 
 export class Pane {
   env: Env;
+  start_time_s: number = Date.now() / 1000;
+  frame: number = 0;
 
   draw(screen: Screen) {
+    this.frame++;
+    if (this.frame % 3 != 0) return;
+
     if (this.env == null)
       throw 'Uninitialized graphics environment';
     const { gl, progPost, progText, fb } = this.env;
 
     const ext = gl.getExtension('EXT_disjoint_timer_query_webgl2');
     const query = gl.createQuery()!;
-    function actuallyRender() {
+    const actuallyRender = () => {
 
       gl.useProgram(progText);
 
@@ -222,6 +227,10 @@ export class Pane {
 
       // Then apply post-processing effects
       gl.useProgram(progPost);
+
+      const uTime = gl.getUniformLocation(progPost, 'u_time');
+      gl.uniform1f(uTime, Date.now() / 1000 - this.start_time_s);
+
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, screen_size.x, screen_size.y);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);

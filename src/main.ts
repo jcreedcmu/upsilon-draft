@@ -95,7 +95,7 @@ async function go() {
     switch (effect.t) {
       case 'redraw':
         const screen = render(state);
-        pane.draw(screen);
+        //        pane.draw(screen);
         return state;
       case 'playSound':
         playBeep(sound, effect.effect);
@@ -139,7 +139,13 @@ async function go() {
   }
   state[0] = handleEffect(state[0], { t: 'redraw' });
 
+  function repaint() {
+    const screen = render(state[0]);
+    pane.draw(screen);
+    requestAnimationFrame(repaint);
+  }
 
+  requestAnimationFrame(repaint);
 }
 
 window.onload = go;
