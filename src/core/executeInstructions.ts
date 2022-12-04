@@ -10,7 +10,25 @@ export type ExecutableSpec = {
   numTargets?: number,
 }
 
-const _executableNameMap = {
+export enum ExecutableName {
+  textDialog = 'text-dialog',
+  combine = 'combine',
+  movCpu5 = 'mov-cpu-5',
+  movCpu1 = 'mov-cpu-1',
+  toggleOpen = 'toggle-open',
+  togglePickup = 'toggle-pickup',
+  toggleInstr = 'toggle-instr',
+  toggleExec = 'toggle-exec',
+  toggleUnlock = 'toggle-unlock',
+  toggleCaps = 'toggle-caps',
+  prefix = 'prefix',
+  charge = 'charge',
+  treadmill = 'treadmill',
+  extractId = 'extract-id',
+  magnet = 'magnet',
+};
+
+export const executableNameMap: Record<ExecutableName, ExecutableSpec> = {
   'text-dialog': { cycles: 3, cpuCost: 0, numTargets: 0 },
   'combine': { cycles: 10, cpuCost: 1, numTargets: 2 },
   'mov-cpu-5': { cycles: 5, cpuCost: 1, numTargets: 2 },
@@ -27,10 +45,6 @@ const _executableNameMap = {
   'extract-id': { cycles: 5, cpuCost: 1 },
   'magnet': { cycles: 5, cpuCost: 1 },
 }
-
-export type ExecutableName = keyof (typeof _executableNameMap);
-
-export const executableNameMap: Record<ExecutableName, ExecutableSpec> = _executableNameMap;
 
 export function isExecutable(k: string): k is ExecutableName {
   return k in executableNameMap;
@@ -65,41 +79,41 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
   }
 
   switch (instr) {
-    case 'text-dialog':
+    case ExecutableName.textDialog:
       return [produce(state, s => {
         s.viewState = { t: 'textDialogView', back: state.viewState };
       }), [{ t: 'redraw' }]];
-    case 'combine':
+    case ExecutableName.combine:
       return [state, []];
-    case 'mov-cpu-5': return movResource(state, targets, 'cpu', 5);
-    case 'mov-cpu-1': return movResource(state, targets, 'cpu', 1);
+    case ExecutableName.movCpu5: return movResource(state, targets, 'cpu', 5);
+    case ExecutableName.movCpu1: return movResource(state, targets, 'cpu', 1);
 
 
-    case 'charge':
+    case ExecutableName.charge:
       return withModifiedTarget(tgt => { modifyResourceꜝ(tgt, 'cpu', x => x + 1); });
-    case 'treadmill':
+    case ExecutableName.treadmill:
       return withModifiedTarget(tgt => { modifyResourceꜝ(tgt, 'cpu', x => x + 1); });
 
-    case 'toggle-unlock':
+    case ExecutableName.toggleUnlock:
       return withModifiedTarget(tgt => { tgt.acls.unlock = !tgt.acls.unlock; });
-    case 'toggle-exec':
+    case ExecutableName.toggleExec:
       return withModifiedTarget(tgt => { tgt.acls.exec = !tgt.acls.exec; });
 
-    case 'toggle-pickup':
+    case ExecutableName.togglePickup:
       return withModifiedTarget(tgt => { tgt.acls.pickup = !tgt.acls.pickup; });
 
-    case 'toggle-instr':
+    case ExecutableName.toggleInstr:
       return withModifiedTarget(tgt => { tgt.acls.instr = !tgt.acls.instr; });
 
-    case 'toggle-caps':
+    case ExecutableName.toggleCaps:
       return withModifiedTarget(tgt => { tgt.name = tgt.name === tgt.name.toUpperCase() ? tgt.name.toLowerCase() : tgt.name.toUpperCase(); });
 
-    case 'toggle-open':
+    case ExecutableName.toggleOpen:
       return withModifiedTarget(tgt => { tgt.acls.open = !tgt.acls.open; });
-    case 'prefix':
+    case ExecutableName.prefix:
       return withModifiedTarget(tgt => { tgt.name = "." + tgt.name; });
 
-    case 'extract-id': {
+    case ExecutableName.extractId: {
       // Takes one argument.
       // Creates a new file whose name is the item id of that argument.
       // Sort of like taking the address of a pointer.
@@ -117,7 +131,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
     }
 
-    case 'magnet': {
+    case ExecutableName.magnet: {
       const referentId = getItem(state.fs, targets[0]).name;
       const referent: Item | undefined = maybeGetItem(state.fs, referentId);
       if (referent == undefined) {

@@ -90,25 +90,25 @@ function errorDir(): ItemPlan {
 function binDirs(): ItemPlan[] {
   return [{
     t: 'dir', name: 'bin', contents: [
-      namedExec('text-dialog', { resources: { cpu: 4 } }),
-      namedExec('mov-cpu-5', { resources: { cpu: 5 } }),
-      namedExec('mov-cpu-1', { resources: { cpu: 5 } }),
-      namedExec('combine'),
-      namedExec('toggle-open'),
-      namedExec('toggle-pickup'),
-      namedExec('toggle-instr', { resources: { cpu: 8 } }),
-      namedExec('toggle-exec'),
-      namedExec('toggle-unlock'),
+      namedExec(ExecutableName.textDialog, { resources: { cpu: 4 } }),
+      namedExec(ExecutableName.movCpu5, { resources: { cpu: 5 } }),
+      namedExec(ExecutableName.movCpu1, { resources: { cpu: 5 } }),
+      namedExec(ExecutableName.combine),
+      namedExec(ExecutableName.toggleOpen),
+      namedExec(ExecutableName.togglePickup),
+      namedExec(ExecutableName.toggleInstr, { resources: { cpu: 8 } }),
+      namedExec(ExecutableName.toggleExec),
+      namedExec(ExecutableName.toggleUnlock),
     ]
   },
   {
     t: 'dir', name: 'bin2', contents: [
-      namedExec('extract-id', { resources: { cpu: 10 } }),
-      namedExec('magnet', { resources: { cpu: 10 } }),
-      namedExec('toggle-caps', { resources: { data: 1 } }),
-      namedExec('prefix', { resources: { network: 1 } }),
-      namedExec('charge', { resources: { cpu: 4, network: 3 } }),
-      namedExec('treadmill', { resources: { cpu: 0, network: 0 } }),
+      namedExec(ExecutableName.extractId, { resources: { cpu: 10 } }),
+      namedExec(ExecutableName.magnet, { resources: { cpu: 10 } }),
+      namedExec(ExecutableName.toggleCaps, { resources: { data: 1 } }),
+      namedExec(ExecutableName.prefix, { resources: { network: 1 } }),
+      namedExec(ExecutableName.charge, { resources: { cpu: 4, network: 3 } }),
+      namedExec(ExecutableName.treadmill, { resources: { cpu: 0, network: 0 } }),
     ]
   }];
 }
