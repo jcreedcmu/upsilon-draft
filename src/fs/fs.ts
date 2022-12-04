@@ -199,9 +199,13 @@ function insertRootItem(fs: Fs, id: Ident, item: Item): [Fs, Ident] {
 
 /// Fs Writes
 
+export function currentId(fs: Fs): Ident {
+  return `item.${fs.counter}`;
+}
+
 // Inserts at end of loc. Intended for fs initialization.
 export function insertItem(fs: Fs, loc: Ident, item: Item, forceId?: Ident): [Fs, Ident] {
-  const id = forceId ?? `item.${fs.counter}`;
+  const id = forceId ?? currentId(fs);
   fs = produce(fs, fsd => {
     if (forceId == undefined)
       fsd.counter++;
@@ -233,6 +237,19 @@ export function modifyItemꜝ(fs: Fs, ident: Ident, f: (x: Item) => void): void 
   fs.idToItem[ident] = item;
 }
 
+
+export function createAndInsertItem(fs: Fs, loc: Ident, ix: number, item: Item): [Fs, Ident, Hook[]] {
+  const id = currentId(fs);
+  fs = produce(fs, fsd => {
+    fsd.counter++;
+    fsd.idToItem[id] = item; // install the item itself
+  });
+
+  let hooks;
+  // insertId takes care of updating _cached_locmap.
+  [fs, hooks] = insertId(fs, loc, ix, id); // ignore hooks during init
+  return [fs, id, hooks];
+}
 
 // This doesn't create the item itself, just inserts the id in the right place
 export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]] {

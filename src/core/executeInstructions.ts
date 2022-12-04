@@ -1,8 +1,8 @@
 import { produce } from "../util/produce";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
-import { getContents, getItem, reifyId } from "../fs/fs";
-import { Effect, GameState, Ident, Item } from "./model";
-import { withError } from "./reduce";
+import { createAndInsertItem, getContents, getItem, getLocation, reifyId } from "../fs/fs";
+import { Effect, GameState, Ident, Item, nextLocation } from "./model";
+import { processHooks, withError } from "./reduce";
 
 export type ExecutableSpec = {
   cycles: number,
@@ -24,6 +24,7 @@ const _executableNameMap = {
   'prefix': { cycles: 5, cpuCost: 1 },
   'charge': { cycles: 5, cpuCost: 1 },
   'treadmill': { cycles: 50, cpuCost: 0 },
+  'extract-id': { cycles: 5, cpuCost: 1 },
 }
 
 export type ExecutableName = keyof (typeof _executableNameMap);
@@ -97,5 +98,19 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
     case 'prefix':
       return withModifiedTarget(tgt => { tgt.name = "." + tgt.name; });
 
+    case 'extract-id': {
+      const newItem: Item = {
+        name: targets[0],
+        contents: [], acls: { pickup: true }, resources: {}, size: 1
+      };
+      const newItemLoc = nextLocation(getLocation(state.fs, actor));
+      if (newItemLoc.t == 'is_root') {
+        return withError(state, 'illegalInstr'); // XXX not really the right error
+      }
+      const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
+      state = produce(state, s => { s.fs = newfs; });
+      state = processHooks(state, hooks);
+      return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
+    }
   }
 }

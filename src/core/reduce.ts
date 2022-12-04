@@ -148,7 +148,7 @@ function processHook(state: GameState, hook: Hook): GameState {
   }
 }
 
-function processHooks(state: GameState, hooks: Hook[]): GameState {
+export function processHooks(state: GameState, hooks: Hook[]): GameState {
   for (const hook of hooks) {
     state = processHook(state, hook);
   }

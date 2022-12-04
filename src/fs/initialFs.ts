@@ -87,8 +87,8 @@ function errorDir(): ItemPlan {
   return { t: 'dir', name: 'error', contents: errorFiles };
 }
 
-function binDir(): ItemPlan {
-  return {
+function binDirs(): ItemPlan[] {
+  return [{
     t: 'dir', name: 'bin', contents: [
       namedExec('text-dialog', { resources: { cpu: 4 } }),
       namedExec('mov-cpu-5', { resources: { cpu: 5 } }),
@@ -99,12 +99,17 @@ function binDir(): ItemPlan {
       namedExec('toggle-instr', { resources: { cpu: 8 } }),
       namedExec('toggle-exec'),
       namedExec('toggle-unlock'),
+    ]
+  },
+  {
+    t: 'dir', name: 'bin2', contents: [
+      namedExec('extract-id', { resources: { cpu: 10 } }),
       namedExec('toggle-caps', { resources: { data: 1 } }),
       namedExec('prefix', { resources: { network: 1 } }),
       namedExec('charge', { resources: { cpu: 4, network: 3 } }),
       namedExec('treadmill', { resources: { cpu: 0, network: 0 } }),
     ]
-  };
+  }];
 }
 
 function initialPlans(): VirtualItemPlan[] {
@@ -122,7 +127,7 @@ function initialPlans(): VirtualItemPlan[] {
         errorDir(),
       ]
     },
-    binDir(),
+    ...binDirs(),
     { t: 'virtual', id: 'vroot' },
     {
       t: 'dir', name: 'home', contents: [
