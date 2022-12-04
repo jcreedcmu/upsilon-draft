@@ -244,3 +244,17 @@ Two outstanding bugs/infelicities that might require some rethink:
  - Operations that modify items don't automatically reify virtual
    things. I fixed known bugs with calls to reifyId, but this is
    error-prone and bad.
+
+=== 2022.12.04 META: (:id 6019e592-4c63-407d-92f3-ad71f0f27260)
+
+ - I think I've fixed most "Operations that modify items don't
+   automatically reify virtual things"? Not sure, probably should have
+   made some red test cases.
+
+ - I wonder if the "directories remember their position" feature
+   should be a QoL thing that you don't start with and have to acquire
+   during the game.
+
+   Come to think of it, I'm not sure if that's robust against remote
+   insertions/deletions either. Maybe I should have some notion of
+   invisible "mark"?
