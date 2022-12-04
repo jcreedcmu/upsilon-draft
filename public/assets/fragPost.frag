@@ -26,18 +26,27 @@ vec2 warp(vec2 pos, vec2 amount){
 const float freq = 1.0 / 2.0;
 
 vec4 samp(vec2 pos) {
-  float offset =  0.5 * sin(6.28 * u_time * freq)  * (int(pos.y) % 3 == 0 ? 1.0 : -1.0);
 
-  vec2 epos = (vec2(pos) + vec2(float(offset), 0)) / windowSize;
 
-  epos = warp(epos, vec2(1.0/50.0,1.0/25.0));
+  vec2 epos = (vec2(pos) ) / windowSize;
 
+  epos = warp(epos, vec2(1.0/40.0, 1.0/30.0));
+
+  float offset =  0.5 * sin(6.28 * u_time * freq)  * (int (epos.y * 648.0) % 3 < 1  ? 1.0 : -1.0);
+
+  float darken = 0.9;
+
+  if (mod(epos.y + u_time / 25., 1./3.) < 1./150.) {
+    darken = 1.0;
+  }
+
+  epos.x += offset / 900.0;
 
   if (epos.x <= 0.0 || epos.y <= 0.0 || epos.x >= 1.0 || epos.y >= 1.0) {
     return vec4(vec3(0.0), 1.0);
   }
   else {
-    return texture(u_screenTexture, epos);
+    return vec4(vec3(darken), 1.0) * texture(u_screenTexture, epos);
   }
 
 }
@@ -45,5 +54,5 @@ vec4 samp(vec2 pos) {
 void main() {
   vec2 pos = gl_FragCoord.xy;
 
-  outputColor = (samp(pos) + 0.5 * samp(pos + vec2(1.0, 0.0)) + 0.5 * samp(pos + vec2(-1.0, 0.0))) / 1.5;
+  outputColor = (samp(pos) + 0.5 * samp(pos + vec2(1.0, 0.1)) + 0.5 * samp(pos + vec2(-1.0, 0.1))) / 1.8;
 }
