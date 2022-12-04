@@ -125,12 +125,15 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       }
       else {
         const newItemLoc = nextLocation(getLocation(state.fs, actor));
-        // XXX there is a funny edge case where things go wrong if 
+        // XXX there is a funny edge case where things go wrong if
         // the old item loc is in the same dir, where the meaning of the new
         // location is invalidated by deleting the old location.
         // Maybe moveIdTo needs to take a call back that returns a location,
         // so that I can capture the intent that the new location is
         // nextLocation(getLocation(... actor)) in a more robust way?
+
+        // Similarly the "currently selected line" should be sort of robust
+        // against insertions.
         const [newfs, hooks] = moveIdTo(state.fs, referentId, newItemLoc);
         state = produce(state, s => { s.fs = newfs; });
         state = processHooks(state, hooks);
