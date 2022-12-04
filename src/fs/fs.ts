@@ -46,13 +46,20 @@ export function virtualId(ident: Ident): Ident {
   return `${VIRTUAL_ITEM_PREFIX}${ident}`;
 }
 
-
-export function getItem(fs: Fs, ident: Ident): Item {
+export function maybeGetItem(fs: Fs, ident: Ident): Item | undefined {
   const item = fs.idToItem[ident];
   if (item === undefined) {
     if (ident.match(VIRTUAL_ITEM_PATTERN)) {
       return getVirtualItem(ident.replace(VIRTUAL_ITEM_PATTERN, ''));
     }
+    return undefined;
+  }
+  return item;
+}
+
+export function getItem(fs: Fs, ident: Ident): Item {
+  const item = maybeGetItem(fs, ident);
+  if (item === undefined) {
     throw new Error(`Couldn't find ident ${ident}`);
   }
   return item;
@@ -298,6 +305,10 @@ export function moveId(fs: Fs, fromLoc: Location, toLoc: Location): [Fs, Hook[]]
   const [fs2, ident, hooks2] = removeId(fs, fromLoc.id, fromLoc.pos);
   const [fs3, hooks3] = insertId(fs2, toLoc.id, toLoc.pos, ident);
   return [fs3, [...hooks2, ...hooks3]];
+}
+
+export function moveIdTo(fs: Fs, id: Ident, toLoc: Location): [Fs, Hook[]] {
+  return moveId(fs, getLocation(fs, id), toLoc);
 }
 
 // ensures ident is really mapped to a real item

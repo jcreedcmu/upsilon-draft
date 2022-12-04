@@ -104,6 +104,7 @@ function binDirs(): ItemPlan[] {
   {
     t: 'dir', name: 'bin2', contents: [
       namedExec('extract-id', { resources: { cpu: 10 } }),
+      namedExec('magnet', { resources: { cpu: 10 } }),
       namedExec('toggle-caps', { resources: { data: 1 } }),
       namedExec('prefix', { resources: { network: 1 } }),
       namedExec('charge', { resources: { cpu: 4, network: 3 } }),

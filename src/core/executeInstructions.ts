@@ -1,6 +1,6 @@
 import { produce } from "../util/produce";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
-import { createAndInsertItem, getContents, getItem, getLocation, reifyId } from "../fs/fs";
+import { createAndInsertItem, getContents, getItem, getLocation, maybeGetItem, moveId, moveIdTo, reifyId } from "../fs/fs";
 import { Effect, GameState, Ident, Item, nextLocation } from "./model";
 import { processHooks, withError } from "./reduce";
 
@@ -25,6 +25,7 @@ const _executableNameMap = {
   'charge': { cycles: 5, cpuCost: 1 },
   'treadmill': { cycles: 50, cpuCost: 0 },
   'extract-id': { cycles: 5, cpuCost: 1 },
+  'magnet': { cycles: 5, cpuCost: 1 },
 }
 
 export type ExecutableName = keyof (typeof _executableNameMap);
@@ -99,18 +100,42 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       return withModifiedTarget(tgt => { tgt.name = "." + tgt.name; });
 
     case 'extract-id': {
+      // Takes one argument.
+      // Creates a new file whose name is the item id of that argument.
+      // Sort of like taking the address of a pointer.
       const newItem: Item = {
         name: targets[0],
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
       const newItemLoc = nextLocation(getLocation(state.fs, actor));
       if (newItemLoc.t == 'is_root') {
-        return withError(state, 'illegalInstr'); // XXX not really the right error
+        return withError(state, 'badInputs');
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
       return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
+    }
+
+    case 'magnet': {
+      const referentId = getItem(state.fs, targets[0]).name;
+      const referent: Item | undefined = maybeGetItem(state.fs, referentId);
+      if (referent == undefined) {
+        return withError(state, 'badInputs');
+      }
+      else {
+        const newItemLoc = nextLocation(getLocation(state.fs, actor));
+        // XXX there is a funny edge case where things go wrong if 
+        // the old item loc is in the same dir, where the meaning of the new
+        // location is invalidated by deleting the old location.
+        // Maybe moveIdTo needs to take a call back that returns a location,
+        // so that I can capture the intent that the new location is
+        // nextLocation(getLocation(... actor)) in a more robust way?
+        const [newfs, hooks] = moveIdTo(state.fs, referentId, newItemLoc);
+        state = produce(state, s => { s.fs = newfs; });
+        state = processHooks(state, hooks);
+        return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
+      }
     }
   }
 }
