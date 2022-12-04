@@ -1,6 +1,14 @@
 import { DEBUG } from '../util/debug';
+import { Point } from '../util/types';
 import { Screen } from './screen';
+import { TEXT_PAGE_H } from './ui-constants';
+import { TEXT_PAGE_W } from './ui-constants';
 import { char_size, COLS, rawPalette, ROWS, SCALE } from './ui-constants';
+
+const screen_size: Point = {
+  x: char_size.x * COLS * SCALE,
+  y: char_size.y * ROWS * SCALE
+}
 
 // returns an array of 16 * 4 floats, which are the rgba values for
 // the 16 palette entries.
@@ -14,6 +22,17 @@ function paletteData(): number[] {
     rv.splice(i * 4, 4, ...[r, g, b, 1.0]);
   }
   return rv;
+}
+
+// Make a new framebuffer object bound to a texture. The texture it's
+// bound to is the one it *outputs* to when we render.
+function makeFb(gl: WebGL2RenderingContext, texture: WebGLTexture): WebGLFramebuffer {
+  const framebuffer = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+  if (framebuffer == null)
+    throw new Error(`Couldn't create framebuffer`);
+  return framebuffer;
 }
 
 function shaderProgram(gl: WebGL2RenderingContext, vs: string, fs: string) {
@@ -61,23 +80,28 @@ function attributeSetFloats(
 
 type Env = {
   gl: WebGL2RenderingContext,
-  prog: WebGLProgram,
+  progPost: WebGLProgram,
+  progText: WebGLProgram,
+  fb: WebGLFramebuffer,
 }
 
-function getEnv(canvas: HTMLCanvasElement, vert: string, frag: string, font: HTMLImageElement): Env {
-  let gl;
-  try {
-    gl = canvas.getContext("webgl2");
-    if (!gl) { throw "x"; }
-  } catch (err) {
-    throw "Your web browser does not support WebGL!";
-  }
-  gl.clearColor(0.8, 0.8, 0.8, 1);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
+function getProgPost(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, vert: string, frag: string): WebGLProgram {
   const prog = shaderProgram(gl, vert, frag);
   gl.useProgram(prog);
 
+  attributeSetFloats(gl, prog, "pos", 3, [
+    -2, 2, 0,
+    2, 2, 0,
+    -2, -2, 0,
+    2, -2, 0
+  ]);
+
+  return prog;
+}
+
+function getProgText(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, vert: string, frag: string, font: HTMLImageElement): WebGLProgram {
+  const prog = shaderProgram(gl, vert, frag);
+  gl.useProgram(prog);
 
   const canvasSize = gl.getUniformLocation(prog, 'u_canvasSize');
   const fontSampler = gl.getUniformLocation(prog, 'u_fontTexture');
@@ -113,7 +137,50 @@ function getEnv(canvas: HTMLCanvasElement, vert: string, frag: string, font: HTM
     2, -2, 0
   ]);
 
-  return { gl, prog };
+  return prog;
+}
+
+function getEnv(canvas: HTMLCanvasElement, vert: string, fragPost: string, fragText: string, font: HTMLImageElement): Env {
+  let gl;
+  try {
+    gl = canvas.getContext("webgl2");
+    if (!gl) { throw "x"; }
+  } catch (err) {
+    throw "Your web browser does not support WebGL!";
+  }
+  gl.clearColor(0.8, 0.8, 0.8, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  const progText = getProgText(gl, canvas, vert, fragText, font);
+
+  const screenTexture = gl.createTexture();
+  if (screenTexture == null) {
+    throw new Error(`couldn't create texture`);
+  }
+  const screenTextureUnit = 3;
+
+  gl.activeTexture(gl.TEXTURE0 + screenTextureUnit);
+  gl.bindTexture(gl.TEXTURE_2D, screenTexture);
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, screen_size.x, screen_size.y, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+  const fb = makeFb(gl, screenTexture);
+
+  const progPost = getProgPost(gl, canvas, vert, fragPost);
+
+  // set up screen sampler
+  const screenSamplerUniform = gl.getUniformLocation(progPost, 'u_screenTexture');
+  if (screenSamplerUniform == null) {
+    throw new Error(`couldn't find uniform`);
+  }
+
+  gl.uniform1i(screenSamplerUniform, screenTextureUnit);
+
+
+  return { gl, progPost, progText, fb };
 }
 
 async function grab(path: string): Promise<string> {
@@ -136,14 +203,29 @@ export class Pane {
   draw(screen: Screen) {
     if (this.env == null)
       throw 'Uninitialized graphics environment';
-    const { gl, prog } = this.env;
+    const { gl, progPost, progText, fb } = this.env;
 
     const ext = gl.getExtension('EXT_disjoint_timer_query_webgl2');
     const query = gl.createQuery()!;
     function actuallyRender() {
+
+      gl.useProgram(progText);
+
+      // XXX maybe do some dirty-checking here
       gl.activeTexture(gl.TEXTURE1);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen.imdat);
+
+      // Render to framebuffer first
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.viewport(0, 0, screen_size.x, screen_size.y);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      // Then apply post-processing effects
+      gl.useProgram(progPost);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, screen_size.x, screen_size.y);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
     }
     if (DEBUG.glTiming) {
       gl.beginQuery(ext.TIME_ELAPSED_EXT, query);
@@ -167,10 +249,11 @@ export class Pane {
     }
   }
 
-  constructor(vert: string, frag: string, font: HTMLImageElement, private c: HTMLCanvasElement) {
-    c.width = char_size.x * COLS * SCALE;
-    c.height = char_size.y * ROWS * SCALE;
-    this.env = getEnv(c, vert, frag, font);
+  constructor(vert: string, fragPost: string, fragText: string, font: HTMLImageElement, private c: HTMLCanvasElement) {
+    c.width = screen_size.x;
+    c.height = screen_size.y;
+
+    this.env = getEnv(c, vert, fragPost, fragText, font);
   }
 
   canvas(): HTMLCanvasElement {
@@ -227,8 +310,9 @@ function getCode(c: string, kc: number): number {
 
 export async function make_pane(c: HTMLCanvasElement): Promise<Pane> {
   const vert = await grab('./assets/vertex.vert');
-  const frag = await grab('./assets/fragment.frag');
+  const fragPost = await grab('./assets/fragPost.frag');
+  const fragText = await grab('./assets/fragText.frag');
   const font = await getImage('./assets/vga.png');
-  const pane = new Pane(vert, frag, font, c);
+  const pane = new Pane(vert, fragPost, fragText, font, c);
   return pane;
 }

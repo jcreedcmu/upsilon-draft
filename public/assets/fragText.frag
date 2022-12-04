@@ -9,6 +9,8 @@ const int COLS = 48;
 const int TEXT_PAGE_W = 48;
 const int TEXT_PAGE_H = 18;
 
+uniform sampler2D u_screenTexture;
+
 uniform sampler2D u_fontTexture;
 
 // a TEXT_PAGE_W * ROWS texture. Each pixel has
@@ -32,8 +34,7 @@ const vec2 im_size = vec2(256.0, 256.0);
 const vec2 windowSize = vec2(SCALE * COLS * char_size.x, SCALE * ROWS * char_size.y);
 
 // Background color outside of the 'screen'
-const vec4 bg = vec4(0.15,0.15,0.1,1.0);
-
+const vec4 bg = vec4(0.15, 0.15, 0.1, 1.0);
 
 vec2 getPixelPos() {
   return vec2( gl_FragCoord.x, windowSize.y -gl_FragCoord.y); // x ∈ [0.0, COLS * char_size.x * SCALE], y ∈ [0.0, ROWS * char_size.y * SCALE]
@@ -87,6 +88,7 @@ float shade_of(float d) {
   return (d < SHADE_SIZE ? d / SHADE_SIZE : 1.0);
 }
 
+
 void main() {
   vec4 color = getColor();
   vec2 pixel_pos = getPixelPos();
@@ -97,9 +99,9 @@ void main() {
 	 // float shadex = (1.0 - 4.0 * (rel.x - rel.x * rel.x)) / 3.0;
 	 // float shadey = (1.0 - 4.0 * (rel.y - rel.y * rel.y)) / 3.0;
 	 // float shade = shadex + shadey;
+
     float shade =shade_of(pixel_pos.x) * shade_of(pixel_pos.y)
       * shade_of(u_canvasSize.x - pixel_pos.x) * shade_of(u_canvasSize.y - pixel_pos.y);
 	 outputColor = vec4((0.3 + 0.7 * shade) * color.rgb, 1.0);
-	// outputColor = color;
   }
 }
