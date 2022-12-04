@@ -225,6 +225,15 @@ function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
   });
 }
 
+// Imperatively modifies item with ident `ident`, using imperative
+// function f.
+export function modifyItemꜝ(fs: Fs, ident: Ident, f: (x: Item) => void): void {
+  const item = getItem(fs, ident);
+  f(item);
+  fs.idToItem[ident] = item;
+}
+
+
 // This doesn't create the item itself, just inserts the id in the right place
 export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]] {
   logger('movement', `insertId ${loc}[${ix}] id ${id}`);

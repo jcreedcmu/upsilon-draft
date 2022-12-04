@@ -1,12 +1,11 @@
 import { produce } from '../util/produce';
 import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction } from './model';
-import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, removeId } from '../fs/fs';
+import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, insertId, modifyItemꜝ, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes } from './error-codes';
 import { nowTicks } from './clock';
 import { logger } from '../util/debug';
-import { insertId } from '../fs/fs';
-import { getResource, modifyResource } from '../fs/resources';
+import { getResource, modifyResourceꜝ } from '../fs/resources';
 import { ExecutableName, executableNameMap, ExecutableSpec, executeInstructions, isExecutable } from './executeInstructions';
 import { SpecialId } from '../fs/initialFs';
 
@@ -37,12 +36,12 @@ export function withError(state: GameState, code: ErrorCode): [GameState, Effect
     // cancel any pending clearError futures
     s.futures = state.futures.filter(f => f.action.t != 'clearError');
 
-    addFuture(s, now + 3, { t: 'clearError' });
+    addFutureꜝ(s, now + 3, { t: 'clearError' });
   }), [{ t: 'redraw' }, { t: 'reschedule' }, { t: 'playSound', effect: 'error' }]]
 }
 
 // imperatively updates state
-function addFuture(state: GameState, whenTicks: number, action: GameAction, live?: boolean) {
+function addFutureꜝ(state: GameState, whenTicks: number, action: GameAction, live?: boolean) {
   state.futures.push({
     whenTicks,
     action,
@@ -73,7 +72,7 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
   }
 
   state = produce(state, s => {
-    modifyResource(getItem(s.fs, id), 'cpu', x => x - cpuCost);
+    modifyResourceꜝ(getItem(s.fs, id), 'cpu', x => x - cpuCost);
   });
 
   const action: GameAction = {
@@ -92,12 +91,14 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
     // defer execution
     const now = nowTicks(state.clock);
     state = produce(state, s => {
-      getItem(s.fs, id).progress = {
-        startTicks: now,
-        targetIds,
-        totalTicks: cycles
-      };
-      addFuture(s, now + cycles, action, true);
+      modifyItemꜝ(s.fs, id, item => {
+        item.progress = {
+          startTicks: now,
+          targetIds,
+          totalTicks: cycles
+        };
+      });
+      addFutureꜝ(s, now + cycles, action, true);
     });
     return [state, [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }, { t: 'reschedule' }]];
   }
@@ -243,9 +244,9 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
       }
       else {
         return [produce(state, s => {
-          // XXX Doesn't work for virtual, should have more general
-          // "modify item" interface that reifies virtual things as necessary
-          getItem(s.fs, state.curId).stickyCurrentPos = state.curLine;
+          modifyItemꜝ(s.fs, state.curId, item => {
+            item.stickyCurrentPos = state.curLine;
+          });
 
           s.curId = loc.id;
           s.curLine = loc.pos;
@@ -306,11 +307,11 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
       const later = nowTicks(state.clock) + 1;
       return [produce(state, s => {
         if (action.targetIds.length > 0)
-          addFuture(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
+          addFutureꜝ(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
         action.targetIds.forEach(targetId => {
-          getItem(s.fs, targetId).flashUntilTick = later;
+          modifyItemꜝ(s.fs, targetId, item => { item.flashUntilTick = later; });
         });
-        getItem(s.fs, action.actorId).progress = undefined;
+        modifyItemꜝ(s.fs, action.actorId, item => { item.progress = undefined; });
       }), effects];
     }
 

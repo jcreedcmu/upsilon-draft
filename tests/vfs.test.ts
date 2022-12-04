@@ -1,4 +1,4 @@
-import { Fs, getContents, getFullContents, getItem, insertId, insertPlans, ItemPlan, mkFs, removeId } from '../src/fs/fs';
+import { getFullContents, getItem, insertPlans, mkFs } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
 import { testFile } from "./test-utils";
 

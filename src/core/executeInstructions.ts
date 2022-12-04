@@ -1,5 +1,5 @@
 import { produce } from "../util/produce";
-import { getResource, modifyResource, Resource } from "../fs/resources";
+import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { getContents, getItem, reifyId } from "../fs/fs";
 import { Effect, GameState, Ident, Item } from "./model";
 import { withError } from "./reduce";
@@ -42,8 +42,8 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
   fs = reifyId(fs, targets[1]);
   state = produce(state, s => { s.fs = fs; });
   return [produce(state, s => {
-    modifyResource(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
-    modifyResource(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);
+    modifyResourceꜝ(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
+    modifyResourceꜝ(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);
   }), []];
 }
 
@@ -74,9 +74,9 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
 
 
     case 'charge':
-      return withModifiedTarget(tgt => { modifyResource(tgt, 'cpu', x => x + 1); });
+      return withModifiedTarget(tgt => { modifyResourceꜝ(tgt, 'cpu', x => x + 1); });
     case 'treadmill':
-      return withModifiedTarget(tgt => { modifyResource(tgt, 'cpu', x => x + 1); });
+      return withModifiedTarget(tgt => { modifyResourceꜝ(tgt, 'cpu', x => x + 1); });
 
     case 'toggle-unlock':
       return withModifiedTarget(tgt => { tgt.acls.unlock = !tgt.acls.unlock; });
