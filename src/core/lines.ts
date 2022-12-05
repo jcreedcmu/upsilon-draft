@@ -140,6 +140,11 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
     const item = getItem(fs, ident);
     const line = getLineOfItem(ident, item, loc, ix, nowTicks(state.clock));
 
+    // Apply different attr if ident is currently recurring
+    if (state.recurring[ident] != undefined) {
+      line.attr = { ...line.attr, fg: ColorCode.bmagenta };
+    }
+
     if (item.progress == undefined) {
       lines.push(line);
     }

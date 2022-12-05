@@ -111,6 +111,7 @@ function binDirs(): ItemPlan[] {
       namedExec(ExecutableName.treadmill, { resources: { cpu: 0, network: 0 } }),
       namedExec(ExecutableName.modify, { resources: { cpu: 5, network: 0 } }),
       namedExec(ExecutableName.copy, { resources: { cpu: 5, network: 0 } }),
+      namedExec(ExecutableName.automate, { resources: { cpu: 5, network: 0 } }),
     ]
   }];
 }

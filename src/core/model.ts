@@ -110,6 +110,8 @@ export type State =
 
 export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
+export type Recurring = Record<Ident, { startTicks: number, periodTicks: number }>;
+
 // This is for alternate modal states within the game interface, which
 // are triggered by "diagetic" controls.
 export type ViewState =
@@ -125,6 +127,7 @@ export type GameState = {
   clock: ClockState,
   path: string[],
   futures: Future[],
+  recurring: Recurring,
   _cached_keybindings: Record<string, KeyAction>,
   _cached_show: Show,
 };
@@ -181,6 +184,7 @@ export function gameStateOfFs(fs: Fs): GameState {
     fs,
     path: [],
     futures: [],
+    recurring: {},
     _cached_keybindings: keybindingsOfFs(fs),
     _cached_show: showOfFs(fs),
   };

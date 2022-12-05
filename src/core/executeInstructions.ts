@@ -4,6 +4,7 @@ import { createAndInsertItem, getContents, getItem, getLocation, maybeGetItem, m
 import { Effect, GameState, Ident, Item, nextLocation } from "./model";
 import { processHooks, withError } from "./reduce";
 import { modificationOrder } from "./modificationOrder";
+import { nowTicks } from "./clock";
 
 export type ExecutableSpec = {
   cycles: number,
@@ -29,6 +30,7 @@ export enum ExecutableName {
   magnet = 'magnet',
   modify = 'modify',
   copy = 'copy',
+  automate = 'automate',
 };
 
 export const executableNameMap: Record<ExecutableName, ExecutableSpec> = {
@@ -49,6 +51,7 @@ export const executableNameMap: Record<ExecutableName, ExecutableSpec> = {
   'magnet': { cycles: 5, cpuCost: 1 },
   'modify': { cycles: 5, cpuCost: 1 },
   'copy': { cycles: 5, cpuCost: 1 },
+  'automate': { cycles: 5, cpuCost: 1 },
 }
 
 export function isExecutable(k: string): k is ExecutableName {
@@ -188,6 +191,17 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
       return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
+    }
+
+    case ExecutableName.automate: {
+      return [produce(state, s => {
+        if (targets[0] in state.recurring) {
+          delete s.recurring[targets[0]];
+        }
+        else {
+          s.recurring[targets[0]] = { startTicks: nowTicks(state.clock) + 20, periodTicks: 20 };
+        }
+      }), [{ t: 'playSound', effect: 'ping' }]];
 
     }
   }
