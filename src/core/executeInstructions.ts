@@ -201,7 +201,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         else {
           s.recurring[targets[0]] = { startTicks: nowTicks(state.clock) + 20, periodTicks: 20 };
         }
-      }), [{ t: 'playSound', effect: 'ping' }]];
+      }), [{ t: 'playSound', effect: 'ping' }, { t: 'reschedule' }]];
 
     }
   }

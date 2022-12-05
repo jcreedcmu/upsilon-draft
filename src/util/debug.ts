@@ -1,6 +1,7 @@
 export const DEBUG = {
   glTiming: false,
   clockUpdate: false,
+  recurring: false,
   rendering: false,
   reschedule: false,
   produce: false,

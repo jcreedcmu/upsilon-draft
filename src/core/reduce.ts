@@ -281,11 +281,27 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
     }
     case 'clockUpdate':
       logger('clockUpdate', `clockUpdate ${action.tick}`);
-      if (state.futures.length > 0) {
+      if (state.futures.length + Object.keys(state.recurring).length > 0) {
         const actions = state.futures.filter(f => f.whenTicks == action.tick).map(x => x.action);
         state = produce(state, s => {
           s.futures = state.futures.filter(f => f.whenTicks > action.tick);
         });
+
+        const recurActions: GameAction[] = Object.keys(state.recurring)
+          .filter(k => {
+            const { startTicks, periodTicks } = state.recurring[k];
+            return (action.tick - startTicks) % periodTicks == 0;
+          })
+          .map(k => ({ t: 'recur', ident: k }));
+
+        logger('recurring', `state.recurring:`, state.recurring);
+        logger('recurring', `phases:`, Object.keys(state.recurring).map(k => {
+          const { startTicks, periodTicks } = state.recurring[k];
+          return [startTicks, periodTicks, action.tick, (action.tick - startTicks) % periodTicks];
+        }));
+        logger('recurring', `recurActions:`, recurActions);
+
+        actions.push(...recurActions);
 
         // FIXME: Maybe I should be doing something smarter about merging
         // effects that I intend to be idempotent, like 'redraw' & 'reschedule'.
@@ -322,5 +338,16 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
 
     case 'none':
       return [state, [{ t: 'redraw' }]];
+
+    case 'recur':
+      // XXX more checking should happen here probably
+      const id = action.ident;
+      const actor = getItem(state.fs, id);
+      if (isExecutable(actor.name)) {
+        return startExecutable(state, id, actor.name);
+      }
+      else {
+        return withError(state, 'illegalInstr');
+      }
   }
 }

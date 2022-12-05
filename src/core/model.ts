@@ -80,6 +80,7 @@ export type GameAction =
   | { t: 'finishExecution', actorId: Ident, targetIds: Ident[], instr: ExecutableName }
   | { t: 'clearError' }
   | { t: 'none' }
+  | { t: 'recur', ident: Ident }
   ;
 
 export type Action =

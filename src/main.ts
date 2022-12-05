@@ -35,17 +35,17 @@ type CanvasBundle = { c: HTMLCanvasElement, d: CanvasRenderingContext2D };
 
 
 function nextWake(state: GameState): WakeTime {
+  // XXX we could check times and be more optimal here
+  if (Object.keys(state.recurring).length > 0) {
+    return { t: 'live' };
+  }
+
   if (state.futures.length > 0) {
     if (state.futures.some(x => x.live))
       return { t: 'live' };
     return { t: 'tick', tick: state.futures[0].whenTicks };
   }
   return { t: 'infinite' };
-
-  //// FIXME: error should put up a non-live future for clearing the error
-  // return state.error == undefined ?
-  //   { t: 'infinite' } :
-  //   { t: 'tick', tick: state.error.expiresAtTick };
 }
 
 function reschedule(dispatch: (a: NewAction) => void, state: GameState): ClockState {
