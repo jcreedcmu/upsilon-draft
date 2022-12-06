@@ -5,6 +5,7 @@ import { Fs, getContents, getFullContents, getItem, getLocation } from '../fs/fs
 import { initialFs, SpecialId } from '../fs/initialFs';
 import { FullLine, getLines } from './lines';
 import { ExecutableName } from './executeInstructions';
+import { produce } from '../util/produce';
 
 export type Acl =
   | 'open'
@@ -219,6 +220,12 @@ export function nextLocation(loc: Location): Location {
     case 'at': return { t: 'at', id: loc.id, pos: loc.pos + 1 };
     case 'is_root': return { t: 'is_root' };
   }
+}
+
+export function deactivateItem(state: GameState, id: Ident): GameState {
+  return produce(state, s => {
+    delete (s.recurring[id]);
+  });
 }
 
 export type Show = {

@@ -1,5 +1,5 @@
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction } from './model';
+import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem } from './model';
 import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, insertId, modifyItemꜝ, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes } from './error-codes';
@@ -27,8 +27,11 @@ function advanceLine(state: GameState, amount: number): GameState {
   return produce(state, s => { s.curLine = (s.curLine + len + amount) % len; });
 }
 
-export function withError(state: GameState, code: ErrorCode): [GameState, Effect[]] {
+export function withError(state: GameState, code: ErrorCode, blame?: Ident): [GameState, Effect[]] {
   const now = nowTicks(state.clock);
+  if (blame != undefined) {
+    state = deactivateItem(state, blame);
+  }
   return [produce(state, s => {
     s.error = {
       code: errorCodes[code],
@@ -57,18 +60,18 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
 
   const targetIds = getItemIdsAfter(state.fs, id, numTargets ?? 1);
   if (targetIds == undefined) {
-    return withError(state, 'noArgument');
+    return withError(state, 'noArgument', id);
   }
 
   const targets = targetIds.map(tid => getItem(state.fs, tid));
 
   const actor = getItem(state.fs, id);
   if (!targets.every(target => canPickup(target, actor))) { // XXX not sure about this logic
-    return withError(state, 'itemLocked');
+    return withError(state, 'itemLocked', id);
   }
 
   if (getResource(getItem(state.fs, id), 'cpu') < cpuCost) {
-    return withError(state, 'noCharge'); // XXX insufficient charge, really
+    return withError(state, 'noCharge', id); // XXX insufficient charge, really
   }
 
   state = produce(state, s => {
@@ -122,20 +125,20 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): [Gam
       { t: 'playSound', effect: 'rising' }
     ]];
     case 'none': return [state, []];
-    case 'error': return withError(state, action.code);
+    case 'error': return withError(state, action.code); // XXX does this arise? does withError want an id?
     case 'exec': {
       const actorId = action.ident;
       const actor = getItem(state.fs, action.ident);
 
       if (actor.progress) {
-        return withError(state, 'alreadyExecuting');
+        return withError(state, 'alreadyExecuting', actorId);
       }
 
       if (isExecutable(actor.name)) {
         return startExecutable(state, actorId, actor.name);
       }
 
-      return withError(state, 'badExecutable');
+      return withError(state, 'badExecutable', actorId);
     }
     case 'back': return reduceKeyAction(state, KeyAction.back);
   }
@@ -320,15 +323,30 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
     case 'finishExecution': {
       let effects;
       [state, effects] = executeInstructions(state, action.instr, action.targetIds, action.actorId);
-      const later = nowTicks(state.clock) + 1;
-      return [produce(state, s => {
-        if (action.targetIds.length > 0)
-          addFutureꜝ(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
-        action.targetIds.forEach(targetId => {
-          modifyItemꜝ(s.fs, targetId, item => { item.flashUntilTick = later; });
-        });
+
+      // deactivate item
+      state = produce(state, s => {
         modifyItemꜝ(s.fs, action.actorId, item => { item.progress = undefined; });
-      }), effects];
+      });
+
+      // XXX Sound effects shouldn't be the thing we trust for whether there's
+      // an error condition.
+      if (effects.some(x => x.t == 'playSound' && x.effect == 'error')) {
+        state = deactivateItem(state, action.actorId);
+        return [state, effects];
+      }
+      else {
+        const later = nowTicks(state.clock) + 1;
+        // flash targets if not error
+        state = produce(state, s => {
+          if (action.targetIds.length > 0)
+            addFutureꜝ(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
+          action.targetIds.forEach(targetId => {
+            modifyItemꜝ(s.fs, targetId, item => { item.flashUntilTick = later; });
+          });
+        });
+        return [state, effects];
+      }
     }
 
     case 'clearError':
@@ -347,7 +365,7 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
         return startExecutable(state, id, actor.name);
       }
       else {
-        return withError(state, 'illegalInstr');
+        return withError(state, 'illegalInstr', id);
       }
   }
 }
