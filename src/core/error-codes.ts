@@ -1,3 +1,5 @@
+import { Ident, Location } from "./model";
+
 export const errorCodes = {
   cantPickUpDir: 100,
   cantPickUpParentDir: 101,
@@ -15,6 +17,12 @@ export const errorCodes = {
 };
 
 export type ErrorCode = keyof (typeof errorCodes);
+
+export type ErrorInfo = {
+  code: ErrorCode, // what type of error
+  blame?: Ident, // which binary caused the error
+  loc?: Location, // in what directory the error occurred
+};
 
 export function errorCodeText(k: ErrorCode): string {
   switch (k) {

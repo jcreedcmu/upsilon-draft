@@ -129,9 +129,10 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         name: targets[0],
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
-      const newItemLoc = nextLocation(getLocation(state.fs, actor));
+      const loc = getLocation(state.fs, actor);
+      const newItemLoc = nextLocation(loc);
       if (newItemLoc.t == 'is_root') {
-        return withError(state, 'badInputs');
+        return withError(state, { code: 'badInputs', blame: actor, loc });
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
@@ -140,10 +141,11 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
     }
 
     case ExecutableName.magnet: {
+      const loc = getLocation(state.fs, actor);
       const referentId = getItem(state.fs, targets[0]).name;
       const referent: Item | undefined = maybeGetItem(state.fs, referentId);
       if (referent == undefined) {
-        return withError(state, 'badInputs');
+        return withError(state, { code: 'badInputs', blame: actor, loc });
       }
       else {
         const newItemLoc = nextLocation(getLocation(state.fs, actor));
@@ -183,9 +185,10 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         name: getItem(state.fs, targets[0]).name,
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
-      const newItemLoc = nextLocation(getLocation(state.fs, actor));
+      const loc = getLocation(state.fs, actor);
+      const newItemLoc = nextLocation(loc);
       if (newItemLoc.t == 'is_root') {
-        return withError(state, 'badInputs');
+        return withError(state, { code: 'badInputs', blame: actor, loc });
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
