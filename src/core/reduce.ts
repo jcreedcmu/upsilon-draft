@@ -1,5 +1,5 @@
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem } from './model';
+import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame } from './model';
 import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, insertId, modifyItemꜝ, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
@@ -27,13 +27,9 @@ function advanceLine(state: GameState, amount: number): GameState {
   return produce(state, s => { s.curLine = (s.curLine + len + amount) % len; });
 }
 
-export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[]] {
-  const { code, blame, loc } = errorInfo;
+function makeErrorBanner(state: GameState, code: ErrorCode): GameState {
   const now = nowTicks(state.clock);
-  if (blame != undefined) {
-    state = deactivateItem(state, blame);
-  }
-  return [produce(state, s => {
+  return produce(state, s => {
     s.error = {
       code: errorCodes[code],
     };
@@ -41,7 +37,22 @@ export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, E
     s.futures = state.futures.filter(f => f.action.t != 'clearError');
 
     addFutureꜝ(s, now + 3, { t: 'clearError' });
-  }), [{ t: 'redraw' }, { t: 'reschedule' }, { t: 'playSound', effect: 'error', locx: errorInfo.loc }]]
+  });
+}
+
+export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[]] {
+  const { code, blame, loc } = errorInfo;
+  if (blame != undefined) {
+    state = deactivateItem(state, blame);
+  }
+  if (isNearbyGame(state, loc)) {
+    state = makeErrorBanner(state, code);
+  }
+  return [state, [
+    { t: 'redraw' },
+    { t: 'reschedule' },
+    { t: 'playSound', effect: 'error', locx: errorInfo.loc }
+  ]]
 }
 
 // imperatively updates state

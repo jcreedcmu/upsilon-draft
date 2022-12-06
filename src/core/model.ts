@@ -252,17 +252,19 @@ export function showAll(): Show {
 // Used for deciding whether to play sounds.
 export function isNearby(state: State, loc: Location | undefined): boolean {
   // `loc` being undefined means play sound unconditionally
+  switch (state.t) {
+    case 'title': return true; // XXX honestly not sure how there are still
+    // localized sounds playing if we got back to title screen.
+    case 'game': return isNearbyGame(state.gameState, loc);
+  }
+}
+
+export function isNearbyGame(state: GameState, loc: Location | undefined): boolean {
   if (loc == undefined)
     return true;
-  switch (state.t) {
-    case 'title': return false; // XXX honestly not sure how there are still
-    // localized sounds playing if we got back to title screen.
-    case 'game': {
-      if (loc.t == 'is_root') {
-        console.error('unexpected isNearby check for is_root');
-        return false; // XXX this would also be a surprising case
-      }
-      return (state.gameState.curId == loc.id);
-    }
+  if (loc.t == 'is_root') {
+    console.error('unexpected isNearby check for is_root');
+    return false; // XXX this would also be a surprising case
   }
+  return (state.curId == loc.id);
 }
