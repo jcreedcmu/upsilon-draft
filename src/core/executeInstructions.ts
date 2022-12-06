@@ -75,6 +75,7 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
 // Wait, maybe they do need a redraw if they're zero-cycle.
 export function executeInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[]] {
 
+  const loc = getLocation(state.fs, actor);
 
   function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[]] {
     const target = getItem(state.fs, targets[0]);
@@ -83,7 +84,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
     // XXX this is wrong if idToItem doesn't already have a location
     return [produce(state, s => {
       s.fs.idToItem[targets[0]] = ftgt;
-    }), [{ t: 'playSound', effect: 'ping' }]];
+    }), [{ t: 'playSound', effect: 'ping', locx: loc }]];
   }
 
   switch (instr) {
@@ -129,7 +130,6 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         name: targets[0],
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
-      const loc = getLocation(state.fs, actor);
       const newItemLoc = nextLocation(loc);
       if (newItemLoc.t == 'is_root') {
         return withError(state, { code: 'badInputs', blame: actor, loc });
@@ -137,11 +137,10 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
-      return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
+      return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping', locx: loc }]];
     }
 
     case ExecutableName.magnet: {
-      const loc = getLocation(state.fs, actor);
       const referentId = getItem(state.fs, targets[0]).name;
       const referent: Item | undefined = maybeGetItem(state.fs, referentId);
       if (referent == undefined) {
@@ -161,7 +160,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         const [newfs, hooks] = moveIdTo(state.fs, referentId, newItemLoc);
         state = produce(state, s => { s.fs = newfs; });
         state = processHooks(state, hooks);
-        return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
+        return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping', locx: loc }]];
       }
     }
 
@@ -185,7 +184,6 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         name: getItem(state.fs, targets[0]).name,
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
-      const loc = getLocation(state.fs, actor);
       const newItemLoc = nextLocation(loc);
       if (newItemLoc.t == 'is_root') {
         return withError(state, { code: 'badInputs', blame: actor, loc });
@@ -193,7 +191,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
-      return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping' }]];
+      return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping', locx: loc }]];
     }
 
     case ExecutableName.automate: {
@@ -204,7 +202,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         else {
           s.recurring[targets[0]] = { startTicks: nowTicks(state.clock) + 20, periodTicks: 20 };
         }
-      }), [{ t: 'playSound', effect: 'ping' }, { t: 'reschedule' }]];
+      }), [{ t: 'playSound', effect: 'ping', locx: loc }, { t: 'reschedule' }]];
 
     }
   }

@@ -14,7 +14,7 @@ export const EXEC_TICKS = 6;
 export function reduce(state: State, action: Action): [State, Effect[]] {
   switch (state.t) {
     case 'title':
-      return [mkInGameState(), [{ t: 'redraw' }, { t: 'playSound', effect: 'startup' }, { t: 'powerButton' }]];
+      return [mkInGameState(), [{ t: 'redraw' }, { t: 'playSound', effect: 'startup', locx: undefined }, { t: 'powerButton' }]];
     case 'game':
       if (action.t == 'boot') return [{ t: 'title' }, [{ t: 'redraw' }, { t: 'powerButton' }]];
       const [gameState, effects] = reduceGameState(state.gameState, action);
@@ -41,7 +41,7 @@ export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, E
     s.futures = state.futures.filter(f => f.action.t != 'clearError');
 
     addFutureꜝ(s, now + 3, { t: 'clearError' });
-  }), [{ t: 'redraw' }, { t: 'reschedule' }, { t: 'playSound', effect: 'error' }]]
+  }), [{ t: 'redraw' }, { t: 'reschedule' }, { t: 'playSound', effect: 'error', locx: errorInfo.loc }]]
 }
 
 // imperatively updates state
@@ -90,7 +90,7 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
   if (cycles == 0) {
     let effects;
     [state, effects] = reduceGameStateFs(state, action);
-    return [state, [...effects, { t: 'playSound', effect: 'rising' }]];
+    return [state, [...effects, { t: 'playSound', effect: 'rising', locx: loc }]];
   }
   else {
     // defer execution
@@ -105,7 +105,7 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
       });
       addFutureꜝ(s, now + cycles, action, true);
     });
-    return [state, [{ t: 'redraw' }, { t: 'playSound', effect: 'rising' }, { t: 'reschedule' }]];
+    return [state, [{ t: 'redraw' }, { t: 'playSound', effect: 'rising', locx: loc }, { t: 'reschedule' }]];
   }
 }
 
@@ -124,7 +124,7 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): [Gam
       s.path.push(item.name);
     }), [
       { t: 'redraw' },
-      { t: 'playSound', effect: 'rising' }
+      { t: 'playSound', effect: 'rising', locx: undefined }
     ]];
     case 'none': return [state, []];
     case 'error': return withError(state, { code: action.code }); // XXX does this arise? does withError want an id?
@@ -177,7 +177,7 @@ function reducePickupAction(state: GameState, action: PickupLineAction): [GameSt
         state,
         [
           { t: 'redraw' },
-          { t: 'playSound', effect: 'pickup' },
+          { t: 'playSound', effect: 'pickup', locx: undefined },
         ]
       ];
     }
@@ -200,7 +200,7 @@ function reduceDropAction(state: GameState, action: DropLineAction): [GameState,
         state,
         [
           { t: 'redraw' },
-          { t: 'playSound', effect: 'drop' }
+          { t: 'playSound', effect: 'drop', locx: undefined }
         ]
       ];
     }
@@ -227,13 +227,13 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
       return [advanceLine(state, -1),
       [
         { t: 'redraw' },
-        { t: 'playSound', effect: 'high' },
+        { t: 'playSound', effect: 'high', locx: undefined },
       ]];
     case KeyAction.nextLine:
       return [advanceLine(state, 1),
       [
         { t: 'redraw' },
-        { t: 'playSound', effect: 'high' },
+        { t: 'playSound', effect: 'high', locx: undefined },
       ]];
     case KeyAction.exec: return reduceExecAction(state, getSelectedLine(state).actions.exec);
 
@@ -259,7 +259,7 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
           s.path.pop();
         }), [
           { t: 'redraw' },
-          { t: 'playSound', effect: 'falling' }
+          { t: 'playSound', effect: 'falling', locx: undefined }
         ]];
       }
     }
@@ -272,7 +272,7 @@ export function reduceGameState(state: GameState, action: GameAction): [GameStat
     case 'fsView': return reduceGameStateFs(state, action);
     case 'textDialogView': return [produce(state, s => {
       s.viewState = vs.back;
-    }), [{ t: 'redraw' }, { t: 'playSound', effect: 'falling' }]];
+    }), [{ t: 'redraw' }, { t: 'playSound', effect: 'falling', locx: undefined }]];
   }
 }
 
