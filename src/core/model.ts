@@ -98,7 +98,6 @@ export enum KeyAction {
 }
 
 export type Effect =
-  | { t: 'redraw' }
   | { t: 'playSound', effect: SoundEffect, locx: Location | undefined }
   | { t: 'reschedule' }
   | { t: 'powerButton' }

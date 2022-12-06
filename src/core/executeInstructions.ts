@@ -71,8 +71,8 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
   }), []];
 }
 
-// These effects don't need to include redraw. Do they need reschedule?
-// Wait, maybe they do need a redraw if they're zero-cycle.
+// Do these effects need reschedule?
+// Maybe they do need a redraw if they're zero-cycle.
 export function executeInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[]] {
 
   const loc = getLocation(state.fs, actor);
@@ -91,7 +91,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
     case ExecutableName.textDialog:
       return [produce(state, s => {
         s.viewState = { t: 'textDialogView', back: state.viewState };
-      }), [{ t: 'redraw' }]];
+      }), []];
     case ExecutableName.combine:
       return [state, []];
     case ExecutableName.movCpu5: return movResource(state, targets, 'cpu', 5);
@@ -137,7 +137,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
-      return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping', locx: loc }]];
+      return [state, [{ t: 'playSound', effect: 'ping', locx: loc }]];
     }
 
     case ExecutableName.magnet: {
@@ -160,7 +160,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         const [newfs, hooks] = moveIdTo(state.fs, referentId, newItemLoc);
         state = produce(state, s => { s.fs = newfs; });
         state = processHooks(state, hooks);
-        return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping', locx: loc }]];
+        return [state, [{ t: 'playSound', effect: 'ping', locx: loc }]];
       }
     }
 
@@ -191,7 +191,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
-      return [state, [{ t: 'redraw' /* ??? */ }, { t: 'playSound', effect: 'ping', locx: loc }]];
+      return [state, [{ t: 'playSound', effect: 'ping', locx: loc }]];
     }
 
     case ExecutableName.automate: {

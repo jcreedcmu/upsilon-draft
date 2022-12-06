@@ -22,7 +22,6 @@ describe('reduce', () => {
     const state = gameStateOfFs(fs);
     const [, effects] = reduceExecAction(state, { t: 'exec', ident: 'text-dialog' });
     expect(effects.filter(x => x.t == 'playSound').length).toEqual(1);
-    expect(effects.filter(x => x.t == 'redraw').length).toEqual(1);
   });
 
 });

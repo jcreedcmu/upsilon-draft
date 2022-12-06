@@ -93,10 +93,6 @@ async function go() {
 
   function handleEffect(state: NewState, effect: Effect): NewState {
     switch (effect.t) {
-      case 'redraw':
-        const screen = render(state);
-        //        pane.draw(screen);
-        return state;
       case 'playSound':
         if (isNearby(state, effect.locx))
           playSound(sound, effect.effect);
@@ -127,7 +123,6 @@ async function go() {
         }
       }
       checkDuplicates('playSound');
-      checkDuplicates('redraw');
       checkDuplicates('reschedule');
     }
 
@@ -138,7 +133,6 @@ async function go() {
   window.onkeydown = (k: KeyboardEvent) => {
     dispatch({ t: 'key', code: key(k) });
   }
-  state[0] = handleEffect(state[0], { t: 'redraw' });
 
   function repaint() {
     const screen = render(state[0]);

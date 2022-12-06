@@ -14,9 +14,9 @@ export const EXEC_TICKS = 6;
 export function reduce(state: State, action: Action): [State, Effect[]] {
   switch (state.t) {
     case 'title':
-      return [mkInGameState(), [{ t: 'redraw' }, { t: 'playSound', effect: 'startup', locx: undefined }, { t: 'powerButton' }]];
+      return [mkInGameState(), [{ t: 'playSound', effect: 'startup', locx: undefined }, { t: 'powerButton' }]];
     case 'game':
-      if (action.t == 'boot') return [{ t: 'title' }, [{ t: 'redraw' }, { t: 'powerButton' }]];
+      if (action.t == 'boot') return [{ t: 'title' }, [{ t: 'powerButton' }]];
       const [gameState, effects] = reduceGameState(state.gameState, action);
       return [produce(state, s => { s.gameState = gameState; }), effects];
   }
@@ -49,7 +49,6 @@ export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, E
     state = makeErrorBanner(state, code);
   }
   return [state, [
-    { t: 'redraw' },
     { t: 'reschedule' },
     { t: 'playSound', effect: 'error', locx: errorInfo.loc }
   ]]
@@ -116,7 +115,7 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
       });
       addFutureꜝ(s, now + cycles, action, true);
     });
-    return [state, [{ t: 'redraw' }, { t: 'playSound', effect: 'rising', locx: loc }, { t: 'reschedule' }]];
+    return [state, [{ t: 'playSound', effect: 'rising', locx: loc }, { t: 'reschedule' }]];
   }
 }
 
@@ -134,7 +133,6 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): [Gam
       s.curLine = item.stickyCurrentPos ?? 0;
       s.path.push(item.name);
     }), [
-      { t: 'redraw' },
       { t: 'playSound', effect: 'rising', locx: undefined }
     ]];
     case 'none': return [state, []];
@@ -187,7 +185,6 @@ function reducePickupAction(state: GameState, action: PickupLineAction): [GameSt
       return [
         state,
         [
-          { t: 'redraw' },
           { t: 'playSound', effect: 'pickup', locx: undefined },
         ]
       ];
@@ -210,7 +207,6 @@ function reduceDropAction(state: GameState, action: DropLineAction): [GameState,
       return [
         state,
         [
-          { t: 'redraw' },
           { t: 'playSound', effect: 'drop', locx: undefined }
         ]
       ];
@@ -237,13 +233,11 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
     case KeyAction.prevLine:
       return [advanceLine(state, -1),
       [
-        { t: 'redraw' },
         { t: 'playSound', effect: 'high', locx: undefined },
       ]];
     case KeyAction.nextLine:
       return [advanceLine(state, 1),
       [
-        { t: 'redraw' },
         { t: 'playSound', effect: 'high', locx: undefined },
       ]];
     case KeyAction.exec: return reduceExecAction(state, getSelectedLine(state).actions.exec);
@@ -269,7 +263,6 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
           s.curLine = loc.pos;
           s.path.pop();
         }), [
-          { t: 'redraw' },
           { t: 'playSound', effect: 'falling', locx: undefined }
         ]];
       }
@@ -283,7 +276,7 @@ export function reduceGameState(state: GameState, action: GameAction): [GameStat
     case 'fsView': return reduceGameStateFs(state, action);
     case 'textDialogView': return [produce(state, s => {
       s.viewState = vs.back;
-    }), [{ t: 'redraw' }, { t: 'playSound', effect: 'falling', locx: undefined }]];
+    }), [{ t: 'playSound', effect: 'falling', locx: undefined }]];
   }
 }
 
@@ -328,7 +321,7 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
         // conservatively safe to do so if by "conservative" I mean
         // "visual updates won't be lost".
         const [s, a] = reduceActions(state, actions);
-        return [s, [...a, { t: 'reschedule' }, { t: 'redraw' }]];
+        return [s, [...a, { t: 'reschedule' },]];
       }
       else {
         return [state, [{ t: 'reschedule' }]]; // FIXME: Is this reschedule right?
@@ -366,10 +359,10 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
     case 'clearError':
       return [produce(state, s => {
         s.error = undefined;
-      }), [{ t: 'redraw' }]];
+      }), []];
 
     case 'none':
-      return [state, [{ t: 'redraw' }]];
+      return [state, []];
 
     case 'recur':
       // XXX more checking should happen here probably
