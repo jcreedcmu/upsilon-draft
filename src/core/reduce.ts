@@ -329,8 +329,8 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
         modifyItemꜝ(s.fs, action.actorId, item => { item.progress = undefined; });
       });
 
-      // XXX Sound effects shouldn't be the thing we trust for whether there's
-      // an error condition.
+      // FIXME(#7): Sound effects shouldn't be the thing we trust for
+      // whether there's an error condition.
       if (effects.some(x => x.t == 'playSound' && x.effect == 'error')) {
         state = deactivateItem(state, action.actorId);
         return [state, effects];
