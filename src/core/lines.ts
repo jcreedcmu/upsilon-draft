@@ -1,4 +1,4 @@
-import { ErrorCode } from './error-codes';
+import { ErrorCode } from './errors';
 import { Attr, Chars } from '../ui/screen';
 import { ColorCode, COLS } from '../ui/ui-constants';
 import { invertAttr, repeat } from '../util/util';

@@ -1,4 +1,4 @@
-import { errorCodes, errorCodeText } from '../core/error-codes';
+import { errorCodes, errorCodeText } from '../core/errors';
 import { Resources } from './resources';
 import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
 import { KeyAction } from '../core/model';

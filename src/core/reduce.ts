@@ -2,7 +2,7 @@ import { produce } from '../util/produce';
 import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem } from './model';
 import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, insertId, modifyItemꜝ, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
-import { ErrorCode, errorCodes, ErrorInfo } from './error-codes';
+import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
 import { logger } from '../util/debug';
 import { getResource, modifyResourceꜝ } from '../fs/resources';
