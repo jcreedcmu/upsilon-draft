@@ -119,7 +119,7 @@ export function initSound(): Sound {
   };
 }
 
-export function playBeep(sound: Sound, which: SoundEffect) {
+export function playSound(sound: Sound, which: SoundEffect) {
   const { d, sounds } = sound;
   const beepSrc = d.createBufferSource();
   beepSrc.buffer = sounds[which];

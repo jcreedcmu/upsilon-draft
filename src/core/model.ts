@@ -247,3 +247,22 @@ export function showAll(): Show {
     info: true
   };
 }
+
+// Returns true if location `loc` is "near" our current location in `state`.
+// Used for deciding whether to play sounds.
+export function isNearby(state: State, loc: Location | undefined): boolean {
+  // `loc` being undefined means play sound unconditionally
+  if (loc == undefined)
+    return true;
+  switch (state.t) {
+    case 'title': return false; // XXX honestly not sure how there are still
+    // localized sounds playing if we got back to title screen.
+    case 'game': {
+      if (loc.t == 'is_root') {
+        console.error('unexpected isNearby check for is_root');
+        return false; // XXX this would also be a surprising case
+      }
+      return (state.gameState.curId == loc.id);
+    }
+  }
+}

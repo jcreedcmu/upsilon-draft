@@ -4,10 +4,10 @@ import { Buffer, buffer } from './util/dutil';
 import { make_pane } from './ui/gl-pane';
 import { key } from './ui/key';
 import { clockedNextWake, ClockState, delayUntilTickMs, MILLISECONDS_PER_TICK, nowTicks, WakeTime } from './core/clock';
-import { Action as NewAction, Effect, GameState, mkState, State as NewState } from "./core/model";
+import { Action as NewAction, Effect, GameState, isNearby, mkState, State as NewState } from "./core/model";
 import { reduce } from './core/reduce';
 import { render } from "./ui/render";
-import { initSound, playBeep } from './ui/sound';
+import { initSound, playSound } from './ui/sound';
 
 // Do a little startup-time preprocessing on the font image so I can
 // edit it more conveniently.
@@ -98,7 +98,8 @@ async function go() {
         //        pane.draw(screen);
         return state;
       case 'playSound':
-        playBeep(sound, effect.effect);
+        if (isNearby(state, effect.locx))
+          playSound(sound, effect.effect);
         return state;
       case 'reschedule':
         if (state.t == 'game') {
