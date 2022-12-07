@@ -3,9 +3,10 @@ upsilon-draft
 
 This is a prototype of a game idea drawing some inspiration from
 
- - factorio
- - TIS-100 & other zachtronics games
- - smalltalk-style reflection
+ - [factorio](https://en.wikipedia.org/wiki/Factorio)
+ - [TIS-100](https://en.wikipedia.org/wiki/TIS-100) & other zachtronics games
+ - [smalltalk](https://en.wikipedia.org/wiki/Smalltalk)-style reflection
+ - [Orteil's "Nested"](https://orteil.dashnet.org/nested)
 
 Demo
 ----
