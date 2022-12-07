@@ -78,6 +78,15 @@ function reschedule(dispatch: (a: NewAction) => void, state: GameState): ClockSt
   }
 }
 
+// return whether a evaluated at t-1 is equal to b at time t, sort of?
+function equalWake(a: WakeTime, b: WakeTime): boolean {
+  switch (a.t) {
+    case 'live': return false;
+    case 'infinite': return b.t == 'infinite';
+    case 'tick': return b.t == 'tick' && b.tick == a.tick;
+  }
+}
+
 async function go() {
 
   const sound = initSound();
@@ -97,14 +106,7 @@ async function go() {
         if (isNearby(state, effect.locx))
           playSound(sound, effect.effect);
         return state;
-      case 'reschedule':
-        if (state.t == 'game') {
-          const newClock = reschedule(dispatch, state.gameState);
-          return produce(state, s => {
-            s.gameState.clock = newClock;
-          });
-        }
-        else return state;
+      case 'reschedule': return state;
       case 'powerButton':
         (document.getElementById('power-button')! as HTMLImageElement).src = state.t == 'title' ?
           'assets/button-up.png' : 'assets/button-down.png';
@@ -112,8 +114,26 @@ async function go() {
     }
   }
 
+  function maybeRescheduleGame(priorState: GameState, state: GameState): GameState {
+    if (!equalWake(nextWake(priorState), nextWake(state))) {
+      const newClock = reschedule(dispatch, state);
+      return produce(state, s => {
+        s.clock = newClock;
+      });
+    }
+    else return state;
+  }
+
+  function maybeReschedule(priorState: NewState, state: NewState): NewState {
+    if (state.t == 'game' && priorState.t == 'game') {
+      return { t: 'game', gameState: maybeRescheduleGame(priorState.gameState, state.gameState) };
+    }
+    else return state;
+  }
+
   function dispatch(action: NewAction): void {
     const [newState, effects] = reduce(state[0], action);
+    const origState = state[0];
     state[0] = newState;
 
     if (DEBUG.duplicates) {
@@ -125,6 +145,8 @@ async function go() {
       checkDuplicates('playSound');
       checkDuplicates('reschedule');
     }
+
+    state[0] = maybeReschedule(origState, state[0]);
 
     effects.forEach(e => {
       state[0] = handleEffect(state[0], e);
