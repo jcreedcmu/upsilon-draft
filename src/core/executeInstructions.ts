@@ -74,8 +74,6 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
   }), []];
 }
 
-// Do these effects need reschedule?
-// Maybe they do need a redraw if they're zero-cycle.
 export function executeInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[]] {
 
   const loc = getLocation(state.fs, actor);
@@ -205,7 +203,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         else {
           s.recurring[targets[0]] = { startTicks: nowTicks(state.clock) + 20, periodTicks: 20 };
         }
-      }), [{ t: 'playSound', effect: 'ping', locx: loc }, { t: 'reschedule' }]];
+      }), [{ t: 'playSound', effect: 'ping', locx: loc }]];
 
     }
   }

@@ -106,7 +106,6 @@ async function go() {
         if (isNearby(state, effect.locx))
           playSound(sound, effect.effect);
         return state;
-      case 'reschedule': return state;
       case 'powerButton':
         (document.getElementById('power-button')! as HTMLImageElement).src = state.t == 'title' ?
           'assets/button-up.png' : 'assets/button-down.png';
@@ -142,8 +141,10 @@ async function go() {
           console.log(`duplicate ${name}`);
         }
       }
+      // playSound isn't idempotent, but I don't currently expect one
+      // dispatch to produce multiple sounds, and I did once have a
+      // bug where that was the symptom.
       checkDuplicates('playSound');
-      checkDuplicates('reschedule');
     }
 
     state[0] = maybeReschedule(origState, state[0]);

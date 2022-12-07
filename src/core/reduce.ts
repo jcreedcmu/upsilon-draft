@@ -49,7 +49,6 @@ export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, E
     state = makeErrorBanner(state, code);
   }
   return [state, [
-    { t: 'reschedule' },
     { t: 'playSound', effect: 'error', locx: errorInfo.loc }
   ]]
 }
@@ -115,7 +114,7 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
       });
       addFutureꜝ(s, now + cycles, action, true);
     });
-    return [state, [{ t: 'playSound', effect: 'rising', locx: loc }, { t: 'reschedule' }]];
+    return [state, [{ t: 'playSound', effect: 'rising', locx: loc }]];
   }
 }
 
@@ -313,18 +312,14 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
 
         actions.push(...recurActions);
 
-        // FIXME: Maybe I should be doing something smarter about merging
-        // effects that I intend to be idempotent, like 'redraw' & 'reschedule'.
-
-        // ...In fact it occurs to me that it's also not even certain
-        // that I always want to redraw here, even though I suppose it's
-        // conservatively safe to do so if by "conservative" I mean
-        // "visual updates won't be lost".
+        // XXX Might want to think about doing something smarter if I
+        // have effects that are intended to be idempotent (even
+        // though I don't think I do right now)
         const [s, a] = reduceActions(state, actions);
-        return [s, [...a, { t: 'reschedule' },]];
+        return [s, [...a]];
       }
       else {
-        return [state, [{ t: 'reschedule' }]]; // FIXME: Is this reschedule right?
+        return [state, []];
       }
 
     case 'finishExecution': {
