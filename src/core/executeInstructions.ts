@@ -12,28 +12,31 @@ export type ExecutableSpec = {
   numTargets?: number,
 }
 
-export enum ExecutableName {
-  textDialog = 'text-dialog',
-  combine = 'combine',
-  movCpu5 = 'mov-cpu-5',
-  movCpu1 = 'mov-cpu-1',
-  toggleOpen = 'toggle-open',
-  togglePickup = 'toggle-pickup',
-  toggleInstr = 'toggle-instr',
-  toggleExec = 'toggle-exec',
-  toggleUnlock = 'toggle-unlock',
-  toggleCaps = 'toggle-caps',
-  prefix = 'prefix',
-  charge = 'charge',
-  treadmill = 'treadmill',
-  extractId = 'extract-id',
-  magnet = 'magnet',
-  modify = 'modify',
-  copy = 'copy',
-  automate = 'automate',
-};
+export const executables = {
+  textDialog: 'text-dialog',
+  combine: 'combine',
+  movCpu5: 'mov-cpu-5',
+  movCpu1: 'mov-cpu-1',
+  toggleOpen: 'toggle-open',
+  togglePickup: 'toggle-pickup',
+  toggleInstr: 'toggle-instr',
+  toggleExec: 'toggle-exec',
+  toggleUnlock: 'toggle-unlock',
+  toggleCaps: 'toggle-caps',
+  prefix: 'prefix',
+  charge: 'charge',
+  treadmill: 'treadmill',
+  extractId: 'extract-id',
+  magnet: 'magnet',
+  modify: 'modify',
+  copy: 'copy',
+  automate: 'automate',
+} as const;
 
-export const executableNameMap: Record<ExecutableName, ExecutableSpec> = {
+export type ExecutablesType = typeof executables;
+export type ExecutableName = ExecutablesType[keyof ExecutablesType];
+
+export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'text-dialog': { cycles: 3, cpuCost: 0, numTargets: 0 },
   'combine': { cycles: 10, cpuCost: 1, numTargets: 2 },
   'mov-cpu-5': { cycles: 5, cpuCost: 1, numTargets: 2 },
@@ -55,7 +58,7 @@ export const executableNameMap: Record<ExecutableName, ExecutableSpec> = {
 }
 
 export function isExecutable(k: string): k is ExecutableName {
-  return k in executableNameMap;
+  return k in executableProperties;
 }
 
 function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number): [GameState, Effect[]] {
@@ -88,41 +91,41 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
   }
 
   switch (instr) {
-    case ExecutableName.textDialog:
+    case executables.textDialog:
       return [produce(state, s => {
         s.viewState = { t: 'textDialogView', back: state.viewState };
       }), []];
-    case ExecutableName.combine:
+    case executables.combine:
       return [state, []];
-    case ExecutableName.movCpu5: return movResource(state, targets, 'cpu', 5);
-    case ExecutableName.movCpu1: return movResource(state, targets, 'cpu', 1);
+    case executables.movCpu5: return movResource(state, targets, 'cpu', 5);
+    case executables.movCpu1: return movResource(state, targets, 'cpu', 1);
 
 
-    case ExecutableName.charge:
+    case executables.charge:
       return withModifiedTarget(tgt => { modifyResourceꜝ(tgt, 'cpu', x => x + 1); });
-    case ExecutableName.treadmill:
+    case executables.treadmill:
       return withModifiedTarget(tgt => { modifyResourceꜝ(tgt, 'cpu', x => x + 1); });
 
-    case ExecutableName.toggleUnlock:
+    case executables.toggleUnlock:
       return withModifiedTarget(tgt => { tgt.acls.unlock = !tgt.acls.unlock; });
-    case ExecutableName.toggleExec:
+    case executables.toggleExec:
       return withModifiedTarget(tgt => { tgt.acls.exec = !tgt.acls.exec; });
 
-    case ExecutableName.togglePickup:
+    case executables.togglePickup:
       return withModifiedTarget(tgt => { tgt.acls.pickup = !tgt.acls.pickup; });
 
-    case ExecutableName.toggleInstr:
+    case executables.toggleInstr:
       return withModifiedTarget(tgt => { tgt.acls.instr = !tgt.acls.instr; });
 
-    case ExecutableName.toggleCaps:
+    case executables.toggleCaps:
       return withModifiedTarget(tgt => { tgt.name = tgt.name === tgt.name.toUpperCase() ? tgt.name.toLowerCase() : tgt.name.toUpperCase(); });
 
-    case ExecutableName.toggleOpen:
+    case executables.toggleOpen:
       return withModifiedTarget(tgt => { tgt.acls.open = !tgt.acls.open; });
-    case ExecutableName.prefix:
+    case executables.prefix:
       return withModifiedTarget(tgt => { tgt.name = "." + tgt.name; });
 
-    case ExecutableName.extractId: {
+    case executables.extractId: {
       // Takes one argument.
       // Creates a new file whose name is the item id of that argument.
       // Sort of like taking the address of a pointer.
@@ -140,7 +143,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       return [state, [{ t: 'playSound', effect: 'ping', locx: loc }]];
     }
 
-    case ExecutableName.magnet: {
+    case executables.magnet: {
       const referentId = getItem(state.fs, targets[0]).name;
       const referent: Item | undefined = maybeGetItem(state.fs, referentId);
       if (referent == undefined) {
@@ -164,7 +167,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       }
     }
 
-    case ExecutableName.modify: {
+    case executables.modify: {
       let newName = getItem(state.fs, targets[0]).name;
       const mo = modificationOrder();
       const found = mo.findIndex(x => x == newName);
@@ -176,7 +179,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       });
     }
 
-    case ExecutableName.copy: {
+    case executables.copy: {
       // Takes one argument.
       // Creates a new file whose name is the same as argument.
       // Doesn't copy attributes or acls or anything.
@@ -194,7 +197,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       return [state, [{ t: 'playSound', effect: 'ping', locx: loc }]];
     }
 
-    case ExecutableName.automate: {
+    case executables.automate: {
       return [produce(state, s => {
         if (targets[0] in state.recurring) {
           delete s.recurring[targets[0]];

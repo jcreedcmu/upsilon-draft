@@ -3,7 +3,7 @@ import { Resources } from './resources';
 import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
 import { KeyAction } from '../core/model';
 import { arrowChars } from '../ui/screen';
-import { ExecutableName } from '../core/executeInstructions';
+import { ExecutableName, executableProperties, executables } from '../core/executeInstructions';
 
 export enum SpecialId {
   keys = '_keys',
@@ -90,28 +90,28 @@ function errorDir(): ItemPlan {
 function binDirs(): ItemPlan[] {
   return [{
     t: 'dir', name: 'bin', contents: [
-      namedExec(ExecutableName.textDialog, { resources: { cpu: 4 } }),
-      namedExec(ExecutableName.movCpu5, { resources: { cpu: 5 } }),
-      namedExec(ExecutableName.movCpu1, { resources: { cpu: 5 } }),
-      namedExec(ExecutableName.combine),
-      namedExec(ExecutableName.toggleOpen),
-      namedExec(ExecutableName.togglePickup),
-      namedExec(ExecutableName.toggleInstr, { resources: { cpu: 8 } }),
-      namedExec(ExecutableName.toggleExec),
-      namedExec(ExecutableName.toggleUnlock),
+      namedExec(executables.textDialog, { resources: { cpu: 4 } }),
+      namedExec(executables.movCpu5, { resources: { cpu: 5 } }),
+      namedExec(executables.movCpu1, { resources: { cpu: 5 } }),
+      namedExec(executables.combine),
+      namedExec(executables.toggleOpen),
+      namedExec(executables.togglePickup),
+      namedExec(executables.toggleInstr, { resources: { cpu: 8 } }),
+      namedExec(executables.toggleExec),
+      namedExec(executables.toggleUnlock),
     ]
   },
   {
     t: 'dir', name: 'bin2', contents: [
-      namedExec(ExecutableName.extractId, { resources: { cpu: 10 } }),
-      namedExec(ExecutableName.magnet, { resources: { cpu: 10 } }),
-      namedExec(ExecutableName.toggleCaps, { resources: { data: 1 } }),
-      namedExec(ExecutableName.prefix, { resources: { network: 1 } }),
-      namedExec(ExecutableName.charge, { resources: { cpu: 4, network: 3 } }),
-      namedExec(ExecutableName.treadmill, { resources: { cpu: 0, network: 0 } }),
-      namedExec(ExecutableName.modify, { resources: { cpu: 5, network: 0 } }),
-      namedExec(ExecutableName.copy, { resources: { cpu: 5, network: 0 } }),
-      namedExec(ExecutableName.automate, { resources: { cpu: 5, network: 0 } }),
+      namedExec(executables.extractId, { resources: { cpu: 10 } }),
+      namedExec(executables.magnet, { resources: { cpu: 10 } }),
+      namedExec(executables.toggleCaps, { resources: { data: 1 } }),
+      namedExec(executables.prefix, { resources: { network: 1 } }),
+      namedExec(executables.charge, { resources: { cpu: 4, network: 3 } }),
+      namedExec(executables.treadmill, { resources: { cpu: 0, network: 0 } }),
+      namedExec(executables.modify, { resources: { cpu: 5, network: 0 } }),
+      namedExec(executables.copy, { resources: { cpu: 5, network: 0 } }),
+      namedExec(executables.automate, { resources: { cpu: 5, network: 0 } }),
     ]
   }];
 }

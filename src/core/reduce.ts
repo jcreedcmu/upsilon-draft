@@ -6,7 +6,7 @@ import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
 import { logger } from '../util/debug';
 import { getResource, modifyResourceꜝ } from '../fs/resources';
-import { ExecutableName, executableNameMap, ExecutableSpec, executeInstructions, isExecutable } from './executeInstructions';
+import { ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable } from './executeInstructions';
 import { SpecialId } from '../fs/initialFs';
 
 export const EXEC_TICKS = 6;
@@ -67,7 +67,7 @@ function addFutureꜝ(state: GameState, whenTicks: number, action: GameAction, l
 
 function startExecutable(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
 
-  const { cycles, cpuCost, numTargets } = executableNameMap[name];
+  const { cycles, cpuCost, numTargets } = executableProperties[name];
   const loc = getLocation(state.fs, id);
 
   const targetIds = getItemIdsAfter(state.fs, id, numTargets ?? 1);
