@@ -110,7 +110,6 @@ export type SceneState =
 export type State = {
   sceneState: SceneState,
   globalAnimationState: {
-    power: boolean,
     shrinkFade: number, // should be in the interval [0,1]
   }
 };
@@ -144,7 +143,6 @@ export function mkState(): State {
   return {
     sceneState: mkInGameState(),
     globalAnimationState: {
-      power: true,
       shrinkFade: 0.001
     }
   };
