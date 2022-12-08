@@ -9,11 +9,11 @@ import { SpecialId } from '../fs/initialFs';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
 import { GameState, Show, SceneState, UserError } from '../core/model';
 import { nowTicks } from '../core/clock';
+import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 
 const CHARGE_COL_SIZE = 3;
 const SIZE_COL_SIZE = 3;
 const MARGIN = 1;
-const INVENTORY_MAX_ITEMS = 3;
 const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 
 // Everything with "Renderable" in its name is a sort of convenience
@@ -65,7 +65,7 @@ function getInventoryLine(state: GameState): RenderableLine[] {
 }
 
 function getInventorySlot(state: GameState): number {
-  return 0;
+  return state.inventorySlot;
 }
 
 function getRenderable(state: GameState): Renderable {

@@ -8,6 +8,7 @@ export const DEBUG = {
   duplicates: true,
   movement: false,
   quickStart: true,
+  keys: false,
 };
 
 export function logger(level: keyof (typeof DEBUG), ...args: any[]) {

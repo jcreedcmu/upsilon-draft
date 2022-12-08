@@ -10,7 +10,7 @@ import { ExecutableName, executableProperties, ExecutableSpec, executeInstructio
 import { SpecialId } from '../fs/initialFs';
 
 export const EXEC_TICKS = 6;
-
+export const INVENTORY_MAX_ITEMS = 3;
 
 export function reduce(state: SceneState, action: Action): [SceneState, Effect[]] {
   switch (state.t) {
@@ -247,6 +247,10 @@ function actionOfKey(state: GameState, keyCode: string): KeyAction | undefined {
   return state._cached_keybindings[keyCode];
 }
 
+function modifyInventorySlotꜝ(state: GameState, increment: number): void {
+  state.inventorySlot = (state.inventorySlot + increment + INVENTORY_MAX_ITEMS) % INVENTORY_MAX_ITEMS;
+}
+
 export function reduceKeyAction(state: GameState, action: KeyAction): [GameState, Effect[]] {
   switch (action) {
     case KeyAction.prevLine:
@@ -286,6 +290,12 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
         ]];
       }
     }
+    case KeyAction.prevInventorySlot:
+      return [produce(state, s => { modifyInventorySlotꜝ(s, -1) }),
+      [{ t: 'playSound', effect: 'high', loc: undefined }]];
+    case KeyAction.nextInventorySlot:
+      return [produce(state, s => { modifyInventorySlotꜝ(s, 1) }),
+      [{ t: 'playSound', effect: 'high', loc: undefined }]];
   }
 }
 
@@ -302,6 +312,7 @@ export function reduceGameState(state: GameState, action: GameAction): [GameStat
 export function reduceGameStateFs(state: GameState, action: GameAction): [GameState, Effect[]] {
   switch (action.t) {
     case 'key': {
+      logger('keys', action.code);
       const keyAction = actionOfKey(state, action.code);
       if (keyAction != undefined)
         return reduceKeyAction(state, keyAction);

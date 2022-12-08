@@ -91,6 +91,8 @@ export type Action =
   ;
 
 export enum KeyAction {
+  prevInventorySlot = 'prev-inventory-slot',
+  nextInventorySlot = 'next-inventory-slot',
   prevLine = 'prev-line',
   nextLine = 'next-line',
   back = 'back',

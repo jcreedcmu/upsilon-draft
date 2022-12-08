@@ -33,16 +33,18 @@ function namedExec(name: ExecutableName, opts?: { resources?: Resources }): Item
 
 function keysDir(): ItemPlan {
   const keys: { name: string, keyAction: KeyAction }[] = [
-    { name: '<up>', keyAction: KeyAction.prevLine },
-    { name: 'w', keyAction: KeyAction.prevLine },
+    { name: ',', keyAction: KeyAction.prevInventorySlot },
+    { name: '.', keyAction: KeyAction.nextInventorySlot },
     { name: '<down>', keyAction: KeyAction.nextLine },
-    { name: 's', keyAction: KeyAction.nextLine },
     { name: '<left>', keyAction: KeyAction.back },
-    { name: 'a', keyAction: KeyAction.back },
-    { name: 'd', keyAction: KeyAction.exec },
     { name: '<return>', keyAction: KeyAction.exec },
     { name: '<right>', keyAction: KeyAction.exec },
     { name: '<space>', keyAction: KeyAction.pickupDrop },
+    { name: '<up>', keyAction: KeyAction.prevLine },
+    { name: 'a', keyAction: KeyAction.back },
+    { name: 'd', keyAction: KeyAction.exec },
+    { name: 's', keyAction: KeyAction.nextLine },
+    { name: 'w', keyAction: KeyAction.prevLine },
   ];
   function keyDir(key: { name: string, keyAction: KeyAction }): ItemPlan {
     const { name, keyAction } = key;
