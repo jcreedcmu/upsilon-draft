@@ -142,8 +142,9 @@ export type GameState = {
 
 export function mkState(): State {
   return {
-    sceneState: { t: 'powerOff' }, globalAnimationState: {
-      power: false,
+    sceneState: mkInGameState(),
+    globalAnimationState: {
+      power: true,
       shrinkFade: 0.001
     }
   };

@@ -89,7 +89,7 @@ function equalWake(a: WakeTime, b: WakeTime): boolean {
 
 function drawParamsOfState(state: State): DrawParams {
   const ga = state.globalAnimationState;
-  if (ga.power || true) {
+  if (ga.power) {
     return {
       beamScale: state.globalAnimationState.shrinkFade,
       fade: state.globalAnimationState.shrinkFade
