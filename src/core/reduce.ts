@@ -6,7 +6,7 @@ import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
 import { logger } from '../util/debug';
 import { getResource, modifyResourceꜝ } from '../fs/resources';
-import { ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable } from './executeInstructions';
+import { ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable } from './executables';
 import { SpecialId } from '../fs/initialFs';
 
 export const EXEC_TICKS = 6;

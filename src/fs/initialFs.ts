@@ -3,7 +3,7 @@ import { Resources } from './resources';
 import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
 import { KeyAction } from '../core/model';
 import { arrowChars } from '../ui/screen';
-import { ExecutableName, executableProperties, executables } from '../core/executeInstructions';
+import { ExecutableName, executableProperties, executables } from '../core/executables';
 
 export enum SpecialId {
   keys = '_keys',

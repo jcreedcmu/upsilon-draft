@@ -1,12 +1,12 @@
+import { Fs, getContents, getFullContents, getItem } from '../fs/fs';
+import { initialFs, SpecialId } from '../fs/initialFs';
 import { Resources } from '../fs/resources';
 import { SoundEffect } from '../ui/sound';
-import { ClockState, mkClockState } from './clock';
-import { Fs, getContents, getFullContents, getItem, getLocation } from '../fs/fs';
-import { initialFs, SpecialId } from '../fs/initialFs';
-import { FullLine, getLines } from './lines';
-import { ExecutableName } from './executeInstructions';
-import { produce } from '../util/produce';
 import { DEBUG } from '../util/debug';
+import { produce } from '../util/produce';
+import { ClockState, mkClockState } from './clock';
+import { ExecutableName } from './executables';
+import { FullLine, getLines } from './lines';
 
 export type Acl =
   | 'open'

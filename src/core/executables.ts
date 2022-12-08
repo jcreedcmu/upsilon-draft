@@ -1,11 +1,10 @@
-import { produce } from "../util/produce";
+import { createAndInsertItem, getItem, getLocation, maybeGetItem, moveIdTo, reifyId } from "../fs/fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
-import { createAndInsertItem, getContents, getItem, getLocation, maybeGetItem, moveId, moveIdTo, reifyId } from "../fs/fs";
+import { produce } from "../util/produce";
+import { nowTicks } from "./clock";
+import { ErrorInfo } from "./errors";
 import { Effect, GameState, Ident, Item, nextLocation } from "./model";
 import { processHooks, withError } from "./reduce";
-import { modificationOrder } from "./modificationOrder";
-import { nowTicks } from "./clock";
-import { ErrorCode, ErrorInfo } from "./errors";
 
 export type ExecutableSpec = {
   cycles: number,
@@ -56,6 +55,41 @@ export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'modify': { cycles: 5, cpuCost: 1 },
   'copy': { cycles: 5, cpuCost: 1 },
   'automate': { cycles: 5, cpuCost: 1 },
+}
+
+export function modificationOrder(): readonly ExecutableName[] {
+  // the fact that typescript infers `_modificationOrder` here as
+  //    ("text-dialog" | ⋯)[]
+  // seems to depend on `executables` being `as const`, but doesn't
+  // require `_modificationOrder` to be `as const` to get an effective
+  // static exhaustiveness check via _staticCheckCoverage below.
+  const _modificationOrder = [
+    executables.textDialog,
+    executables.combine,
+    executables.movCpu5,
+    executables.movCpu1,
+    executables.toggleOpen,
+    executables.togglePickup,
+    executables.toggleInstr,
+    executables.toggleExec,
+    executables.toggleUnlock,
+    executables.toggleCaps,
+    executables.prefix,
+    executables.charge,
+    executables.treadmill,
+    executables.extractId,
+    executables.magnet,
+    executables.modify,
+    executables.copy,
+    executables.automate
+  ];
+
+  // We don't ever expect to call this function, but it will only typecheck if
+  // every value of `executables` appears somewhere in _modificationOrder
+  function _staticCheckCoverage(x: ExecutableName, f: (y: (typeof _modificationOrder)[number]) => void): void {
+    return f(x);
+  }
+  return _modificationOrder;
 }
 
 export function isExecutable(k: string): k is ExecutableName {
