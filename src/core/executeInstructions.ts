@@ -5,6 +5,7 @@ import { Effect, GameState, Ident, Item, nextLocation } from "./model";
 import { processHooks, withError } from "./reduce";
 import { modificationOrder } from "./modificationOrder";
 import { nowTicks } from "./clock";
+import { ErrorCode, ErrorInfo } from "./errors";
 
 export type ExecutableSpec = {
   cycles: number,
@@ -61,7 +62,7 @@ export function isExecutable(k: string): k is ExecutableName {
   return k in executableProperties;
 }
 
-function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number): [GameState, Effect[]] {
+function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number): [GameState, Effect[], ErrorInfo | undefined] {
   const actualAmount = Math.min(amount, getResource(getItem(state.fs, targets[0]), 'cpu'));
 
   let fs = state.fs;
@@ -71,30 +72,34 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
   return [produce(state, s => {
     modifyResourceꜝ(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
     modifyResourceꜝ(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);
-  }), []];
+  }), [], undefined];
 }
 
-export function executeInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[]] {
+function withErrorExec(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[], ErrorInfo | undefined] {
+  return [...withError(state, errorInfo), errorInfo];
+}
+
+export function executeInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[], ErrorInfo | undefined] {
 
   const loc = getLocation(state.fs, actor);
 
-  function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[]] {
+  function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[], ErrorInfo | undefined] {
     const target = getItem(state.fs, targets[0]);
     const ftgt = produce(target, t => { f(t); });
 
     // XXX this is wrong if idToItem doesn't already have a location
     return [produce(state, s => {
       s.fs.idToItem[targets[0]] = ftgt;
-    }), [{ t: 'playSound', effect: 'ping', locx: loc }]];
+    }), [{ t: 'playSound', effect: 'ping', locx: loc }], undefined];
   }
 
   switch (instr) {
     case executables.textDialog:
       return [produce(state, s => {
         s.viewState = { t: 'textDialogView', back: state.viewState };
-      }), []];
+      }), [], undefined];
     case executables.combine:
-      return [state, []];
+      return [state, [], undefined];
     case executables.movCpu5: return movResource(state, targets, 'cpu', 5);
     case executables.movCpu1: return movResource(state, targets, 'cpu', 1);
 
@@ -133,19 +138,19 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       };
       const newItemLoc = nextLocation(loc);
       if (newItemLoc.t == 'is_root') {
-        return withError(state, { code: 'badInputs', blame: actor, loc });
+        return withErrorExec(state, { code: 'badInputs', blame: actor, loc });
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
-      return [state, [{ t: 'playSound', effect: 'ping', locx: loc }]];
+      return [state, [{ t: 'playSound', effect: 'ping', locx: loc }], undefined];
     }
 
     case executables.magnet: {
       const referentId = getItem(state.fs, targets[0]).name;
       const referent: Item | undefined = maybeGetItem(state.fs, referentId);
       if (referent == undefined) {
-        return withError(state, { code: 'badInputs', blame: actor, loc });
+        return withErrorExec(state, { code: 'badInputs', blame: actor, loc });
       }
       else {
         const newItemLoc = nextLocation(getLocation(state.fs, actor));
@@ -161,7 +166,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         const [newfs, hooks] = moveIdTo(state.fs, referentId, newItemLoc);
         state = produce(state, s => { s.fs = newfs; });
         state = processHooks(state, hooks);
-        return [state, [{ t: 'playSound', effect: 'ping', locx: loc }]];
+        return [state, [{ t: 'playSound', effect: 'ping', locx: loc }], undefined];
       }
     }
 
@@ -187,12 +192,12 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       };
       const newItemLoc = nextLocation(loc);
       if (newItemLoc.t == 'is_root') {
-        return withError(state, { code: 'badInputs', blame: actor, loc });
+        return withErrorExec(state, { code: 'badInputs', blame: actor, loc });
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
-      return [state, [{ t: 'playSound', effect: 'ping', locx: loc }]];
+      return [state, [{ t: 'playSound', effect: 'ping', locx: loc }], undefined];
     }
 
     case executables.automate: {
@@ -203,8 +208,9 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         else {
           s.recurring[targets[0]] = { startTicks: nowTicks(state.clock) + 20, periodTicks: 20 };
         }
-      }), [{ t: 'playSound', effect: 'ping', locx: loc }]];
+      }), [{ t: 'playSound', effect: 'ping', locx: loc }], undefined];
 
     }
   }
+
 }
