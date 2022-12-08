@@ -232,14 +232,6 @@ export function finalRender(state: Renderable): Screen {
 
 export function render(state: SceneState): Screen {
   switch (state.t) {
-    case 'powerOff':
-      const screen = new Screen();
-      const str1 = '* * \x03 UpsilonDraft \x02 * *';
-      screen.drawAttrStr(screen.at(Math.floor((screen.cols - str1.length) / 2), 3), [{ str: str1, attr: { fg: 15, bg: 4 } }]);
-      const str2 = 'press any key to start';
-      screen.drawAttrStr(screen.at(Math.floor((screen.cols - str2.length) / 2), 5), [{ str: str2, attr: { fg: 0, bg: 15 } }]);
-      return screen;
-
     case 'game': {
       return finalRender(getRenderable(state.gameState));
     }

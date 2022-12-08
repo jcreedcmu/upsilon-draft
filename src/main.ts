@@ -8,6 +8,7 @@ import { Action, Effect, GameState, isNearby, mkState, SceneState, State } from 
 import { reduce } from './core/reduce';
 import { render } from "./ui/render";
 import { initSound, playSound } from './ui/sound';
+import { lerp } from "./util/util";
 
 // Do a little startup-time preprocessing on the font image so I can
 // edit it more conveniently.
@@ -89,19 +90,15 @@ function equalWake(a: WakeTime, b: WakeTime): boolean {
 
 function drawParamsOfState(state: State): DrawParams {
   const ga = state.globalAnimationState;
-  if (ga.power) {
-    return {
-      beamScale: state.globalAnimationState.shrinkFade,
-      fade: state.globalAnimationState.shrinkFade
-    };
+  if (ga.shrinkFade == 1.0) {
+    return { beamScale: 1.0, fade: 1.0 };
   }
-  else {
-    return {
-      beamScale: 0.001,
-      fade: 0.0
-    };
-  }
+  return {
+    beamScale: ga.shrinkFade + 0.001,
+    fade: Math.pow(ga.shrinkFade, 2),
+  };
 }
+
 
 async function go() {
 
@@ -123,8 +120,9 @@ async function go() {
           playSound(sound, effect.effect);
         return state;
       case 'powerButton':
-        (document.getElementById('power-button')! as HTMLImageElement).src = state.t == 'powerOff' ?
-          'assets/button-up.png' : 'assets/button-down.png';
+        const isPowerOn = state.gameState.power;
+        (document.getElementById('power-button')! as HTMLImageElement).src =
+          isPowerOn ? 'assets/button-down.png' : 'assets/button-up.png';
         return state;
     }
   }
@@ -178,9 +176,15 @@ async function go() {
     const screen = render(state[0].sceneState);
     pane.draw(screen, drawParamsOfState(state[0]));
 
+    const ga = state[0].globalAnimationState;
+    const nextShrinkFade = (state[0].sceneState.gameState.power) ?
+      (Math.min(lerp(ga.shrinkFade, 1.05, 0.01), 1.0)) :
+      (Math.max(lerp(ga.shrinkFade, -0.05, 0.05), 0.0));
+
     state[0] = produce(state[0], s => {
-      s.globalAnimationState.shrinkFade = Math.min(1.0, s.globalAnimationState.shrinkFade + 0.01);
+      s.globalAnimationState.shrinkFade = nextShrinkFade;
     });
+
     requestAnimationFrame(repaint);
   }
 

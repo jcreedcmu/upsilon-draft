@@ -11,14 +11,34 @@ import { SpecialId } from '../fs/initialFs';
 
 export const EXEC_TICKS = 6;
 
+
 export function reduce(state: SceneState, action: Action): [SceneState, Effect[]] {
   switch (state.t) {
-    case 'powerOff':
-      return [mkInGameState(), [{ t: 'playSound', effect: 'startup', locx: undefined }, { t: 'powerButton' }]];
     case 'game':
-      if (action.t == 'boot') return [{ t: 'powerOff' }, [{ t: 'powerButton' }]];
-      const [gameState, effects] = reduceGameState(state.gameState, action);
-      return [produce(state, s => { s.gameState = gameState; }), effects];
+      if (action.t == 'boot') {
+        if (state.gameState.power) {
+          return [produce(state, s => { s.gameState.power = false; }),
+          [/* XXX power down sound? */
+            { t: 'powerButton' }]];
+        }
+        else {
+          return [produce(
+            /* XXX redundant construction? but I do in fact want to
+            reconstruct for reboots... */
+            mkInGameState(), s => { s.gameState.power = true; }),
+          [{ t: 'playSound', effect: 'startup', locx: undefined },
+          { t: 'powerButton' }]];
+        }
+      }
+      else {
+        if (state.gameState.power) {
+          const [gameState, effects] = reduceGameState(state.gameState, action);
+          return [produce(state, s => { s.gameState = gameState; }), effects];
+        }
+        else {
+          return [state, []];
+        }
+      }
   }
 }
 

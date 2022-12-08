@@ -105,14 +105,13 @@ export type Effect =
 // If I need to add more state around settings, menus, saving, etc.,
 // it might go here.
 export type SceneState =
-  | { t: 'powerOff' }
   | { t: 'game', gameState: GameState };
 
 export type State = {
   sceneState: SceneState,
   globalAnimationState: {
     power: boolean,
-    shrinkFade: number, // should be in the half-open interval (0,1]
+    shrinkFade: number, // should be in the interval [0,1]
   }
 };
 
@@ -127,6 +126,7 @@ export type ViewState =
   | { t: 'textDialogView', back: ViewState };
 
 export type GameState = {
+  power: boolean,
   viewState: ViewState,
   curId: Ident,
   curLine: number,
@@ -190,6 +190,7 @@ export function showOfFs(fs: Fs): Show {
 
 export function gameStateOfFs(fs: Fs): GameState {
   return {
+    power: false,
     viewState: { t: 'fsView' },
     clock: mkClockState(),
     error: undefined,
@@ -265,8 +266,6 @@ export function showAll(): Show {
 export function isNearby(state: SceneState, loc: Location | undefined): boolean {
   // `loc` being undefined means play sound unconditionally
   switch (state.t) {
-    case 'powerOff': return true; // XXX honestly not sure how there are still
-    // localized sounds playing if we got back to title screen.
     case 'game': return isNearbyGame(state.gameState, loc);
   }
 }
