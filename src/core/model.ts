@@ -105,7 +105,7 @@ export type Effect =
 // If I need to add more state around settings, menus, saving, etc.,
 // it might go here.
 export type SceneState =
-  | { t: 'title' }
+  | { t: 'powerOff' }
   | { t: 'game', gameState: GameState };
 
 export type State = {
@@ -142,7 +142,7 @@ export type GameState = {
 
 export function mkState(): State {
   return {
-    sceneState: { t: 'title' }, globalAnimationState: {
+    sceneState: { t: 'powerOff' }, globalAnimationState: {
       power: false,
       shrinkFade: 0.001
     }
@@ -264,7 +264,7 @@ export function showAll(): Show {
 export function isNearby(state: SceneState, loc: Location | undefined): boolean {
   // `loc` being undefined means play sound unconditionally
   switch (state.t) {
-    case 'title': return true; // XXX honestly not sure how there are still
+    case 'powerOff': return true; // XXX honestly not sure how there are still
     // localized sounds playing if we got back to title screen.
     case 'game': return isNearbyGame(state.gameState, loc);
   }

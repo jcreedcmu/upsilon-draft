@@ -123,7 +123,7 @@ async function go() {
           playSound(sound, effect.effect);
         return state;
       case 'powerButton':
-        (document.getElementById('power-button')! as HTMLImageElement).src = state.t == 'title' ?
+        (document.getElementById('power-button')! as HTMLImageElement).src = state.t == 'powerOff' ?
           'assets/button-up.png' : 'assets/button-down.png';
         return state;
     }

@@ -13,10 +13,10 @@ export const EXEC_TICKS = 6;
 
 export function reduce(state: SceneState, action: Action): [SceneState, Effect[]] {
   switch (state.t) {
-    case 'title':
+    case 'powerOff':
       return [mkInGameState(), [{ t: 'playSound', effect: 'startup', locx: undefined }, { t: 'powerButton' }]];
     case 'game':
-      if (action.t == 'boot') return [{ t: 'title' }, [{ t: 'powerButton' }]];
+      if (action.t == 'boot') return [{ t: 'powerOff' }, [{ t: 'powerButton' }]];
       const [gameState, effects] = reduceGameState(state.gameState, action);
       return [produce(state, s => { s.gameState = gameState; }), effects];
   }
