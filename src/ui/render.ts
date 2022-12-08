@@ -34,7 +34,7 @@ export type FsRenderable = {
   show: Show,
   path: string[],
   error: UserError | undefined,
-  invLine?: RenderableLine
+  invLines: RenderableLine[]
 };
 
 export type TextDialogRenderable = {};
@@ -53,13 +53,12 @@ function defaultLine(name: string): RenderableLine {
   };
 }
 
-function getInventoryLine(state: GameState): RenderableLine | undefined {
+function getInventoryLine(state: GameState): RenderableLine[] {
   const inventory = getContents(state.fs, SpecialId.inventory);
-  if (inventory.length == 0)
-    return undefined;
-  const id = inventory[0];
-  const invItem = getItem(state.fs, id);
-  return getRenderableLineOfItem(id, invItem, nowTicks(state.clock));
+  return inventory.map(id => {
+    const invItem = getItem(state.fs, id);
+    return getRenderableLineOfItem(id, invItem, nowTicks(state.clock));
+  });
 }
 
 function getRenderable(state: GameState): Renderable {
@@ -73,7 +72,7 @@ function getRenderable(state: GameState): Renderable {
         lines,
         path: state.path,
         show: state._cached_show,
-        invLine: getInventoryLine(state),
+        invLines: getInventoryLine(state),
       };
     }
     case 'textDialogView':
@@ -178,9 +177,9 @@ export function renderFsView(rend: FsRenderable): Screen {
   });
 
   if (rend.show.inventory) {
-    if (rend.invLine != undefined) {
-      renderLine(screen, { x: len + 1, y: 1 }, len, rend.invLine, rend.show);
-    }
+    rend.invLines.forEach((line, ix) => {
+      renderLine(screen, { x: len + 1, y: ix + 1 }, len, line, rend.show);
+    });
   }
 
   if (rend.show.cwd) {
