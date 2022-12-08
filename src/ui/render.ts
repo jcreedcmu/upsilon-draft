@@ -7,7 +7,7 @@ import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
 import { getContents, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
-import { GameState, Show, State, UserError } from '../core/model';
+import { GameState, Show, SceneState, UserError } from '../core/model';
 import { nowTicks } from '../core/clock';
 
 const CHARGE_COL_SIZE = 3;
@@ -230,7 +230,7 @@ export function finalRender(state: Renderable): Screen {
   }
 }
 
-export function render(state: State): Screen {
+export function render(state: SceneState): Screen {
   switch (state.t) {
     case 'title':
       const screen = new Screen();

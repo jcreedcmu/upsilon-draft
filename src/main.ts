@@ -4,7 +4,7 @@ import { Buffer, buffer } from './util/dutil';
 import { DrawParams, make_pane } from './ui/gl-pane';
 import { key } from './ui/key';
 import { clockedNextWake, ClockState, delayUntilTickMs, MILLISECONDS_PER_TICK, nowTicks, WakeTime } from './core/clock';
-import { Action as NewAction, Effect, GameState, isNearby, mkState, State } from "./core/model";
+import { Action, Effect, GameState, isNearby, mkState, SceneState, State } from "./core/model";
 import { reduce } from './core/reduce';
 import { render } from "./ui/render";
 import { initSound, playSound } from './ui/sound';
@@ -48,7 +48,7 @@ function nextWake(state: GameState): WakeTime {
   return { t: 'infinite' };
 }
 
-function reschedule(dispatch: (a: NewAction) => void, state: GameState): ClockState {
+function reschedule(dispatch: (a: Action) => void, state: GameState): ClockState {
   let { clock } = state;
   if (clock.timeoutId) {
     clearTimeout(clock.timeoutId);
@@ -104,7 +104,7 @@ async function go() {
 
   const state: State[] = [mkState()];
 
-  function handleEffect(state: State, effect: Effect): State {
+  function handleEffect(state: SceneState, effect: Effect): SceneState {
     switch (effect.t) {
       case 'playSound':
         if (isNearby(state, effect.locx))
@@ -127,17 +127,15 @@ async function go() {
     else return state;
   }
 
-  function maybeReschedule(priorState: State, state: State): State {
+  function maybeReschedule(priorState: SceneState, state: SceneState): SceneState {
     if (state.t == 'game' && priorState.t == 'game') {
       return { t: 'game', gameState: maybeRescheduleGame(priorState.gameState, state.gameState) };
     }
     else return state;
   }
 
-  function dispatch(action: NewAction): void {
-    const [newState, effects] = reduce(state[0], action);
-    const origState = state[0];
-    state[0] = newState;
+  function dispatch(action: Action): void {
+    let [sceneState, effects] = reduce(state[0].sceneState, action);
 
     if (DEBUG.duplicates) {
       function checkDuplicates(name: Effect['t']) {
@@ -151,18 +149,21 @@ async function go() {
       checkDuplicates('playSound');
     }
 
-    state[0] = maybeReschedule(origState, state[0]);
+    sceneState = maybeReschedule(state[0].sceneState, sceneState);
 
     effects.forEach(e => {
-      state[0] = handleEffect(state[0], e);
+      sceneState = handleEffect(sceneState, e);
     });
+
+    state[0] = produce(state[0], s => { s.sceneState = sceneState; });
+
   }
   window.onkeydown = (k: KeyboardEvent) => {
     dispatch({ t: 'key', code: key(k) });
   }
 
   function repaint() {
-    const screen = render(state[0]);
+    const screen = render(state[0].sceneState);
     pane.draw(screen, drawParamsOfState(state[0]));
     requestAnimationFrame(repaint);
   }

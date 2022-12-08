@@ -1,5 +1,5 @@
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame } from './model';
+import { SceneState, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame } from './model';
 import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, insertId, modifyItemꜝ, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
@@ -11,7 +11,7 @@ import { SpecialId } from '../fs/initialFs';
 
 export const EXEC_TICKS = 6;
 
-export function reduce(state: State, action: Action): [State, Effect[]] {
+export function reduce(state: SceneState, action: Action): [SceneState, Effect[]] {
   switch (state.t) {
     case 'title':
       return [mkInGameState(), [{ t: 'playSound', effect: 'startup', locx: undefined }, { t: 'powerButton' }]];

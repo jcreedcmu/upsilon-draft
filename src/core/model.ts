@@ -104,9 +104,12 @@ export type Effect =
 
 // If I need to add more state around settings, menus, saving, etc.,
 // it might go here.
-export type State =
+export type SceneState =
   | { t: 'title' }
   | { t: 'game', gameState: GameState };
+
+export type State =
+  { sceneState: SceneState };
 
 export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
@@ -133,7 +136,7 @@ export type GameState = {
 };
 
 export function mkState(): State {
-  return { t: 'title' };
+  return { sceneState: { t: 'title' } };
 }
 
 export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
@@ -190,7 +193,7 @@ export function gameStateOfFs(fs: Fs): GameState {
   };
 }
 
-export function mkInGameState(): State {
+export function mkInGameState(): SceneState {
   return { t: 'game', gameState: gameStateOfFs(initialFs()) };
 }
 
@@ -248,7 +251,7 @@ export function showAll(): Show {
 
 // Returns true if location `loc` is "near" our current location in `state`.
 // Used for deciding whether to play sounds.
-export function isNearby(state: State, loc: Location | undefined): boolean {
+export function isNearby(state: SceneState, loc: Location | undefined): boolean {
   // `loc` being undefined means play sound unconditionally
   switch (state.t) {
     case 'title': return true; // XXX honestly not sure how there are still
