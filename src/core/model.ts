@@ -99,7 +99,7 @@ export enum KeyAction {
 }
 
 export type Effect =
-  | { t: 'playSound', effect: SoundEffect, locx: Location | undefined }
+  | { t: 'playSound', effect: SoundEffect, loc: Location | undefined }
   | { t: 'powerButton' }
   ;
 

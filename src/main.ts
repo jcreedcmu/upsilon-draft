@@ -119,7 +119,7 @@ async function go() {
   function handleEffect(state: SceneState, effect: Effect): SceneState {
     switch (effect.t) {
       case 'playSound':
-        if (isNearby(state, effect.locx))
+        if (isNearby(state, effect.loc))
           playSound(sound, effect.effect);
         return state;
       case 'powerButton':
