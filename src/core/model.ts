@@ -6,6 +6,7 @@ import { initialFs, SpecialId } from '../fs/initialFs';
 import { FullLine, getLines } from './lines';
 import { ExecutableName } from './executeInstructions';
 import { produce } from '../util/produce';
+import { DEBUG } from '../util/debug';
 
 export type Acl =
   | 'open'
@@ -143,7 +144,7 @@ export function mkState(): State {
   return {
     sceneState: mkInGameState(),
     globalAnimationState: {
-      shrinkFade: 0.001
+      shrinkFade: DEBUG.quickStart ? 1.0 : 0.001
     }
   };
 }
@@ -188,7 +189,7 @@ export function showOfFs(fs: Fs): Show {
 
 export function gameStateOfFs(fs: Fs): GameState {
   return {
-    power: false,
+    power: false || DEBUG.quickStart,
     viewState: { t: 'fsView' },
     clock: mkClockState(),
     error: undefined,

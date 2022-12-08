@@ -99,6 +99,9 @@ function drawParamsOfState(state: State): DrawParams {
   };
 }
 
+function powerButtonImageOfState(state: SceneState): string {
+  return state.gameState.power ? 'assets/button-down.png' : 'assets/button-up.png';
+}
 
 async function go() {
 
@@ -106,12 +109,12 @@ async function go() {
 
   const pane = await make_pane(document.getElementById('c') as HTMLCanvasElement);
 
+  const state: State[] = [mkState()];
+
   const powerButton = document.getElementById('power-button')! as HTMLImageElement;
   powerButton.className = 'button';
-  powerButton.src = 'assets/button-up.png';
+  powerButton.src = powerButtonImageOfState(state[0].sceneState);
   powerButton.onclick = () => dispatch({ t: 'boot' });
-
-  const state: State[] = [mkState()];
 
   function handleEffect(state: SceneState, effect: Effect): SceneState {
     switch (effect.t) {
@@ -120,9 +123,8 @@ async function go() {
           playSound(sound, effect.effect);
         return state;
       case 'powerButton':
-        const isPowerOn = state.gameState.power;
         (document.getElementById('power-button')! as HTMLImageElement).src =
-          isPowerOn ? 'assets/button-down.png' : 'assets/button-up.png';
+          powerButtonImageOfState(state);
         return state;
     }
   }
