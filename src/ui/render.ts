@@ -36,7 +36,8 @@ export type FsRenderable = {
   show: Show,
   path: string[],
   error: UserError | undefined,
-  invLines: RenderableLine[]
+  invLines: RenderableLine[],
+  inventorySlot: number,
 };
 
 export type TextDialogRenderable = {};
@@ -63,6 +64,10 @@ function getInventoryLine(state: GameState): RenderableLine[] {
   });
 }
 
+function getInventorySlot(state: GameState): number {
+  return 0;
+}
+
 function getRenderable(state: GameState): Renderable {
   switch (state.viewState.t) {
     case 'fsView': {
@@ -75,6 +80,7 @@ function getRenderable(state: GameState): Renderable {
         path: state.path,
         show: state._cached_show,
         invLines: getInventoryLine(state),
+        inventorySlot: getInventorySlot(state),
       };
     }
     case 'textDialogView':
@@ -207,6 +213,7 @@ export function renderFsView(rend: FsRenderable): Screen {
   if (rend.show.inventory) {
     screen.drawRect({ x: len, y: 0, w: len + 1, h: INVENTORY_MAX_ITEMS + 1 }, INV_ATTR);
     screen.drawTagStr(screen.at(len + 2, 0), `${boxw}Holding${boxe}`, INV_ATTR);
+    screen.drawTagStr(screen.at(len, rend.inventorySlot + 1), `>`, INV_ATTR);
   }
   if (rend.show.info) {
     screen.drawRect({ x: len, y: INFO_SECTION_START_Y, w: len + 1, h: screen.rows - 2 - INFO_SECTION_START_Y }, INV_ATTR);
