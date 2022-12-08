@@ -1,5 +1,5 @@
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkInGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame, SceneState } from './model';
+import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame, SceneState } from './model';
 import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, insertId, modifyItemꜝ, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
@@ -25,7 +25,7 @@ export function reduce(state: SceneState, action: Action): [SceneState, Effect[]
           return [produce(
             /* XXX redundant construction? but I do in fact want to
             reconstruct for reboots... */
-            mkInGameState(), s => { s.gameState.power = true; }),
+            mkGameState(), s => { s.gameState.power = true; }),
           [{ t: 'playSound', effect: 'startup', loc: undefined },
           { t: 'powerButton' }]];
         }

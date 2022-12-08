@@ -134,15 +134,16 @@ export type GameState = {
   error: UserError | undefined,
   clock: ClockState,
   path: string[],
-  futures: Future[],
-  recurring: Recurring,
+  futures: Future[], // generic future events that happen on a timer
+  recurring: Recurring, // active executables that execute recurringly
+  inventorySlot: number, // active inventory slot index
   _cached_keybindings: Record<string, KeyAction>,
   _cached_show: Show,
 };
 
 export function mkState(): State {
   return {
-    sceneState: mkInGameState(),
+    sceneState: mkGameState(),
     globalAnimationState: {
       shrinkFade: DEBUG.quickStart ? 1.0 : 0.001
     }
@@ -199,12 +200,13 @@ export function gameStateOfFs(fs: Fs): GameState {
     path: [],
     futures: [],
     recurring: {},
+    inventorySlot: 0,
     _cached_keybindings: keybindingsOfFs(fs),
     _cached_show: showOfFs(fs),
   };
 }
 
-export function mkInGameState(): SceneState {
+export function mkGameState(): SceneState {
   return { t: 'game', gameState: gameStateOfFs(initialFs()) };
 }
 
