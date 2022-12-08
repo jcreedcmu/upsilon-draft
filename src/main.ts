@@ -1,10 +1,10 @@
 import { produce } from "./util/produce";
 import { DEBUG, logger } from './util/debug';
 import { Buffer, buffer } from './util/dutil';
-import { make_pane } from './ui/gl-pane';
+import { DrawParams, make_pane } from './ui/gl-pane';
 import { key } from './ui/key';
 import { clockedNextWake, ClockState, delayUntilTickMs, MILLISECONDS_PER_TICK, nowTicks, WakeTime } from './core/clock';
-import { Action as NewAction, Effect, GameState, isNearby, mkState, State as NewState } from "./core/model";
+import { Action as NewAction, Effect, GameState, isNearby, mkState, State } from "./core/model";
 import { reduce } from './core/reduce';
 import { render } from "./ui/render";
 import { initSound, playSound } from './ui/sound';
@@ -87,6 +87,10 @@ function equalWake(a: WakeTime, b: WakeTime): boolean {
   }
 }
 
+function drawParamsOfState(state: State): DrawParams {
+  return { beamScale: 1.0, fade: 1.0 };
+}
+
 async function go() {
 
   const sound = initSound();
@@ -98,9 +102,9 @@ async function go() {
   powerButton.src = 'assets/button-up.png';
   powerButton.onclick = () => dispatch({ t: 'boot' });
 
-  const state: NewState[] = [mkState()];
+  const state: State[] = [mkState()];
 
-  function handleEffect(state: NewState, effect: Effect): NewState {
+  function handleEffect(state: State, effect: Effect): State {
     switch (effect.t) {
       case 'playSound':
         if (isNearby(state, effect.locx))
@@ -123,7 +127,7 @@ async function go() {
     else return state;
   }
 
-  function maybeReschedule(priorState: NewState, state: NewState): NewState {
+  function maybeReschedule(priorState: State, state: State): State {
     if (state.t == 'game' && priorState.t == 'game') {
       return { t: 'game', gameState: maybeRescheduleGame(priorState.gameState, state.gameState) };
     }
@@ -159,7 +163,7 @@ async function go() {
 
   function repaint() {
     const screen = render(state[0]);
-    pane.draw(screen);
+    pane.draw(screen, drawParamsOfState(state[0]));
     requestAnimationFrame(repaint);
   }
 

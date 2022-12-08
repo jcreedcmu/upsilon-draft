@@ -197,12 +197,17 @@ function getImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
+export type DrawParams = {
+  beamScale: number,
+  fade: number,
+}
+
 export class Pane {
   env: Env;
   start_time_s: number = Date.now() / 1000;
   frame: number = 0;
 
-  draw(screen: Screen) {
+  draw(screen: Screen, drawParams: DrawParams) {
     this.frame++;
     if (this.frame % 3 != 0) return;
 
@@ -230,6 +235,12 @@ export class Pane {
 
       const uTime = gl.getUniformLocation(progPost, 'u_time');
       gl.uniform1f(uTime, Date.now() / 1000 - this.start_time_s);
+
+      const uBeamScale = gl.getUniformLocation(progPost, 'u_beamScale');
+      gl.uniform1f(uBeamScale, drawParams.beamScale);
+
+      const uFade = gl.getUniformLocation(progPost, 'u_fade');
+      gl.uniform1f(uFade, drawParams.fade);
 
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, screen_size.x, screen_size.y);

@@ -10,6 +10,13 @@ uniform sampler2D u_screenTexture;
 
 uniform float u_time;
 
+uniform float u_beamScale; // When u_beamScale is 1.0, show normal
+                           // size. When small positive, draw small
+                           // image. Don't let it be zero or else we
+                           // divide by zero.
+uniform float u_fade; // When u_fade is 1.0, show standard brightness.
+                      // When 0.0, paint black.
+
 const int SCALE = 3; // how big a single pixel is
 // How big a glyph is in the font
 const ivec2 char_size = ivec2(6, 12);
@@ -20,7 +27,7 @@ vec2 warp(vec2 pos, vec2 amount){
   pos = pos * 2.0 - 1.0;
   pos *= vec2(1.0 + (pos.y * pos.y) * amount.x,
               1.0 + (pos.x * pos.x) * amount.y);
-  return pos * 0.51 + 0.5;
+  return pos * 0.51 / u_beamScale + 0.5;
 }
 
 const float freq = 1.0 / 2.0;
@@ -48,11 +55,10 @@ vec4 samp(vec2 pos) {
   else {
     return vec4(vec3(darken), 1.0) * texture(u_screenTexture, epos);
   }
-
 }
 
 void main() {
   vec2 pos = gl_FragCoord.xy;
-
-  outputColor = (samp(pos) + 0.5 * samp(pos + vec2(1.0, 0.1)) + 0.5 * samp(pos + vec2(-1.0, 0.1))) / 1.8;
+  vec4 fade = vec4(vec3(u_fade / 1.8), 1.0);
+  outputColor = fade * (samp(pos) + 0.5 * samp(pos + vec2(1.0, 0.1)) + 0.5 * samp(pos + vec2(-1.0, 0.1))) ;
 }
