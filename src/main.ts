@@ -88,7 +88,19 @@ function equalWake(a: WakeTime, b: WakeTime): boolean {
 }
 
 function drawParamsOfState(state: State): DrawParams {
-  return { beamScale: 1.0, fade: 1.0 };
+  const ga = state.globalAnimationState;
+  if (ga.power || true) {
+    return {
+      beamScale: state.globalAnimationState.shrinkFade,
+      fade: state.globalAnimationState.shrinkFade
+    };
+  }
+  else {
+    return {
+      beamScale: 0.001,
+      fade: 0.0
+    };
+  }
 }
 
 async function go() {
@@ -165,6 +177,10 @@ async function go() {
   function repaint() {
     const screen = render(state[0].sceneState);
     pane.draw(screen, drawParamsOfState(state[0]));
+
+    state[0] = produce(state[0], s => {
+      s.globalAnimationState.shrinkFade = Math.min(1.0, s.globalAnimationState.shrinkFade + 0.01);
+    });
     requestAnimationFrame(repaint);
   }
 

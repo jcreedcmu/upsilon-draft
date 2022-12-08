@@ -108,8 +108,13 @@ export type SceneState =
   | { t: 'title' }
   | { t: 'game', gameState: GameState };
 
-export type State =
-  { sceneState: SceneState };
+export type State = {
+  sceneState: SceneState,
+  globalAnimationState: {
+    power: boolean,
+    shrinkFade: number, // should be in the half-open interval (0,1]
+  }
+};
 
 export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
@@ -136,7 +141,12 @@ export type GameState = {
 };
 
 export function mkState(): State {
-  return { sceneState: { t: 'title' } };
+  return {
+    sceneState: { t: 'title' }, globalAnimationState: {
+      power: false,
+      shrinkFade: 0.001
+    }
+  };
 }
 
 export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
