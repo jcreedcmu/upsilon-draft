@@ -32,6 +32,7 @@ export type Ident = string;
 // or is the root item.
 export type Location =
   | { t: 'at', id: Ident, pos: number }
+  | { t: 'inventory', pos: number }
   | { t: 'is_root' };
 
 // A hook is an extra piece of code that should be run any time a
@@ -235,6 +236,10 @@ export function nextLocation(loc: Location): Location {
   switch (loc.t) {
     case 'at': return { t: 'at', id: loc.id, pos: loc.pos + 1 };
     case 'is_root': return { t: 'is_root' };
+
+    // XXX this is clearly wrong, but god help us if we're executing
+    // binaries inside the inventory, I think?
+    case 'inventory': return { t: 'inventory', pos: loc.pos };
   }
 }
 
@@ -276,8 +281,8 @@ export function isNearby(state: SceneState, loc: Location | undefined): boolean 
 export function isNearbyGame(state: GameState, loc: Location | undefined): boolean {
   if (loc == undefined)
     return true;
-  if (loc.t == 'is_root') {
-    console.error('unexpected isNearby check for is_root');
+  if (loc.t != 'at') {
+    console.error(`unexpected isNearby check for ${loc.t}`);
     return false; // XXX this would also be a surprising case
   }
   return (state.curId == loc.id);

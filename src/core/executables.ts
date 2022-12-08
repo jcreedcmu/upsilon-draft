@@ -171,7 +171,8 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
       const newItemLoc = nextLocation(loc);
-      if (newItemLoc.t == 'is_root') {
+      if (newItemLoc.t != 'at') {
+        // XXX not sure if this is the right error
         return withErrorExec(state, { code: 'badInputs', blame: actor, loc });
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
@@ -225,7 +226,8 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
       const newItemLoc = nextLocation(loc);
-      if (newItemLoc.t == 'is_root') {
+      if (newItemLoc.t != 'at') {
+        // XXX not sure if this is the right error
         return withErrorExec(state, { code: 'badInputs', blame: actor, loc });
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);

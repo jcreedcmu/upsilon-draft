@@ -273,7 +273,7 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
 
     case KeyAction.back: {
       const loc = getLocation(state.fs, state.curId);
-      if (loc == undefined || loc.t == 'is_root') {
+      if (loc == undefined || loc.t == 'is_root' || loc.t == 'inventory') {
         return withError(state, { code: 'cantGoBack' });
       }
       else {
@@ -281,7 +281,6 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
           modifyItemꜝ(s.fs, state.curId, item => {
             item.stickyCurrentPos = state.curLine;
           });
-
           s.curId = loc.id;
           s.curLine = loc.pos;
           s.path.pop();
