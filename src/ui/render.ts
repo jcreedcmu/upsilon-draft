@@ -13,6 +13,8 @@ import { nowTicks } from '../core/clock';
 const CHARGE_COL_SIZE = 3;
 const SIZE_COL_SIZE = 3;
 const MARGIN = 1;
+const INVENTORY_MAX_ITEMS = 3;
+const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 
 // Everything with "Renderable" in its name is a sort of convenience
 // representation a bit closer in form (compared to the raw state
@@ -156,7 +158,7 @@ export function renderFsView(rend: FsRenderable): Screen {
     const selected = i == rend.curLine;
     if (rend.show.info) {
       if (line.text && selected) {
-        screen.drawTagStr(screen.at(len + 1, 3, len), line.text, INV_ATTR);
+        screen.drawTagStr(screen.at(len + 1, INFO_SECTION_START_Y + 1, len), line.text, INV_ATTR);
       }
       if (selected) {
         const rrs = getRenderableResources(line);
@@ -203,12 +205,12 @@ export function renderFsView(rend: FsRenderable): Screen {
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   const boxe = String.fromCharCode(boxify(BOXE)(0));
   if (rend.show.inventory) {
-    screen.drawRect({ x: len, y: 0, w: len + 1, h: 2 }, INV_ATTR);
+    screen.drawRect({ x: len, y: 0, w: len + 1, h: INVENTORY_MAX_ITEMS + 1 }, INV_ATTR);
     screen.drawTagStr(screen.at(len + 2, 0), `${boxw}Holding${boxe}`, INV_ATTR);
   }
   if (rend.show.info) {
-    screen.drawRect({ x: len, y: 2, w: len + 1, h: screen.rows - 4 }, INV_ATTR);
-    screen.drawTagStr(screen.at(len + 2, 2), `${boxw}Info${boxe}`, INV_ATTR);
+    screen.drawRect({ x: len, y: INFO_SECTION_START_Y, w: len + 1, h: screen.rows - 2 - INFO_SECTION_START_Y }, INV_ATTR);
+    screen.drawTagStr(screen.at(len + 2, INFO_SECTION_START_Y), `${boxw}Info${boxe}`, INV_ATTR);
   }
   return screen;
 }
