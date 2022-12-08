@@ -3,7 +3,7 @@ import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
 import { ErrorInfo } from "./errors";
-import { Effect, GameState, Ident, Item, nextLocation } from "./model";
+import { Effect, GameState, Ident, Item, Location, nextLocation } from "./model";
 import { processHooks, withError } from "./reduce";
 
 export type ExecutableSpec = {
@@ -96,7 +96,7 @@ export function isExecutable(k: string): k is ExecutableName {
   return k in executableProperties;
 }
 
-function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number): [GameState, Effect[], ErrorInfo | undefined] {
+function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number, loc: Location): [GameState, Effect[], ErrorInfo | undefined] {
   const actualAmount = Math.min(amount, getResource(getItem(state.fs, targets[0]), 'cpu'));
 
   let fs = state.fs;
@@ -106,7 +106,7 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
   return [produce(state, s => {
     modifyResourceꜝ(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
     modifyResourceꜝ(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);
-  }), [], undefined];
+  }), [{ t: 'playSound', effect: 'ping', locx: loc }], undefined];
 }
 
 function withErrorExec(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[], ErrorInfo | undefined] {
@@ -133,9 +133,9 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         s.viewState = { t: 'textDialogView', back: state.viewState };
       }), [], undefined];
     case executables.combine:
-      return [state, [], undefined];
-    case executables.movCpu5: return movResource(state, targets, 'cpu', 5);
-    case executables.movCpu1: return movResource(state, targets, 'cpu', 1);
+      return [state, [{ t: 'playSound', effect: 'ping', locx: loc }], undefined];
+    case executables.movCpu5: return movResource(state, targets, 'cpu', 5, loc);
+    case executables.movCpu1: return movResource(state, targets, 'cpu', 1, loc);
 
 
     case executables.charge:
