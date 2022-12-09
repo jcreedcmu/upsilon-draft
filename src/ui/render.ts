@@ -2,7 +2,7 @@ import { logger } from '../util/debug';
 import { Resources } from '../fs/resources';
 import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
 import { Point } from '../util/types';
-import { ColorCode } from './ui-constants';
+import { ColorCode, COLS } from './ui-constants';
 import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
 import { getContents, getInventoryItem, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
@@ -11,6 +11,7 @@ import { GameState, Show, SceneState, UserError } from '../core/model';
 import { nowTicks } from '../core/clock';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 
+const FS_LEN = int(COLS / 2) - 1;
 const CHARGE_COL_SIZE = 3;
 const SIZE_COL_SIZE = 3;
 const MARGIN = 1;
@@ -57,7 +58,8 @@ function defaultLine(name: string): RenderableLine {
 }
 
 function emptyRenderableLine(): RenderableLine {
-  return { str: Chars.SHADE1, attr: { fg: ColorCode.yellow, bg: ColorCode.blue }, size: 0, resources: {} };
+  const boxw = String.fromCharCode(boxify(BOXW)(0));
+  return { str: repeat(boxw, FS_LEN), attr: { fg: ColorCode.yellow, bg: ColorCode.blue }, size: 0, resources: {} };
 }
 
 function getInventoryLines(state: GameState): RenderableLine[] {
@@ -169,35 +171,34 @@ export function getRenderableResources(line: RenderableLine): RenderableResource
 export function renderFsView(rend: FsRenderable): Screen {
   const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
 
-  const len = int(screen.cols / 2) - 1;
   const lines = rend.lines;
   lines.forEach((line, i) => {
     const selected = i == rend.curLine;
     if (rend.show.info) {
       if (line.text && selected) {
-        screen.drawTagStr(screen.at(len + 1, INFO_SECTION_START_Y + 1, len), line.text, INV_ATTR);
+        screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), line.text, INV_ATTR);
       }
       if (selected) {
         const rrs = getRenderableResources(line);
         rrs.forEach((rr, ix) => {
           const nameStr = `${rr.name}:`;
-          screen.drawTagStr(screen.at(len + 1, screen.rows - 3 - ix), nameStr, INV_ATTR);
+          screen.drawTagStr(screen.at(FS_LEN + 1, screen.rows - 3 - ix), nameStr, INV_ATTR);
           if (rr.count >= 5)
             screen.drawAttrStr(
-              screen.at(len + nameStr.length + 1, screen.rows - 3 - ix),
+              screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix),
               [{ str: rr.count + '', attr: INV_ATTR }, { str: rr.symbol, attr: rr.attr }]
             );
           else
-            screen.drawTagStr(screen.at(len + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
+            screen.drawTagStr(screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
         });
       }
     }
-    renderLine(screen, { x: 0, y: i }, len, line, rend.show, selected);
+    renderLine(screen, { x: 0, y: i }, FS_LEN, line, rend.show, selected);
   });
 
   if (rend.show.inventory) {
     rend.invLines.forEach((line, ix) => {
-      renderLine(screen, { x: len + 1, y: ix + 1 }, len, line, rend.show);
+      renderLine(screen, { x: FS_LEN + 1, y: ix + 1 }, FS_LEN, line, rend.show);
     });
   }
 
@@ -222,13 +223,13 @@ export function renderFsView(rend: FsRenderable): Screen {
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   const boxe = String.fromCharCode(boxify(BOXE)(0));
   if (rend.show.inventory) {
-    screen.drawRect({ x: len, y: 0, w: len + 1, h: INVENTORY_MAX_ITEMS + 1 }, INV_ATTR);
-    screen.drawTagStr(screen.at(len + 2, 0), `${boxw}Holding${boxe}`, INV_ATTR);
-    screen.drawTagStr(screen.at(len, rend.inventorySlot + 1), `>`, INV_ATTR);
+    screen.drawRect({ x: FS_LEN, y: 0, w: FS_LEN + 1, h: INVENTORY_MAX_ITEMS + 1 }, INV_ATTR);
+    screen.drawTagStr(screen.at(FS_LEN + 2, 0), `${boxw}Holding${boxe}`, INV_ATTR);
+    screen.drawTagStr(screen.at(FS_LEN, rend.inventorySlot + 1), `>`, INV_ATTR);
   }
   if (rend.show.info) {
-    screen.drawRect({ x: len, y: INFO_SECTION_START_Y, w: len + 1, h: screen.rows - 2 - INFO_SECTION_START_Y }, INV_ATTR);
-    screen.drawTagStr(screen.at(len + 2, INFO_SECTION_START_Y), `${boxw}Info${boxe}`, INV_ATTR);
+    screen.drawRect({ x: FS_LEN, y: INFO_SECTION_START_Y, w: FS_LEN + 1, h: screen.rows - 2 - INFO_SECTION_START_Y }, INV_ATTR);
+    screen.drawTagStr(screen.at(FS_LEN + 2, INFO_SECTION_START_Y), `${boxw}Info${boxe}`, INV_ATTR);
   }
   return screen;
 }
