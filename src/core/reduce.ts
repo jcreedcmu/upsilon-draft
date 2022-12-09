@@ -1,6 +1,6 @@
 import { produce } from '../util/produce';
 import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame, SceneState } from './model';
-import { getContents, getFullContents, getItem, getItemIdsAfter, getLocation, insertId, modifyItemꜝ, removeId } from '../fs/fs';
+import { getContents, getFullContents, getInventoryItem, getItem, getItemIdsAfter, getLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
@@ -194,13 +194,12 @@ function reducePickupAction(state: GameState, action: PickupLineAction): [GameSt
     case 'error': return withError(state, { code: action.code });
     case 'pickup': {
       let fs = state.fs;
-      let ident, hooks1, hooks2;
+      let ident, hooks;
       // FIXME: abstract this away into an fs move function
-      [fs, ident, hooks1] = removeId(fs, action.loc, action.ix);
-      [fs, hooks2] = insertId(fs, SpecialId.inventory, 0, ident);
+      [fs, ident, hooks] = removeId(fs, action.loc, action.ix);
+      fs = insertIntoInventory(fs, ident, state.inventorySlot);
       state = produce(state, s => { s.fs = fs; });
-      state = processHooks(state, hooks1);
-      state = processHooks(state, hooks2);
+      state = processHooks(state, hooks);
       return [
         state,
         [
@@ -217,12 +216,11 @@ function reduceDropAction(state: GameState, action: DropLineAction): [GameState,
       return withError(state, { code: action.code });
     case 'drop': {
       let fs = state.fs;
-      let ident, hooks1, hooks2;
-      [fs, ident, hooks1] = removeId(fs, SpecialId.inventory, 0);
-      [fs, hooks2] = insertId(fs, action.loc, action.ix, ident);
+      let ident, hooks1, hooks;
+      [fs, ident] = removeFromInventory(fs, state.inventorySlot);
+      [fs, hooks] = insertId(fs, action.loc, action.ix, ident);
       state = produce(state, s => { s.fs = fs; });
-      state = processHooks(state, hooks1);
-      state = processHooks(state, hooks2);
+      state = processHooks(state, hooks);
       return [
         state,
         [
@@ -251,6 +249,10 @@ function modifyInventorySlotꜝ(state: GameState, increment: number): void {
   state.inventorySlot = (state.inventorySlot + increment + INVENTORY_MAX_ITEMS) % INVENTORY_MAX_ITEMS;
 }
 
+function shouldDropVersusPickup(state: GameState): boolean {
+  return getInventoryItem(state.fs, state.inventorySlot) != undefined;
+}
+
 export function reduceKeyAction(state: GameState, action: KeyAction): [GameState, Effect[]] {
   switch (action) {
     case KeyAction.prevLine:
@@ -266,7 +268,7 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
     case KeyAction.exec: return reduceExecAction(state, getSelectedLine(state).actions.exec);
 
     case KeyAction.pickupDrop:
-      if (getContents(state.fs, SpecialId.inventory).length > 0)
+      if (shouldDropVersusPickup(state))
         return reduceDropAction(state, getSelectedLine(state).actions.drop);
       else
         return reducePickupAction(state, getSelectedLine(state).actions.pickup);

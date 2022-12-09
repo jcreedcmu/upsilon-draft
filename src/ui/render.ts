@@ -4,7 +4,7 @@ import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
 import { Point } from '../util/types';
 import { ColorCode } from './ui-constants';
 import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
-import { getContents, getItem } from '../fs/fs';
+import { getContents, getInventoryItem, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
 import { GameState, Show, SceneState, UserError } from '../core/model';
@@ -56,12 +56,23 @@ function defaultLine(name: string): RenderableLine {
   };
 }
 
-function getInventoryLine(state: GameState): RenderableLine[] {
-  const inventory = getContents(state.fs, SpecialId.inventory);
-  return inventory.map(id => {
-    const invItem = getItem(state.fs, id);
-    return getRenderableLineOfItem(id, invItem, nowTicks(state.clock));
-  });
+function emptyRenderableLine(): RenderableLine {
+  return { str: Chars.SHADE1, attr: { fg: ColorCode.yellow, bg: ColorCode.blue }, size: 0, resources: {} };
+}
+
+function getInventoryLines(state: GameState): RenderableLine[] {
+  const rv: RenderableLine[] = [];
+  for (let i = 0; i < INVENTORY_MAX_ITEMS; i++) {
+    const id = getInventoryItem(state.fs, i);
+    if (id != undefined) {
+      const invItem = getItem(state.fs, id);
+      rv.push(getRenderableLineOfItem(id, invItem, nowTicks(state.clock)));
+    }
+    else {
+      rv.push(emptyRenderableLine());
+    }
+  }
+  return rv;
 }
 
 function getInventorySlot(state: GameState): number {
@@ -79,7 +90,7 @@ function getRenderable(state: GameState): Renderable {
         lines,
         path: state.path,
         show: state._cached_show,
-        invLines: getInventoryLine(state),
+        invLines: getInventoryLines(state),
         inventorySlot: getInventorySlot(state),
       };
     }

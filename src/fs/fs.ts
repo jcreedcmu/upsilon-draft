@@ -16,6 +16,7 @@ const VIRTUAL_ITEM_PREFIX = '_gen_';
 export type Fs = {
   counter: number;
   idToItem: Record<Ident, Item>;
+  inventory: (Ident | undefined)[];
 
   // Any field that is named _cached_* is a computed
   // view that is not part of the fundamental state.
@@ -113,7 +114,8 @@ export function mkFs(): Fs {
   let fs: Fs = {
     counter: 0,
     idToItem: {},
-    _cached_locmap: {}
+    _cached_locmap: {},
+    inventory: [],
   };
   fs = makeInsertRootItem(fs, SpecialId.root)
   fs = makeInsertRootItem(fs, SpecialId.inventory);
@@ -324,4 +326,26 @@ export function reifyId(fs: Fs, ident: Ident): Fs {
   else {
     return fs;
   }
+}
+
+export function insertIntoInventory(fs: Fs, ident: Ident, pos: number): Fs {
+  return produce(fs, fsd => {
+    fsd.inventory[pos] = ident;
+    fsd._cached_locmap[ident] = { t: 'inventory', pos };
+  });
+}
+
+export function removeFromInventory(fs: Fs, pos: number): [Fs, Ident] {
+  const ident = fs.inventory[pos];
+  if (ident == undefined) {
+    throw new Error(`Tried to remove from inventory slot ${pos} when there was nothing there.`);
+  }
+  return [produce(fs, fsd => {
+    fsd.inventory[pos] = undefined
+    fsd._cached_locmap[ident] = { t: 'is_root' };
+  }), ident];
+}
+
+export function getInventoryItem(fs: Fs, pos: number): Ident | undefined {
+  return fs.inventory[pos];
 }

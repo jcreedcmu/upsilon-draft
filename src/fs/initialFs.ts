@@ -33,8 +33,8 @@ function namedExec(name: ExecutableName, opts?: { resources?: Resources }): Item
 
 function keysDir(): ItemPlan {
   const keys: { name: string, keyAction: KeyAction }[] = [
-    { name: ',', keyAction: KeyAction.prevInventorySlot },
-    { name: '.', keyAction: KeyAction.nextInventorySlot },
+    { name: '[', keyAction: KeyAction.prevInventorySlot },
+    { name: ']', keyAction: KeyAction.nextInventorySlot },
     { name: '<down>', keyAction: KeyAction.nextLine },
     { name: '<left>', keyAction: KeyAction.back },
     { name: '<return>', keyAction: KeyAction.exec },
