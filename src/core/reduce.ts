@@ -1,5 +1,5 @@
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame, SceneState } from './model';
+import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame, SceneState, soundsOfFs } from './model';
 import { getContents, getFullContents, getInventoryItem, getItem, getItemIdsAfter, getLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
@@ -179,6 +179,7 @@ function processHook(state: GameState, hook: Hook): GameState {
   switch (hook) {
     case 'LENS': return produce(state, s => { s._cached_show = showOfFs(state.fs); });
     case 'KEY': return produce(state, s => { s._cached_keybindings = keybindingsOfFs(state.fs); });
+    case 'SOUND': return produce(state, s => { s._cached_sounds = soundsOfFs(state.fs); });
   }
 }
 
@@ -258,12 +259,12 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
     case KeyAction.prevLine:
       return [advanceLine(state, -1),
       [
-        { t: 'playSound', effect: 'high', loc: undefined },
+        { t: 'playAbstractSound', effect: 'click', loc: undefined },
       ]];
     case KeyAction.nextLine:
       return [advanceLine(state, 1),
       [
-        { t: 'playSound', effect: 'high', loc: undefined },
+        { t: 'playAbstractSound', effect: 'click', loc: undefined },
       ]];
     case KeyAction.exec: return reduceExecAction(state, getSelectedLine(state).actions.exec);
 

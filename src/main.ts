@@ -4,7 +4,7 @@ import { Buffer, buffer } from './util/dutil';
 import { DrawParams, make_pane } from './ui/gl-pane';
 import { key } from './ui/key';
 import { clockedNextWake, ClockState, delayUntilTickMs, MILLISECONDS_PER_TICK, nowTicks, WakeTime } from './core/clock';
-import { Action, Effect, GameState, isNearby, mkState, SceneState, State } from "./core/model";
+import { Action, Effect, GameState, getConcreteSound, isNearby, mkState, SceneState, State } from "./core/model";
 import { reduce } from './core/reduce';
 import { render } from "./ui/render";
 import { initSound, playSound } from './ui/sound';
@@ -122,6 +122,12 @@ async function go() {
         if (isNearby(state, effect.loc))
           playSound(sound, effect.effect);
         return state;
+      case 'playAbstractSound': {
+        const sound = getConcreteSound(state.gameState, effect.effect);
+        if (sound !== undefined) {
+          return handleEffect(state, { t: 'playSound', effect: sound, loc: effect.loc });
+        }
+      }
       case 'powerButton':
         (document.getElementById('power-button')! as HTMLImageElement).src =
           powerButtonImageOfState(state);

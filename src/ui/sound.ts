@@ -3,9 +3,12 @@ import { lerp, mlerp } from "../util/util";
 const SAMPLE_RATE = 44100; // samples/s
 const BEEP_LENGTH = 30000; // samples
 
-export type SoundEffect =
-  | 'rising' | 'falling' | 'high' | 'low' | 'med' | 'pickup' | 'drop' | 'error'
-  | 'startup' | 'ping';
+export const allSoundEffects = [
+  'rising', 'falling', 'high', 'low', 'med', 'pickup', 'drop', 'error'
+  , 'startup', 'ping'
+] as const;
+
+export type SoundEffect = (typeof allSoundEffects)[number];
 
 type SoundEffectSpec = {
   startFreq: number, // Hz

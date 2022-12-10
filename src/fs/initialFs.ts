@@ -4,9 +4,11 @@ import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
 import { KeyAction } from '../core/model';
 import { arrowChars } from '../ui/screen';
 import { ExecutableName, executableProperties, executables } from '../core/executables';
+import { SoundEffect } from '../ui/sound';
 
 export enum SpecialId {
   keys = '_keys',
+  sounds = '_sounds',
   lens = '_lens',
   root = '_root',
   inventory = '_inventory',
@@ -55,6 +57,22 @@ function keysDir(): ItemPlan {
     contents: keys.map(keyDir),
     forceId: SpecialId.keys,
     resources: { data: 4 }
+  };
+}
+
+function soundsDir(): ItemPlan {
+  const sounds: { name: string, soundEffect: SoundEffect }[] = [
+    { name: 'click', soundEffect: 'high' },
+  ];
+  function soundDir(sound: { name: string, soundEffect: SoundEffect }): ItemPlan {
+    const { name, soundEffect } = sound;
+    return { t: 'dir', name, contents: [{ t: 'file', name: soundEffect }], hooks: ['SOUND'] }
+  }
+  return {
+    t: 'dir', name: 'sounds',
+    contents: sounds.map(soundDir),
+    forceId: SpecialId.sounds,
+    resources: {}
   };
 }
 
@@ -129,6 +147,7 @@ function initialPlans(): VirtualItemPlan[] {
       t: 'dir', name: 'sys',
       contents: [
         keysDir(),
+        soundsDir(),
         lensDir(),
         errorDir(),
       ]

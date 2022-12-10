@@ -1,7 +1,7 @@
 import { Fs, getContents, getFullContents, getItem } from '../fs/fs';
 import { initialFs, SpecialId } from '../fs/initialFs';
 import { Resources } from '../fs/resources';
-import { SoundEffect } from '../ui/sound';
+import { allSoundEffects, SoundEffect } from '../ui/sound';
 import { DEBUG } from '../util/debug';
 import { produce } from '../util/produce';
 import { ClockState, mkClockState } from './clock';
@@ -39,7 +39,9 @@ export type Location =
 // directory has its contents changed.
 export type Hook =
   | 'LENS'
-  | 'KEY';
+  | 'KEY'
+  | 'SOUND'
+  ;
 
 export type Value = number | string;
 
@@ -101,8 +103,11 @@ export enum KeyAction {
   pickupDrop = 'pickup-drop', // Maybe want separate pickup and drop actions?
 }
 
+export type AbstractSoundEffect = 'click';
+
 export type Effect =
   | { t: 'playSound', effect: SoundEffect, loc: Location | undefined }
+  | { t: 'playAbstractSound', effect: AbstractSoundEffect, loc: Location | undefined }
   | { t: 'powerButton' }
   ;
 
@@ -141,6 +146,7 @@ export type GameState = {
   recurring: Recurring, // active executables that execute recurringly
   inventorySlot: number, // active inventory slot index
   _cached_keybindings: Record<string, KeyAction>,
+  _cached_sounds: Record<string, SoundEffect>,
   _cached_show: Show,
 };
 
@@ -191,6 +197,30 @@ export function showOfFs(fs: Fs): Show {
   }
 }
 
+export function getConcreteSound(state: GameState, sound: AbstractSoundEffect): SoundEffect | undefined {
+  return state._cached_sounds[sound];
+}
+
+export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
+  let cont;
+  try {
+    cont = getFullContents(fs, SpecialId.sounds);
+  }
+  catch (e) {
+    return {};
+  }
+  const rv: Record<string, SoundEffect> = {};
+  cont.forEach(item => {
+    if (item.contents.length == 1) {
+      const inner = getItem(fs, item.contents[0]);
+      if ((allSoundEffects as readonly string[]).includes(inner.name)) {
+        rv[item.name] = inner.name as SoundEffect;
+      }
+    }
+  });
+  return rv;
+}
+
 export function gameStateOfFs(fs: Fs): GameState {
   return {
     power: false || DEBUG.quickStart,
@@ -205,6 +235,7 @@ export function gameStateOfFs(fs: Fs): GameState {
     recurring: {},
     inventorySlot: 0,
     _cached_keybindings: keybindingsOfFs(fs),
+    _cached_sounds: soundsOfFs(fs),
     _cached_show: showOfFs(fs),
   };
 }
