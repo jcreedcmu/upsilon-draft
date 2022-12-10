@@ -45,10 +45,17 @@ export type Hook =
 
 export type Value = number | string;
 
+export type ItemType =
+  | 'plain'
+  | 'checkbox'
+  ;
+
 export type Item = {
   name: string, // displayable name
 
   contents: Ident[],
+
+  itemType: ItemType,
 
   // Other game-relevant attributes
   acls: Acls, // Permissions bits

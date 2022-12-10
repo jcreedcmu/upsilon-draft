@@ -17,6 +17,7 @@ export const Chars = {
   SHADE2: '\x0e',
   SHADE3: '\x0f',
   SHADE4: '\x00',
+  CHECKMARK: '\xa4',
 }
 
 export const arrowChars = '\xa0\xa1\xa2\xa3';

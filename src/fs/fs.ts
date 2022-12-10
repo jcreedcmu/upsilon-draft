@@ -102,6 +102,7 @@ export function getItemIdsAfter(fs: Fs, ident: Ident, howMany: number): Ident[] 
 function makeInsertRootItem(fs: Fs, name: SpecialId): Fs {
   [fs,] = insertRootItem(fs, name, {
     name,
+    itemType: 'plain',
     acls: {},
     contents: [],
     resources: {},
@@ -127,6 +128,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
 
     case 'dir': {
       return {
+        itemType: 'plain',
         name: plan.name,
         acls: { open: true },
         // XXX This is a little sketchy.
@@ -142,6 +144,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
 
     case 'exec': {
       return {
+        itemType: 'plain',
         name: plan.name,
         acls: { exec: true, pickup: true },
         contents: [],
@@ -151,6 +154,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
     }
 
     case 'file': return {
+      itemType: 'plain',
       name: plan.name,
       acls: { pickup: true },
       contents: [],
@@ -160,6 +164,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
     };
 
     case 'instr': return {
+      itemType: 'plain',
       name: plan.name,
       acls: { instr: true, pickup: true },
       contents: [],

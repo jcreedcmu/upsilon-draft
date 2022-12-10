@@ -167,6 +167,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       // Creates a new file whose name is the item id of that argument.
       // Sort of like taking the address of a pointer.
       const newItem: Item = {
+        itemType: 'plain',
         name: targets[0],
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
@@ -222,6 +223,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       // Creates a new file whose name is the same as argument.
       // Doesn't copy attributes or acls or anything.
       const newItem: Item = {
+        itemType: 'plain',
         name: getItem(state.fs, targets[0]).name,
         contents: [], acls: { pickup: true }, resources: {}, size: 1
       };
