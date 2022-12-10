@@ -79,7 +79,7 @@ function soundsDir(): ItemPlan {
   }
   const toggle: ItemPlan = { t: 'checkbox', name: 'sounds', checked: true };
   return {
-    t: 'dir', name: 'sounds',
+    t: 'dir', name: 'sounds', hooks: ['SOUND'],
     contents: [toggle, ...sounds.map(soundDir)],
     forceId: SpecialId.sounds,
     resources: {}

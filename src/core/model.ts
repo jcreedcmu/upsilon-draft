@@ -232,7 +232,7 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
   const rv: Record<string, SoundEffect> = {};
 
   const ix = cont.findIndex(item => item.itemType == 'checkbox' && item.name == 'sounds');
-  if (ix != -1 && !cont[ix].acls.checked)
+  if (!(ix != -1 && cont[ix].acls.checked))
     return {}; // disable all sounds
 
   cont.forEach(item => {
