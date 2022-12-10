@@ -1,6 +1,6 @@
 import { produce } from '../util/produce';
 import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame, SceneState, soundsOfFs } from './model';
-import { getContents, getFullContents, getInventoryItem, getItem, getItemIdsAfter, getLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
+import { getContents, getFullContents, getInventoryItem, getItem, getItemIdsAfter, getLocation, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
@@ -145,9 +145,13 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
 // executable very early.
 
 export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]] {
-  return [produce(state, s => {
+  const loc = getLocation(state.fs, ident);
+  state = produce(state, s => {
     modifyItemꜝ(s.fs, ident, item => { item.acls.checked = !item.acls.checked; });
-  }), [{ t: 'playAbstractSound', effect: 'toggle', loc: undefined }]];
+  });
+  state = processHooks(state, hooksOfLocation(state.fs, loc));
+  return [state,
+    [{ t: 'playAbstractSound', effect: 'toggle', loc: loc }]];
 }
 
 export function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {

@@ -292,12 +292,13 @@ export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]
   return [fs, parent.hooks ?? []];
 }
 
-//// Dead code?
-// function spliced<T>(list: T[], ix: number, length: number): T[] {
-//   const tmp = [...list];
-//   tmp.slice(ix, length);
-//   return tmp;
-// }
+export function hooksOfLocation(fs: Fs, loc: Location): Hook[] {
+  switch (loc.t) {
+    case 'at': return getItem(fs, loc.id).hooks ?? [];
+    case 'inventory': return [];
+    case 'is_root': return [];
+  }
+}
 
 export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
   const parent = getItem(fs, loc);
