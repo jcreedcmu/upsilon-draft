@@ -109,7 +109,10 @@ export function initSound(): Sound {
       }),
       rising: makeBeep({ startFreq: 220, endFreq: 440 }),
       falling: makeBeep({ startFreq: 440, endFreq: 220 }),
-      high: makeBeep({ startFreq: 440 }),
+      high: makeBeep({
+        startFreq: 1000, duration_s: 0.01 + 0.03,
+        attack_s: 0.01, decay_s: 0.00, sustain: 1, release_s: 0.03
+      }),
       low: makeBeep({ startFreq: 220 }),
       med: makeBeep({ startFreq: 330, duration_s: 0.2 }),
       pickup: makeBeep({ startFreq: 55, endFreq: 440 }),
