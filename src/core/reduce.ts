@@ -17,9 +17,12 @@ export function reduce(state: SceneState, action: Action): [SceneState, Effect[]
     case 'game':
       if (action.t == 'boot') {
         if (state.gameState.power) {
-          return [produce(state, s => { s.gameState.power = false; }),
-          [/* XXX power down sound? */
-            { t: 'powerButton' }]];
+          if (action.onlyTurnOn)
+            return [state, []];
+          else
+            return [produce(state, s => { s.gameState.power = false; }),
+            [/* XXX power down sound? */
+              { t: 'powerButton' }]];
         }
         else {
           return [produce(

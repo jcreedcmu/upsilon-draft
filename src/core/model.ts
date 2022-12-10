@@ -98,7 +98,7 @@ export type GameAction =
 
 export type Action =
   | GameAction
-  | { t: 'boot' }
+  | { t: 'boot', onlyTurnOn?: boolean }
   ;
 
 export enum KeyAction {

@@ -107,14 +107,15 @@ async function go() {
 
   const sound = initSound();
 
-  const pane = await make_pane(document.getElementById('c') as HTMLCanvasElement);
-
+  const c = document.getElementById('c') as HTMLCanvasElement;
+  const pane = await make_pane(c);
   const state: State[] = [mkState()];
 
   const powerButton = document.getElementById('power-button')! as HTMLImageElement;
   powerButton.className = 'button';
   powerButton.src = powerButtonImageOfState(state[0].sceneState);
   powerButton.onclick = () => dispatch({ t: 'boot' });
+  c.onclick = () => dispatch({ t: 'boot', onlyTurnOn: true });
 
   function handleEffect(state: SceneState, effect: Effect): SceneState {
     switch (effect.t) {

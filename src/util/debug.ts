@@ -9,7 +9,7 @@ export const DEBUG = {
   produce: false,
   duplicates: true,
   movement: false,
-  quickStart: isDev,
+  quickStart: false && isDev,
   keys: false,
 };
 
