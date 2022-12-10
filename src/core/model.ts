@@ -230,8 +230,13 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
     return {};
   }
   const rv: Record<string, SoundEffect> = {};
+
+  const ix = cont.findIndex(item => item.itemType == 'checkbox' && item.name == 'sounds');
+  if (ix != -1 && !cont[ix].acls.checked)
+    return {}; // disable all sounds
+
   cont.forEach(item => {
-    if (item.contents.length == 1) {
+    if (item.contents.length >= 1) {
       const inner = getItem(fs, item.contents[0]);
       if ((allSoundEffects as readonly string[]).includes(inner.name)) {
         rv[item.name] = inner.name as SoundEffect;
