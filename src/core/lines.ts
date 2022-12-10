@@ -117,6 +117,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
     resources: item.resources,
     chargeNeeded: item.acls.exec ? 1 : 0,
     attr,
+    checked: item.itemType == 'checkbox' ? item.acls.checked : undefined,
   }
 }
 

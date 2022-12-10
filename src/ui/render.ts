@@ -27,6 +27,7 @@ export type RenderableLine = {
   inProgress?: boolean,
   resources: Resources,
   size: number,
+  checked?: boolean | undefined,
   chargeNeeded?: number,
   attr: Attr,
 }
@@ -144,11 +145,19 @@ function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine,
     screen.drawAttrStr(screen.at(chargeCol, y), output);
   }
 
-
   if (show.size) {
     const sizeStr = line.size ? zeropad(line.size + '', SIZE_COL_SIZE) : '';
     const sizeAttr = (line.size < 2 && !invert) ? { fg: ColorCode.bblack, bg: ColorCode.blue } : attrs.base;
     screen.drawTagStr(screen.at(sizeCol, y), sizeStr, sizeAttr);
+  }
+
+  if (line.checked !== undefined) {
+    const inner = line.checked ? Chars.CHECKMARK : ' ';
+    const checkedStr = `[${inner}]`;
+    const attr = line.checked
+      ? { fg: ColorCode.bgreen, bg: ColorCode.green }
+      : { fg: ColorCode.bred, bg: ColorCode.red };
+    screen.drawTagStr(screen.at(sizeCol, y), checkedStr, attr);
   }
 }
 
