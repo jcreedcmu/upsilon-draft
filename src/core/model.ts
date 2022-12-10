@@ -13,7 +13,8 @@ export type Acl =
   | 'pickup'
   | 'exec'
   | 'instr'
-  | 'unlock';
+  | 'unlock'
+  | 'checked';
 export type Acls = { [P in Acl]?: boolean };
 
 export type UserError = {

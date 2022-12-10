@@ -167,6 +167,7 @@ function initialPlans(): VirtualItemPlan[] {
         { t: 'file', name: 'foo', resources: { cpu: 5 } },
         { t: 'file', name: 'bar', text: 'Here is some {white}white text{/} and here is some {red}red text{/}.' },
         { t: 'file', name: 'mumble', size: 23 },
+        { t: 'checkbox', name: 'toggle', checked: true },
       ]
     }
   ];

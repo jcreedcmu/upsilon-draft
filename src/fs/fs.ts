@@ -27,7 +27,8 @@ export type ItemPlan =
   | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[], resources?: Resources }
   | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, numTargets?: number, resources?: Resources }
   | { t: 'file', name: string, text?: string, size?: number, resources?: Resources, forceId?: Ident }
-  | { t: 'instr', name: string };
+  | { t: 'instr', name: string }
+  | { t: 'checkbox', name: string, checked: boolean, forceId?: Ident };
 
 export type VirtualItemPlan = ItemPlan
   | { t: 'virtual', id: Ident };
@@ -170,6 +171,16 @@ export function itemOfPlan(plan: ItemPlan): Item {
       resources: {},
       size: 1,
     };
+
+    case 'checkbox': return {
+      itemType: 'checkbox',
+      name: plan.name,
+      acls: { pickup: true, checked: plan.checked },
+      contents: [],
+      resources: {},
+      size: 1,
+    };
+
   }
 }
 
