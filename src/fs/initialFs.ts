@@ -146,13 +146,13 @@ function binDirs(): ItemPlan[] {
   }];
 }
 
-function initialPlans(): VirtualItemPlan[] {
-  return [
-    {
-      t: 'file', name: 'README', text: `
+const readmeText = `
 {white}${arrowChars}{/}/{white}wasd{/}: navigate
 {white}<enter>{/}: interact
-{white}<space>{/}: pickup/drop` },
+{white}<space>{/}: pickup/drop`;
+
+function initialPlans(): VirtualItemPlan[] {
+  return [
     {
       t: 'dir', name: 'sys',
       contents: [
@@ -172,7 +172,11 @@ function initialPlans(): VirtualItemPlan[] {
         { t: 'checkbox', name: 'toggle', checked: true },
         { t: 'checkbox', name: 'toggle', checked: false },
       ]
-    }
+    },
+    {
+      t: 'file', name: 'README.txt', text: readmeText
+    },
+
   ];
 }
 

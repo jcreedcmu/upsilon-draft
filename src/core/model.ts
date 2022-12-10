@@ -247,13 +247,14 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
 }
 
 export function gameStateOfFs(fs: Fs): GameState {
+  const root = getContents(fs, SpecialId.root);
   return {
     power: false || DEBUG.quickStart,
     viewState: { t: 'fsView' },
     clock: mkClockState(),
     error: undefined,
     curId: SpecialId.root,
-    curLine: 0,
+    curLine: root.length - 1,
     fs,
     path: [],
     futures: [],
