@@ -98,7 +98,12 @@ function execActionForItem(ident: Ident, item: Item): ExecLineAction {
 
 function pickupActionForItem(item: Item, loc: Ident, ix: number): PickupLineAction {
   if (!canPickup(item)) {
-    return { t: 'error', code: 'cantPickUpLocked' };
+    if (canOpen(item)) {
+      return { t: 'error', code: 'cantPickUpDir' };
+    }
+    else {
+      return { t: 'error', code: 'cantPickUpLocked' };
+    }
   }
   else {
     return { t: 'pickup', loc, ix };
