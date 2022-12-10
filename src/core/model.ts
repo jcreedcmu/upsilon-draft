@@ -122,6 +122,7 @@ export type AbstractSoundEffect =
   | 'pickup'
   | 'drop'
   | 'success'
+  | 'toggle'
   ;
 
 export type Effect =

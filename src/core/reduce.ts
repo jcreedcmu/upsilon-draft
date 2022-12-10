@@ -147,7 +147,7 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
 export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]] {
   return [produce(state, s => {
     modifyItemꜝ(s.fs, ident, item => { item.acls.checked = !item.acls.checked; });
-  }), [{ t: 'playAbstractSound', effect: 'change-file' /* XXX */, loc: undefined }]];
+  }), [{ t: 'playAbstractSound', effect: 'toggle', loc: undefined }]];
 }
 
 export function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {

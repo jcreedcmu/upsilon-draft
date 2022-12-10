@@ -71,6 +71,7 @@ function soundsDir(): ItemPlan {
     { name: 'pickup', soundEffect: 'pickup' },
     { name: 'drop', soundEffect: 'drop' },
     { name: 'success', soundEffect: 'ping' },
+    { name: 'toggle', soundEffect: 'high' },
   ];
   function soundDir(sound: { name: string, soundEffect: SoundEffect }): ItemPlan {
     const { name, soundEffect } = sound;
