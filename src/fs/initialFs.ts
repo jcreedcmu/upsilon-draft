@@ -11,7 +11,6 @@ export enum SpecialId {
   sounds = '_sounds',
   lens = '_lens',
   root = '_root',
-  inventory = '_inventory',
 };
 
 function singleExec(name: string, opts?: { numTargets?: number, resources?: Resources }): ItemPlan {

@@ -119,7 +119,6 @@ export function mkFs(): Fs {
     inventory: [],
   };
   fs = makeInsertRootItem(fs, SpecialId.root)
-  fs = makeInsertRootItem(fs, SpecialId.inventory);
   return fs;
 }
 

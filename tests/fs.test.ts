@@ -20,7 +20,6 @@ const fs = (() => {
 describe('filesystem', () => {
   test('should have a correct location map', () => {
     expect(fs._cached_locmap).toEqual({
-      _inventory: { t: 'is_root', },
       _root: { t: 'is_root', },
       dir: { t: 'at', id: '_root', pos: 0, },
       foo_a: { t: 'at', id: 'dir', pos: 0, },
@@ -37,7 +36,6 @@ describe('filesystem', () => {
 
     expect(getContents(fs2, 'dir')).toEqual(['foo_a', 'foo_c', 'foo_d']);
     expect(fs2._cached_locmap).toEqual({
-      _inventory: { t: 'is_root', },
       _root: { t: 'is_root', },
       dir: { t: 'at', id: '_root', pos: 0, },
       foo_a: { t: 'at', id: 'dir', pos: 0, },
@@ -52,7 +50,6 @@ describe('filesystem', () => {
 
     expect(getContents(fs3, 'dir')).toEqual(['foo_b', 'foo_a', 'foo_c', 'foo_d']);
     expect(fs3._cached_locmap).toEqual({
-      _inventory: { t: 'is_root', },
       _root: { t: 'is_root', },
       dir: { t: 'at', id: '_root', pos: 0, },
       foo_b: { t: 'at', id: 'dir', pos: 0, },
