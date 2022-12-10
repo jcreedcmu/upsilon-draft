@@ -34,8 +34,9 @@ export function typeCharForItem(item: Item): string {
     return '+';
   else if (!item.acls.pickup)
     return Chars.LOCK;
-  else if (canExec(item))
+  else if (canExec(item)) {
     return '*';
+  }
   else
     return ' ';
 }
@@ -62,6 +63,7 @@ export type ExecLineAction =
   | { t: 'error', code: ErrorCode }
   | { t: 'exec', ident: Ident }
   | { t: 'back' }
+  | { t: 'toggle', ident: Ident }
   ;
 
 export type PickupLineAction =
@@ -85,6 +87,9 @@ export type FullLine = RenderableLine & {
 function execActionForItem(ident: Ident, item: Item): ExecLineAction {
   if (canOpen(item))
     return { t: 'descend', ident };
+  if (item.itemType == 'checkbox') {
+    return { t: 'toggle', ident };
+  }
   if (canExec(item))
     return { t: 'exec', ident };
   else

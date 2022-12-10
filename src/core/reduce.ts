@@ -143,6 +143,13 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
 // construct lines for a directory. May want to reconsider this,
 // although it is in some way convenient knowing whether a file is
 // executable very early.
+
+export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]] {
+  return [produce(state, s => {
+    modifyItemꜝ(s.fs, ident, item => { item.acls.checked = !item.acls.checked; });
+  }), [{ t: 'playAbstractSound', effect: 'change-file' /* XXX */, loc: undefined }]];
+}
+
 export function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
 
   switch (action.t) {
@@ -172,6 +179,7 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): [Gam
       return withError(state, { code: 'badExecutable', blame: actorId, loc });
     }
     case 'back': return reduceKeyAction(state, KeyAction.back);
+    case 'toggle': return toggleItem(state, action.ident);
   }
 }
 
