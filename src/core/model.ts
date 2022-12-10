@@ -103,7 +103,18 @@ export enum KeyAction {
   pickupDrop = 'pickup-drop', // Maybe want separate pickup and drop actions?
 }
 
-export type AbstractSoundEffect = 'click';
+export type AbstractSoundEffect =
+  | 'change-file'
+  | 'go-back'
+  | 'change-slot'
+  | 'startup'
+  | 'error'
+  | 'execute'
+  | 'go-into'
+  | 'pickup'
+  | 'drop'
+  | 'success'
+  ;
 
 export type Effect =
   | { t: 'playSound', effect: SoundEffect, loc: Location | undefined }

@@ -106,7 +106,7 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
   return [produce(state, s => {
     modifyResourceꜝ(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
     modifyResourceꜝ(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);
-  }), [{ t: 'playSound', effect: 'ping', loc }], undefined];
+  }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
 }
 
 function withErrorExec(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[], ErrorInfo | undefined] {
@@ -124,7 +124,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
     // XXX this is wrong if idToItem doesn't already have a location
     return [produce(state, s => {
       s.fs.idToItem[targets[0]] = ftgt;
-    }), [{ t: 'playSound', effect: 'ping', loc }], undefined];
+    }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
   }
 
   switch (instr) {
@@ -133,7 +133,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         s.viewState = { t: 'textDialogView', back: state.viewState };
       }), [], undefined];
     case executables.combine:
-      return [state, [{ t: 'playSound', effect: 'ping', loc }], undefined];
+      return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
     case executables.movCpu5: return movResource(state, targets, 'cpu', 5, loc);
     case executables.movCpu1: return movResource(state, targets, 'cpu', 1, loc);
 
@@ -178,7 +178,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
-      return [state, [{ t: 'playSound', effect: 'ping', loc }], undefined];
+      return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
     }
 
     case executables.magnet: {
@@ -201,7 +201,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         const [newfs, hooks] = moveIdTo(state.fs, referentId, newItemLoc);
         state = produce(state, s => { s.fs = newfs; });
         state = processHooks(state, hooks);
-        return [state, [{ t: 'playSound', effect: 'ping', loc }], undefined];
+        return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
       }
     }
 
@@ -233,7 +233,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
       state = processHooks(state, hooks);
-      return [state, [{ t: 'playSound', effect: 'ping', loc }], undefined];
+      return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
     }
 
     case executables.automate: {
@@ -244,7 +244,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         else {
           s.recurring[targets[0]] = { startTicks: nowTicks(state.clock) + 20, periodTicks: 20 };
         }
-      }), [{ t: 'playSound', effect: 'ping', loc }], undefined];
+      }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
 
     }
   }

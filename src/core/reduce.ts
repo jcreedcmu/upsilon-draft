@@ -26,7 +26,7 @@ export function reduce(state: SceneState, action: Action): [SceneState, Effect[]
             /* XXX redundant construction? but I do in fact want to
             reconstruct for reboots... */
             mkGameState(), s => { s.gameState.power = true; }),
-          [{ t: 'playSound', effect: 'startup', loc: undefined },
+          [{ t: 'playAbstractSound', effect: 'startup', loc: undefined },
           { t: 'powerButton' }]];
         }
       }
@@ -69,7 +69,7 @@ export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, E
     state = makeErrorBanner(state, code);
   }
   return [state, [
-    { t: 'playSound', effect: 'error', loc: errorInfo.loc }
+    { t: 'playAbstractSound', effect: 'error', loc: errorInfo.loc }
   ]]
 }
 
@@ -119,7 +119,7 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
   if (cycles == 0) {
     let effects;
     [state, effects] = reduceGameStateFs(state, action);
-    return [state, [...effects, { t: 'playSound', effect: 'rising', loc }]];
+    return [state, [...effects, { t: 'playAbstractSound', effect: 'execute', loc }]];
   }
   else {
     // defer execution
@@ -134,7 +134,7 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
       });
       addFutureꜝ(s, now + cycles, action, true);
     });
-    return [state, [{ t: 'playSound', effect: 'rising', loc }]];
+    return [state, [{ t: 'playAbstractSound', effect: 'execute', loc }]];
   }
 }
 
@@ -152,7 +152,7 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): [Gam
       s.curLine = item.stickyCurrentPos ?? 0;
       s.path.push(item.name);
     }), [
-      { t: 'playSound', effect: 'rising', loc: undefined }
+      { t: 'playAbstractSound', effect: 'go-into', loc: undefined }
     ]];
     case 'none': return [state, []];
     case 'error': return withError(state, { code: action.code }); // XXX does this arise? does withError want an id?
@@ -204,7 +204,7 @@ function reducePickupAction(state: GameState, action: PickupLineAction): [GameSt
       return [
         state,
         [
-          { t: 'playSound', effect: 'pickup', loc: undefined },
+          { t: 'playAbstractSound', effect: 'pickup', loc: undefined },
         ]
       ];
     }
@@ -225,7 +225,7 @@ function reduceDropAction(state: GameState, action: DropLineAction): [GameState,
       return [
         state,
         [
-          { t: 'playSound', effect: 'drop', loc: undefined }
+          { t: 'playAbstractSound', effect: 'drop', loc: undefined }
         ]
       ];
     }
@@ -259,12 +259,12 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
     case KeyAction.prevLine:
       return [advanceLine(state, -1),
       [
-        { t: 'playAbstractSound', effect: 'click', loc: undefined },
+        { t: 'playAbstractSound', effect: 'change-file', loc: undefined },
       ]];
     case KeyAction.nextLine:
       return [advanceLine(state, 1),
       [
-        { t: 'playAbstractSound', effect: 'click', loc: undefined },
+        { t: 'playAbstractSound', effect: 'change-file', loc: undefined },
       ]];
     case KeyAction.exec: return reduceExecAction(state, getSelectedLine(state).actions.exec);
 
@@ -288,16 +288,16 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
           s.curLine = loc.pos;
           s.path.pop();
         }), [
-          { t: 'playSound', effect: 'falling', loc: undefined }
+          { t: 'playAbstractSound', effect: 'go-back', loc: undefined }
         ]];
       }
     }
     case KeyAction.prevInventorySlot:
       return [produce(state, s => { modifyInventorySlotꜝ(s, -1) }),
-      [{ t: 'playSound', effect: 'high', loc: undefined }]];
+      [{ t: 'playAbstractSound', effect: 'change-slot', loc: undefined }]];
     case KeyAction.nextInventorySlot:
       return [produce(state, s => { modifyInventorySlotꜝ(s, 1) }),
-      [{ t: 'playSound', effect: 'high', loc: undefined }]];
+      [{ t: 'playAbstractSound', effect: 'change-slot', loc: undefined }]];
   }
 }
 
@@ -307,7 +307,7 @@ export function reduceGameState(state: GameState, action: GameAction): [GameStat
     case 'fsView': return reduceGameStateFs(state, action);
     case 'textDialogView': return [produce(state, s => {
       s.viewState = vs.back;
-    }), [{ t: 'playSound', effect: 'falling', loc: undefined }]];
+    }), [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]];
   }
 }
 

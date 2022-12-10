@@ -1,7 +1,7 @@
 import { errorCodes, errorCodeText } from '../core/errors';
 import { Resources } from './resources';
 import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
-import { KeyAction } from '../core/model';
+import { AbstractSoundEffect, KeyAction } from '../core/model';
 import { arrowChars } from '../ui/screen';
 import { ExecutableName, executableProperties, executables } from '../core/executables';
 import { SoundEffect } from '../ui/sound';
@@ -61,8 +61,17 @@ function keysDir(): ItemPlan {
 }
 
 function soundsDir(): ItemPlan {
-  const sounds: { name: string, soundEffect: SoundEffect }[] = [
-    { name: 'click', soundEffect: 'high' },
+  const sounds: { name: AbstractSoundEffect, soundEffect: SoundEffect }[] = [
+    { name: 'change-file', soundEffect: 'high' },
+    { name: 'go-back', soundEffect: 'falling' },
+    { name: 'change-slot', soundEffect: 'high' },
+    { name: 'startup', soundEffect: 'startup' },
+    { name: 'error', soundEffect: 'error' },
+    { name: 'execute', soundEffect: 'rising' },
+    { name: 'go-into', soundEffect: 'rising' },
+    { name: 'pickup', soundEffect: 'pickup' },
+    { name: 'drop', soundEffect: 'drop' },
+    { name: 'success', soundEffect: 'ping' },
   ];
   function soundDir(sound: { name: string, soundEffect: SoundEffect }): ItemPlan {
     const { name, soundEffect } = sound;

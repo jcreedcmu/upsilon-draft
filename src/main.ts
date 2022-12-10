@@ -161,10 +161,11 @@ async function go() {
           console.log(`duplicate ${name}`);
         }
       }
-      // playSound isn't idempotent, but I don't currently expect one
-      // dispatch to produce multiple sounds, and I did once have a
-      // bug where that was the symptom.
+      // Sound events aren't idempotent, but I don't currently expect
+      // one dispatch to produce multiple sounds, and I did once have
+      // a bug where that was the symptom, so we might as well check.
       checkDuplicates('playSound');
+      checkDuplicates('playAbstractSound');
     }
 
     sceneState = maybeReschedule(state[0].sceneState, sceneState);
