@@ -1,3 +1,5 @@
+export const isDev = !!location.host.match(/localhost/);
+
 export const DEBUG = {
   glTiming: false,
   clockUpdate: false,
@@ -7,7 +9,7 @@ export const DEBUG = {
   produce: false,
   duplicates: true,
   movement: false,
-  quickStart: true,
+  quickStart: isDev,
   keys: false,
 };
 
