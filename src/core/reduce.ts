@@ -1,12 +1,12 @@
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, deactivateItem, isNearby, isNearbyGame, SceneState, soundsOfFs } from './model';
+import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, cancelRecur, isNearby, isNearbyGame, SceneState, soundsOfFs } from './model';
 import { getContents, getFullContents, getInventoryItem, getItem, getItemIdsAfter, getLocation, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
 import { logger } from '../util/debug';
 import { getResource, modifyResourceꜝ } from '../fs/resources';
-import { ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable } from './executables';
+import { cancelRecurꜝ, ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ } from './executables';
 import { SpecialId } from '../fs/initialFs';
 import { isAbstractSoundEffect, isSoundEffect } from '../ui/sound';
 
@@ -67,7 +67,7 @@ function makeErrorBanner(state: GameState, code: ErrorCode): GameState {
 export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[]] {
   const { code, blame, loc } = errorInfo;
   if (blame != undefined) {
-    state = deactivateItem(state, blame);
+    state = cancelRecur(state, blame);
   }
   if (isNearbyGame(state, loc)) {
     state = makeErrorBanner(state, code);
@@ -78,7 +78,7 @@ export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, E
 }
 
 // imperatively updates state
-function addFutureꜝ(state: GameState, whenTicks: number, action: GameAction, live?: boolean) {
+export function addFutureꜝ(state: GameState, whenTicks: number, action: GameAction, live?: boolean) {
   state.futures.push({
     whenTicks,
     action,
@@ -364,22 +364,6 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
           s.futures = state.futures.filter(f => f.whenTicks > action.tick);
         });
 
-        const recurActions: GameAction[] = Object.keys(state.recurring)
-          .filter(k => {
-            const { startTicks, periodTicks } = state.recurring[k];
-            return (action.tick - startTicks) % periodTicks == 0;
-          })
-          .map(k => ({ t: 'recur', ident: k }));
-
-        logger('recurring', `state.recurring:`, state.recurring);
-        logger('recurring', `phases:`, Object.keys(state.recurring).map(k => {
-          const { startTicks, periodTicks } = state.recurring[k];
-          return [startTicks, periodTicks, action.tick, (action.tick - startTicks) % periodTicks];
-        }));
-        logger('recurring', `recurActions:`, recurActions);
-
-        actions.push(...recurActions);
-
         // XXX Might want to think about doing something smarter if I
         // have effects that are intended to be idempotent (even
         // though I don't think I do right now)
@@ -394,18 +378,20 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
       let effects, error;
       [state, effects, error] = executeInstructions(state, action.instr, action.targetIds, action.actorId);
 
-      // deactivate item
+      // deactivate item's progressbar
       state = produce(state, s => {
         modifyItemꜝ(s.fs, action.actorId, item => { item.progress = undefined; });
       });
 
-      // FIXME(#7): Sound effects shouldn't be the thing we trust for
-      // whether there's an error condition.
       if (error != undefined) {
-        state = deactivateItem(state, action.actorId);
+        // unsuccessful execution
+        state = cancelRecur(state, action.actorId);
         return [state, effects];
       }
       else {
+        // successful execution
+
+        // Add argument flash
         const later = nowTicks(state.clock) + 1;
         // flash targets if not error
         state = produce(state, s => {
@@ -415,6 +401,13 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
             modifyItemꜝ(s.fs, targetId, item => { item.flashUntilTick = later; });
           });
         });
+
+        // Schedule recurrent execution if appropriate
+        if (isRecurring(state, action.actorId)) {
+          state = produce(state, s => {
+            scheduleRecurꜝ(s, action.actorId);
+          });
+        }
         return [state, effects];
       }
     }
@@ -427,7 +420,7 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
     case 'none':
       return [state, []];
 
-    case 'recur':
+    case 'recur': {
       // XXX more checking should happen here probably
       const id = action.ident;
       const actor = getItem(state.fs, id);
@@ -439,5 +432,6 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
         // XXX not the right error code really
         return withError(state, { code: 'illegalInstr', blame: id, loc });
       }
+    }
   }
 }

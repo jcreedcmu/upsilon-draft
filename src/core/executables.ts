@@ -4,7 +4,9 @@ import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
 import { ErrorInfo } from "./errors";
 import { Effect, GameState, Ident, Item, Location, nextLocation } from "./model";
-import { processHooks, withError } from "./reduce";
+import { addFutureꜝ, processHooks, withError } from "./reduce";
+
+export const RECURRENCE_LENGTH = 10;
 
 export type ExecutableSpec = {
   cycles: number,
@@ -111,6 +113,22 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
 
 function withErrorExec(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[], ErrorInfo | undefined] {
   return [...withError(state, errorInfo), errorInfo];
+}
+
+export function isRecurring(state: GameState, ident: Ident): boolean {
+  return !!state.recurring[ident];
+}
+
+export function scheduleRecurꜝ(state: GameState, ident: Ident) {
+  addFutureꜝ(state, nowTicks(state.clock) + RECURRENCE_LENGTH, { t: 'recur', ident }, true);
+  // NOTE: this periodTicks data is currently unused, but it feels right to me
+  // that it should be introspectable.
+  state.recurring[ident] = { periodTicks: RECURRENCE_LENGTH };
+
+}
+
+export function cancelRecurꜝ(state: GameState, ident: Ident) {
+  delete state.recurring[ident];
 }
 
 export function executeInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[], ErrorInfo | undefined] {
@@ -240,12 +258,13 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
     }
 
     case executables.automate: {
+      const target = targets[0];
       return [produce(state, s => {
-        if (targets[0] in state.recurring) {
-          delete s.recurring[targets[0]];
+        if (target in state.recurring) {
+          cancelRecurꜝ(s, target);
         }
         else {
-          s.recurring[targets[0]] = { startTicks: nowTicks(state.clock) + 20, periodTicks: 20 };
+          scheduleRecurꜝ(s, target);
         }
       }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
 

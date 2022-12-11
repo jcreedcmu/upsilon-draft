@@ -5,7 +5,7 @@ import { AbstractSoundEffect, allSoundEffects, SoundEffect } from '../ui/sound';
 import { DEBUG } from '../util/debug';
 import { produce } from '../util/produce';
 import { ClockState, mkClockState } from './clock';
-import { ExecutableName } from './executables';
+import { cancelRecurꜝ, ExecutableName } from './executables';
 import { FullLine, getLines } from './lines';
 
 export type Acl =
@@ -129,7 +129,7 @@ export type State = {
 
 export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
-export type Recurring = Record<Ident, { startTicks: number, periodTicks: number }>;
+export type Recurring = Record<Ident, { periodTicks: number }>;
 
 // This is for alternate modal states within the game interface, which
 // are triggered by "diagetic" controls.
@@ -292,9 +292,9 @@ export function nextLocation(loc: Location): Location {
   }
 }
 
-export function deactivateItem(state: GameState, id: Ident): GameState {
+export function cancelRecur(state: GameState, id: Ident): GameState {
   return produce(state, s => {
-    delete (s.recurring[id]);
+    cancelRecurꜝ(s, id);
   });
 }
 
