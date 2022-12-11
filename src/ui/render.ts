@@ -8,9 +8,10 @@ import { logger } from '../util/debug';
 import { Point } from '../util/types';
 import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
 import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
-import { ColorCode, COLS } from './ui-constants';
+import { ColorCode, COLS, ROWS } from './ui-constants';
 
-const FS_LEN = int(COLS / 2) - 1;
+const FS_LEN = int(COLS / 2) - 1; // number of columns one row can take up in fsview
+const FS_ROWS = ROWS - 1;
 const CHARGE_COL_SIZE = 3;
 const SIZE_COL_SIZE = 3;
 const MARGIN = 1;
@@ -183,12 +184,24 @@ export function getRenderableResources(line: RenderableLine): RenderableResource
   return rv;
 }
 
+function getDisplayableLines(lines: RenderableLine[], curLine: number): [RenderableLine[], number] {
+  if (lines.length <= FS_ROWS)
+    return [lines, 0];
+  const page = Math.floor(curLine / FS_ROWS);
+  const offset = page * FS_ROWS;
+  return [lines.slice(offset, offset + FS_ROWS), offset];
+}
+
 export function renderFsView(rend: FsRenderable): Screen {
   const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
   logger('renderFsView', rend);
   const lines = rend.lines;
-  lines.forEach((line, i) => {
-    const selected = i == rend.curLine;
+
+  const [displayableLines, offset] = getDisplayableLines(lines, rend.curLine);
+
+  displayableLines.forEach((line, i) => {
+    const lineIndex = i + offset;
+    const selected = lineIndex == rend.curLine;
     if (rend.show.info) {
       if (line.text && selected) {
         screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), line.text, INV_ATTR);
