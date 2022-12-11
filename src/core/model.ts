@@ -52,10 +52,15 @@ export type ItemType =
   | 'sound'
   ;
 
+export type ItemContent =
+  | { t: 'text', text: string };
+
 export type Item = {
   name: string, // displayable name
 
   contents: Ident[],
+
+  content: ItemContent,
 
   itemType: ItemType,
 

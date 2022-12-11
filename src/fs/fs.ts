@@ -2,7 +2,7 @@ import { produce } from "../util/produce";
 import { Resources } from './resources';
 import { SpecialId } from "./initialFs";
 import { canOpen } from '../core/lines';
-import { Hook, Ident, Item, ItemType, Location } from '../core/model';
+import { Hook, Ident, Item, ItemContent, ItemType, Location } from '../core/model';
 import { getVirtualItem, getVirtualItemLocation } from "./vfs";
 import { logger } from "../util/debug";
 
@@ -26,7 +26,7 @@ export type Fs = {
 export type ItemPlan =
   | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[], resources?: Resources }
   | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, numTargets?: number, resources?: Resources }
-  | { t: 'file', name: string, text?: string, size?: number, resources?: Resources, forceId?: Ident, itemType?: ItemType }
+  | { t: 'file', name: string, content?: ItemContent, size?: number, resources?: Resources, forceId?: Ident, itemType?: ItemType }
   | { t: 'instr', name: string }
   | { t: 'checkbox', name: string, checked: boolean, forceId?: Ident };
 
@@ -106,6 +106,7 @@ function makeInsertRootItem(fs: Fs, name: SpecialId): Fs {
     itemType: 'plain',
     acls: {},
     contents: [],
+    content: textContent(''),
     resources: {},
     size: 0
   });
@@ -123,6 +124,10 @@ export function mkFs(): Fs {
   return fs;
 }
 
+export function textContent(text: string): ItemContent {
+  return { t: 'text', text };
+}
+
 export function itemOfPlan(plan: ItemPlan): Item {
   switch (plan.t) {
 
@@ -136,6 +141,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
         // I think it depends on the invariant that virtual
         // directories only have virtual contents.
         contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []),
+        content: textContent(''),
         resources: plan.resources ?? {},
         size: 1,
         hooks: plan.hooks,
@@ -148,6 +154,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
         name: plan.name,
         acls: { exec: true, pickup: true },
         contents: [],
+        content: textContent(''),
         resources: plan.resources ?? {},
         size: 1,
       };
@@ -158,7 +165,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
       name: plan.name,
       acls: { pickup: true },
       contents: [],
-      text: plan.text,
+      content: plan.content ?? { t: 'text', text: '' },
       resources: plan.resources ?? {},
       size: 1,
     };
@@ -167,6 +174,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
       itemType: 'plain',
       name: plan.name,
       acls: { instr: true, pickup: true },
+      content: textContent(''),
       contents: [],
       resources: {},
       size: 1,
@@ -177,6 +185,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
       name: plan.name,
       acls: { pickup: true, checked: plan.checked },
       contents: [],
+      content: textContent(''),
       resources: {},
       size: 1,
     };

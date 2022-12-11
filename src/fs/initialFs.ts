@@ -3,7 +3,7 @@ import { ExecutableName, executables } from '../core/executables';
 import { KeyAction } from '../core/model';
 import { arrowChars } from '../ui/screen';
 import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
-import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
+import { Fs, insertPlans, ItemPlan, mkFs, textContent, VirtualItemPlan } from './fs';
 import { Resources } from './resources';
 
 export enum SpecialId {
@@ -110,7 +110,7 @@ function errorDir(): ItemPlan {
     return {
       t: 'file',
       name: 'E' + code,
-      text: errorCodeText(str as keyof (typeof errorCodes))
+      content: textContent(errorCodeText(str as keyof (typeof errorCodes)))
     };
   });
 
@@ -167,14 +167,14 @@ function initialPlans(): VirtualItemPlan[] {
     {
       t: 'dir', name: 'home', contents: [
         { t: 'file', name: 'foo', resources: { cpu: 5 } },
-        { t: 'file', name: 'bar', text: 'Here is some {white}white text{/} and here is some {red}red text{/}.' },
+        { t: 'file', name: 'bar', content: textContent('Here is some {white}white text{/} and here is some {red}red text{/}.') },
         { t: 'file', name: 'mumble', size: 23 },
         { t: 'checkbox', name: 'toggle', checked: true },
         { t: 'checkbox', name: 'toggle', checked: false },
       ]
     },
     {
-      t: 'file', name: 'README.txt', text: readmeText
+      t: 'file', name: 'README.txt', content: textContent(readmeText)
     },
 
   ];

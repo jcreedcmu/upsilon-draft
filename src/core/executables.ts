@@ -1,4 +1,4 @@
-import { createAndInsertItem, getItem, getLocation, maybeGetItem, moveIdTo, reifyId } from "../fs/fs";
+import { createAndInsertItem, getItem, getLocation, maybeGetItem, moveIdTo, reifyId, textContent } from "../fs/fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
@@ -169,7 +169,9 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       const newItem: Item = {
         itemType: 'plain',
         name: targets[0],
-        contents: [], acls: { pickup: true }, resources: {}, size: 1
+        contents: [],
+        content: textContent(''),
+        acls: { pickup: true }, resources: {}, size: 1
       };
       const newItemLoc = nextLocation(loc);
       if (newItemLoc.t != 'at') {
@@ -225,7 +227,9 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       const newItem: Item = {
         itemType: 'plain',
         name: getItem(state.fs, targets[0]).name,
-        contents: [], acls: { pickup: true }, resources: {}, size: 1
+        contents: [],
+        content: textContent(''),
+        acls: { pickup: true }, resources: {}, size: 1
       };
       const newItemLoc = nextLocation(loc);
       if (newItemLoc.t != 'at') {
