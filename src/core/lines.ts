@@ -180,7 +180,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
         actions: {
           exec: { t: 'error', code: 'alreadyExecuting' },
           pickup: { t: 'error', code: 'cantPickUpLocked' },
-          drop: { t: 'error', code: 'cantPickUpLocked' },
+          drop: dropActionForItem(item, loc, lines.length),
         }
       });
     }
