@@ -2,7 +2,7 @@ import { produce } from "../util/produce";
 import { Resources } from './resources';
 import { SpecialId } from "./initialFs";
 import { canOpen } from '../core/lines';
-import { Hook, Ident, Item, Location } from '../core/model';
+import { Hook, Ident, Item, ItemType, Location } from '../core/model';
 import { getVirtualItem, getVirtualItemLocation } from "./vfs";
 import { logger } from "../util/debug";
 
@@ -26,7 +26,7 @@ export type Fs = {
 export type ItemPlan =
   | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[], resources?: Resources }
   | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, numTargets?: number, resources?: Resources }
-  | { t: 'file', name: string, text?: string, size?: number, resources?: Resources, forceId?: Ident }
+  | { t: 'file', name: string, text?: string, size?: number, resources?: Resources, forceId?: Ident, itemType?: ItemType }
   | { t: 'instr', name: string }
   | { t: 'checkbox', name: string, checked: boolean, forceId?: Ident };
 
@@ -154,7 +154,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
     }
 
     case 'file': return {
-      itemType: 'plain',
+      itemType: plan.itemType ?? 'plain',
       name: plan.name,
       acls: { pickup: true },
       contents: [],

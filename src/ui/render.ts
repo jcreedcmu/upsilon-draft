@@ -7,7 +7,7 @@ import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
 import { getContents, getInventoryItem, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
-import { GameState, Show, SceneState, UserError } from '../core/model';
+import { GameState, Show, SceneState, UserError, ItemType } from '../core/model';
 import { nowTicks } from '../core/clock';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 
@@ -23,6 +23,7 @@ const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 
 export type RenderableLine = {
   str: string,
+  itemType: ItemType,
   text?: string,
   inProgress?: boolean,
   resources: Resources,
@@ -50,6 +51,7 @@ export type Renderable =
 
 function defaultLine(name: string): RenderableLine {
   return {
+    itemType: 'plain',
     resources: {},
     attr: { fg: 15, bg: 0 },
     size: 1,
@@ -60,7 +62,13 @@ function defaultLine(name: string): RenderableLine {
 
 function emptyRenderableLine(): RenderableLine {
   const boxw = String.fromCharCode(boxify(BOXW)(0));
-  return { str: repeat(boxw, FS_LEN), attr: { fg: ColorCode.yellow, bg: ColorCode.blue }, size: 0, resources: {} };
+  return {
+    str: repeat(boxw, FS_LEN),
+    itemType: 'plain',
+    attr: { fg: ColorCode.yellow, bg: ColorCode.blue },
+    size: 0,
+    resources: {}
+  };
 }
 
 function getInventoryLines(state: GameState): RenderableLine[] {

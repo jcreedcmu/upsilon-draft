@@ -1,7 +1,7 @@
 import { Fs, getContents, getFullContents, getItem } from '../fs/fs';
 import { initialFs, SpecialId } from '../fs/initialFs';
 import { Resources } from '../fs/resources';
-import { allSoundEffects, SoundEffect } from '../ui/sound';
+import { AbstractSoundEffect, allSoundEffects, SoundEffect } from '../ui/sound';
 import { DEBUG } from '../util/debug';
 import { produce } from '../util/produce';
 import { ClockState, mkClockState } from './clock';
@@ -49,6 +49,7 @@ export type Value = number | string;
 export type ItemType =
   | 'plain'
   | 'checkbox'
+  | 'sound'
   ;
 
 export type Item = {
@@ -110,20 +111,6 @@ export enum KeyAction {
   exec = 'exec',
   pickupDrop = 'pickup-drop', // Maybe want separate pickup and drop actions?
 }
-
-export type AbstractSoundEffect =
-  | 'change-file'
-  | 'go-back'
-  | 'change-slot'
-  | 'startup'
-  | 'error'
-  | 'execute'
-  | 'go-into'
-  | 'pickup'
-  | 'drop'
-  | 'success'
-  | 'toggle'
-  ;
 
 export type Effect =
   | { t: 'playSound', effect: SoundEffect, loc: Location | undefined }
@@ -217,9 +204,6 @@ export function showOfFs(fs: Fs): Show {
   }
 }
 
-export function getConcreteSound(state: GameState, sound: AbstractSoundEffect): SoundEffect | undefined {
-  return state._cached_sounds[sound];
-}
 
 export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
   let cont;
@@ -343,4 +327,8 @@ export function isNearbyGame(state: GameState, loc: Location | undefined): boole
     return false; // XXX this would also be a surprising case
   }
   return (state.curId == loc.id);
+}
+
+export function getConcreteSound(state: GameState, sound: AbstractSoundEffect): SoundEffect | undefined {
+  return state._cached_sounds[sound];
 }

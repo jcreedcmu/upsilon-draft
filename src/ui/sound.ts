@@ -3,12 +3,36 @@ import { lerp, mlerp } from "../util/util";
 const SAMPLE_RATE = 44100; // samples/s
 const BEEP_LENGTH = 30000; // samples
 
+export const allAbstractSoundEffects = [
+  'change-file',
+  'go-back',
+  'change-slot',
+  'startup',
+  'error',
+  'execute',
+  'go-into',
+  'pickup',
+  'drop',
+  'success',
+  'toggle',
+] as const;
+
+export type AbstractSoundEffect = (typeof allAbstractSoundEffects)[number];
+
+export function isAbstractSoundEffect(str: string): str is AbstractSoundEffect {
+  return allAbstractSoundEffects.includes(str as AbstractSoundEffect);
+}
+
 export const allSoundEffects = [
   'rising', 'falling', 'high', 'low', 'med', 'pickup', 'drop', 'error'
   , 'startup', 'ping'
 ] as const;
 
 export type SoundEffect = (typeof allSoundEffects)[number];
+
+export function isSoundEffect(str: string): str is SoundEffect {
+  return allSoundEffects.includes(str as SoundEffect);
+}
 
 type SoundEffectSpec = {
   startFreq: number, // Hz

@@ -1,10 +1,10 @@
 import { errorCodes, errorCodeText } from '../core/errors';
-import { Resources } from './resources';
-import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
-import { AbstractSoundEffect, KeyAction } from '../core/model';
+import { ExecutableName, executables } from '../core/executables';
+import { KeyAction } from '../core/model';
 import { arrowChars } from '../ui/screen';
-import { ExecutableName, executableProperties, executables } from '../core/executables';
-import { SoundEffect } from '../ui/sound';
+import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
+import { Fs, insertPlans, ItemPlan, mkFs, VirtualItemPlan } from './fs';
+import { Resources } from './resources';
 
 export enum SpecialId {
   keys = '_keys',
@@ -75,7 +75,7 @@ function soundsDir(): ItemPlan {
   ];
   function soundDir(sound: { name: string, soundEffect: SoundEffect }): ItemPlan {
     const { name, soundEffect } = sound;
-    return { t: 'dir', name, contents: [{ t: 'file', name: soundEffect }], hooks: ['SOUND'] }
+    return { t: 'dir', name, contents: [{ t: 'file', itemType: 'sound', name: soundEffect }], hooks: ['SOUND'] }
   }
   const toggle: ItemPlan = { t: 'checkbox', name: 'sounds', checked: true };
   return {

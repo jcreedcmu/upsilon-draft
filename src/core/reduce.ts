@@ -8,6 +8,7 @@ import { logger } from '../util/debug';
 import { getResource, modifyResourceꜝ } from '../fs/resources';
 import { ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable } from './executables';
 import { SpecialId } from '../fs/initialFs';
+import { isAbstractSoundEffect, isSoundEffect } from '../ui/sound';
 
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;
@@ -141,11 +142,6 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
   }
 }
 
-// Something to note is that we're not checking the executability acl
-// *here*; it's being checked in execActionForItem already when we
-// construct lines for a directory. May want to reconsider this,
-// although it is in some way convenient knowing whether a file is
-// executable very early.
 
 export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]] {
   const loc = getLocation(state.fs, ident);
@@ -157,6 +153,23 @@ export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]
     [{ t: 'playAbstractSound', effect: 'toggle', loc: loc }]];
 }
 
+export function playAudioItem(state: GameState, ident: Ident): [GameState, Effect[]] {
+  const item = getItem(state.fs, ident);
+  const loc = getLocation(state.fs, ident);
+  if (isSoundEffect(item.name)) {
+    return [state,
+      [{ t: 'playSound', effect: item.name, loc: loc }]];
+  }
+  else {
+    return [state, []];
+  }
+}
+
+// Something to note is that we're not checking the executability acl
+// *here* in reduceExecAction; it's being checked in execActionForItem
+// already when we construct lines for a directory. May want to
+// reconsider this, although it is in some way convenient knowing
+// whether a file is executable very early.
 export function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
 
   switch (action.t) {
@@ -187,7 +200,9 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): [Gam
     }
     case 'back': return reduceKeyAction(state, KeyAction.back);
     case 'toggle': return toggleItem(state, action.ident);
+    case 'play': return playAudioItem(state, action.ident);
   }
+
 }
 
 function processHook(state: GameState, hook: Hook): GameState {

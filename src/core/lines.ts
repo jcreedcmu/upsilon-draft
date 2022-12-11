@@ -30,6 +30,9 @@ export function canPickup(item: Item, actor?: Item): boolean {
 }
 
 export function typeCharForItem(item: Item): string {
+  if (item.itemType == 'sound') {
+    return '<';
+  }
   if (canOpen(item))
     return '+';
   else if (!item.acls.pickup)
@@ -64,6 +67,7 @@ export type ExecLineAction =
   | { t: 'exec', ident: Ident }
   | { t: 'back' }
   | { t: 'toggle', ident: Ident }
+  | { t: 'play', ident: Ident } // as in: play audio
   ;
 
 export type PickupLineAction =
@@ -87,7 +91,11 @@ export type FullLine = RenderableLine & {
 function execActionForItem(ident: Ident, item: Item): ExecLineAction {
   if (canOpen(item))
     return { t: 'descend', ident };
-  if (item.itemType == 'checkbox') {
+
+  if (item.itemType == 'sound') {
+    return { t: 'play', ident };
+  }
+  else if (item.itemType == 'checkbox') {
     return { t: 'toggle', ident };
   }
   if (canExec(item))
@@ -122,6 +130,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
 
   return {
     str,
+    itemType: item.itemType,
     text: item.text,
     size: item.size,
     resources: item.resources,
@@ -164,6 +173,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
       const numTargets = numTargetsOfExecutable(item);
       lines.push({
         str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
+        itemType: 'plain',
         resources: line.resources,
         size: 0,
         inProgress: true,
@@ -179,6 +189,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
 
   if (loc != SpecialId.root) {
     lines.push({
+      itemType: 'plain',
       str: '  ..',
       size: 0,
       actions: {
@@ -192,6 +203,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
   }
   else {
     lines.push({
+      itemType: 'plain',
       str: '',
       size: 0,
       actions: {
