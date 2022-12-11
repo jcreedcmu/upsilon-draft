@@ -5,9 +5,12 @@ This is a prototype of a game idea drawing some inspiration from
 
  - [factorio](https://en.wikipedia.org/wiki/Factorio)
  - [TIS-100](https://en.wikipedia.org/wiki/TIS-100) & other zachtronics games
- - [smalltalk](https://en.wikipedia.org/wiki/Smalltalk)-style reflection
  - [Orteil's "Nested"](https://orteil.dashnet.org/nested)
+ - [Quadrilateral Cowboy](https://en.wikipedia.org/wiki/Quadrilateral_Cowboy)
+ - [smalltalk](https://en.wikipedia.org/wiki/Smalltalk)-style reflection
  - [uxn](https://100r.co/site/uxn.html)
+
+Thanks to @dwrensha and @tom7 for ideas.
 
 Demo
 ----
