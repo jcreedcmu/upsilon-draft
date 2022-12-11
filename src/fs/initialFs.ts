@@ -75,7 +75,11 @@ function soundsDir(): ItemPlan {
   ];
   function soundDir(sound: { name: string, soundEffect: SoundEffect }): ItemPlan {
     const { name, soundEffect } = sound;
-    return { t: 'dir', name, contents: [{ t: 'file', itemType: 'sound', name: soundEffect }], hooks: ['SOUND'] }
+    return {
+      t: 'dir', name, contents: [
+        { t: 'file', itemType: 'plain', name: soundEffect + '.snd', content: { t: 'sound', effect: soundEffect } }
+      ], hooks: ['SOUND']
+    }
   }
   const toggle: ItemPlan = { t: 'checkbox', name: 'sounds', checked: true };
   return {

@@ -30,7 +30,7 @@ export function canPickup(item: Item, actor?: Item): boolean {
 }
 
 export function typeCharForItem(item: Item): string {
-  if (item.itemType == 'sound') {
+  if (item.content.t == 'sound') {
     return Chars.SPEAKER;
   }
   if (canOpen(item))
@@ -92,7 +92,7 @@ function execActionForItem(ident: Ident, item: Item): ExecLineAction {
   if (canOpen(item))
     return { t: 'descend', ident };
 
-  if (item.itemType == 'sound') {
+  if (item.content.t == 'sound') {
     return { t: 'play', ident };
   }
   else if (item.content.t == 'checkbox') {

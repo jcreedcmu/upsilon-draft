@@ -48,12 +48,12 @@ export type Value = number | string;
 
 export type ItemType =
   | 'plain'
-  | 'sound'
   ;
 
 export type ItemContent =
   | { t: 'text', text: string }
-  | { t: 'checkbox', checked: boolean };
+  | { t: 'checkbox', checked: boolean }
+  | { t: 'sound', effect: SoundEffect };
 
 export type Item = {
   name: string, // displayable name
@@ -234,9 +234,9 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
 
   cont.forEach(item => {
     if (item.contents.length >= 1) {
-      const inner = getItem(fs, item.contents[0]);
-      if ((allSoundEffects as readonly string[]).includes(inner.name)) {
-        rv[item.name] = inner.name as SoundEffect;
+      const content = getItem(fs, item.contents[0]).content;
+      if (content.t == 'sound') {
+        rv[item.name] = content.effect;
       }
     }
   });

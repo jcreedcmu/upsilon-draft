@@ -161,9 +161,9 @@ export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]
 export function playAudioItem(state: GameState, ident: Ident): [GameState, Effect[]] {
   const item = getItem(state.fs, ident);
   const loc = getLocation(state.fs, ident);
-  if (isSoundEffect(item.name)) {
+  if (item.content.t == 'sound') {
     return [state,
-      [{ t: 'playSound', effect: item.name, loc: loc }]];
+      [{ t: 'playSound', effect: item.content.effect, loc: loc }]];
   }
   else {
     return [state, []];
