@@ -79,7 +79,6 @@ export type Item = {
   numTargets?: number,
 
   size: number,
-  text?: string,
 
   // --- transient animation experiment ---
   // When defined, and the current time is <= this value,

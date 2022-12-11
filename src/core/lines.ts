@@ -131,7 +131,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
   return {
     str,
     itemType: item.itemType,
-    text: item.text,
+    text: (item.content.t == 'text' ? item.content.text : ''),
     size: item.size,
     resources: item.resources,
     chargeNeeded: item.acls.exec ? 1 : 0,
