@@ -18,6 +18,7 @@ export const Chars = {
   SHADE3: '\x0f',
   SHADE4: '\x00',
   CHECKMARK: '\xa4',
+  SPEAKER: '\xa5',
 }
 
 export const arrowChars = '\xa0\xa1\xa2\xa3';

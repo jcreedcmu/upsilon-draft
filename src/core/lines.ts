@@ -31,7 +31,7 @@ export function canPickup(item: Item, actor?: Item): boolean {
 
 export function typeCharForItem(item: Item): string {
   if (item.itemType == 'sound') {
-    return '<';
+    return Chars.SPEAKER;
   }
   if (canOpen(item))
     return '+';
