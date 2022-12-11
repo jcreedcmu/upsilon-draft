@@ -1,4 +1,4 @@
-import { getFullContents, getItem, insertPlans, mkFs } from '../src/fs/fs';
+import { getContents, getFullContents, getItem, insertPlans, mkFs } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
 import { testFile } from "./test-utils";
 
@@ -21,7 +21,7 @@ describe('virtual filesystem', () => {
       return fs;
     })();
 
-    expect(getItem(fs, '_gen_vroot').contents.length > 0).toBe(true);
+    expect(getContents(fs, '_gen_vroot').length > 0).toBe(true);
     expect(getFullContents(fs, '_gen_vroot').map(x => x.name))
       .toEqual([
         'dir-20',

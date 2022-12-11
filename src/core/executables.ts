@@ -168,7 +168,6 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       // Sort of like taking the address of a pointer.
       const newItem: Item = {
         name: targets[0],
-        contents: [],
         content: textContent(''),
         acls: { pickup: true }, resources: {}, size: 1
       };
@@ -223,10 +222,10 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
       // Takes one argument.
       // Creates a new file whose name is the same as argument.
       // Doesn't copy attributes or acls or anything.
+      const item = getItem(state.fs, targets[0]);
       const newItem: Item = {
-        name: getItem(state.fs, targets[0]).name,
-        contents: [],
-        content: textContent(''),
+        name: item.name,
+        content: item.content,
         acls: { pickup: true }, resources: {}, size: 1
       };
       const newItemLoc = nextLocation(loc);

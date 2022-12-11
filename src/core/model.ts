@@ -1,4 +1,4 @@
-import { Fs, getContents, getFullContents, getItem } from '../fs/fs';
+import { Fs, getContents, getFullContents, getItem, itemContents } from '../fs/fs';
 import { initialFs, SpecialId } from '../fs/initialFs';
 import { Resources } from '../fs/resources';
 import { AbstractSoundEffect, allSoundEffects, SoundEffect } from '../ui/sound';
@@ -48,13 +48,12 @@ export type Value = number | string;
 
 export type ItemContent =
   | { t: 'text', text: string }
+  | { t: 'dir', contents: Ident[] }
   | { t: 'checkbox', checked: boolean }
   | { t: 'sound', effect: SoundEffect };
 
 export type Item = {
   name: string, // displayable name
-
-  contents: Ident[],
 
   content: ItemContent,
 
@@ -174,8 +173,9 @@ export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
   }
   const rv: Record<string, KeyAction> = {};
   cont.forEach(item => {
-    if (item.contents.length == 1) {
-      const inner = getItem(fs, item.contents[0]);
+    const contents = itemContents(item);
+    if (contents.length == 1) {
+      const inner = getItem(fs, contents[0]);
       if (Object.values(KeyAction).includes(inner.name as KeyAction)) {
         rv[item.name] = inner.name as KeyAction;
       }
@@ -227,8 +227,9 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
   }
 
   cont.forEach(item => {
-    if (item.contents.length >= 1) {
-      const content = getItem(fs, item.contents[0]).content;
+    const contents = itemContents(item);
+    if (contents.length >= 1) {
+      const content = getItem(fs, contents[0]).content;
       if (content.t == 'sound') {
         rv[item.name] = content.effect;
       }

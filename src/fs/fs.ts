@@ -35,9 +35,15 @@ export type VirtualItemPlan = ItemPlan
 
 /// Fs Read Utilities
 
+export function itemContents(item: Item): Ident[] {
+  if (item.content.t == 'dir')
+    return item.content.contents;
+  else
+    return []; // XXX should warn if we get here?
+}
+
 export function getContents(fs: Fs, ident: Ident): Ident[] {
-  const item = getItem(fs, ident);
-  return item.contents;
+  return itemContents(getItem(fs, ident));
 }
 
 export function getFullContents(fs: Fs, ident: Ident): Item[] {
@@ -104,8 +110,8 @@ function makeInsertRootItem(fs: Fs, name: SpecialId): Fs {
   [fs,] = insertRootItem(fs, name, {
     name,
     acls: {},
-    contents: [],
-    content: textContent(''),
+
+    content: { t: 'dir', contents: [] },
     resources: {},
     size: 0
   });
@@ -138,8 +144,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
         //
         // I think it depends on the invariant that virtual
         // directories only have virtual contents.
-        contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []),
-        content: textContent(''),
+        content: { t: 'dir', contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []) },
         resources: plan.resources ?? {},
         size: 1,
         hooks: plan.hooks,
@@ -150,7 +155,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
       return {
         name: plan.name,
         acls: { exec: true, pickup: true },
-        contents: [],
         content: textContent(''),
         resources: plan.resources ?? {},
         size: 1,
@@ -160,7 +164,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
     case 'file': return {
       name: plan.name,
       acls: { pickup: true },
-      contents: [],
       content: plan.content ?? { t: 'text', text: '' },
       resources: plan.resources ?? {},
       size: 1,
@@ -170,7 +173,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
       name: plan.name,
       acls: { instr: true, pickup: true },
       content: textContent(''),
-      contents: [],
       resources: {},
       size: 1,
     };
@@ -178,7 +180,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
     case 'checkbox': return {
       name: plan.name,
       acls: { pickup: true },
-      contents: [],
       content: { t: 'checkbox', checked: plan.checked },
       resources: {},
       size: 1,
@@ -282,9 +283,9 @@ export function createAndInsertItem(fs: Fs, loc: Ident, ix: number, item: Item):
 export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]] {
   logger('movement', `insertId ${loc}[${ix}] id ${id}`);
   const parent = getItem(fs, loc);
-  const contents = [...parent.contents];
+  const contents = [...itemContents(parent)];
 
-  fs = modifyItem(fs, loc, item => produce(item, it => { it.contents.splice(ix, 0, id) }));
+  fs = modifyItem(fs, loc, item => produce(item, it => { itemContents(it).splice(ix, 0, id) }));
 
   fs = produce(fs, fsd => {
     fsd._cached_locmap[id] = { t: 'at', id: loc, pos: ix };
@@ -305,11 +306,11 @@ export function hooksOfLocation(fs: Fs, loc: Location): Hook[] {
 
 export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
   const parent = getItem(fs, loc);
-  const contents = [...parent.contents];
+  const contents = [...itemContents(parent)];
   const id = contents[ix];
   logger('movement', `removeId ${loc}[${ix}] = ${id}`);
 
-  fs = modifyItem(fs, loc, item => produce(item, it => { it.contents.splice(ix, 1) }));
+  fs = modifyItem(fs, loc, item => produce(item, it => { itemContents(it).splice(ix, 1) }));
 
   fs = produce(fs, fsd => {
     fsd._cached_locmap[id] = { t: 'is_root' };

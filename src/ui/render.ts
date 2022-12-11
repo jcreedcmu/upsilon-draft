@@ -1,15 +1,14 @@
-import { doOnce, logger } from '../util/debug';
-import { Resources } from '../fs/resources';
-import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
-import { Point } from '../util/types';
-import { ColorCode, COLS } from './ui-constants';
-import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
-import { getContents, getInventoryItem, getItem } from '../fs/fs';
-import { SpecialId } from '../fs/initialFs';
-import { getLines, getRenderableLineOfItem } from '../core/lines';
-import { GameState, Show, SceneState, UserError } from '../core/model';
 import { nowTicks } from '../core/clock';
+import { getLines, getRenderableLineOfItem } from '../core/lines';
+import { GameState, SceneState, Show, UserError } from '../core/model';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
+import { getInventoryItem, getItem } from '../fs/fs';
+import { Resources } from '../fs/resources';
+import { logger } from '../util/debug';
+import { Point } from '../util/types';
+import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
+import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
+import { ColorCode, COLS } from './ui-constants';
 
 const FS_LEN = int(COLS / 2) - 1;
 const CHARGE_COL_SIZE = 3;
@@ -186,7 +185,7 @@ export function getRenderableResources(line: RenderableLine): RenderableResource
 
 export function renderFsView(rend: FsRenderable): Screen {
   const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
-
+  logger('renderFsView', rend);
   const lines = rend.lines;
   lines.forEach((line, i) => {
     const selected = i == rend.curLine;

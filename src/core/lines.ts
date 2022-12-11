@@ -1,12 +1,12 @@
-import { ErrorCode } from './errors';
+import { getContents, getItem } from '../fs/fs';
+import { SpecialId } from '../fs/initialFs';
+import { RenderableLine } from '../ui/render';
 import { Attr, Chars } from '../ui/screen';
 import { ColorCode, COLS } from '../ui/ui-constants';
 import { invertAttr, repeat } from '../util/util';
 import { nowTicks } from './clock';
-import { getContents, getItem } from '../fs/fs';
-import { SpecialId } from '../fs/initialFs';
+import { ErrorCode } from './errors';
 import { GameState, Ident, Item, numTargetsOfExecutable } from './model';
-import { RenderableLine } from '../ui/render';
 
 export type Action =
   | { t: 'back' }
