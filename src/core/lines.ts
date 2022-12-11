@@ -1,6 +1,6 @@
 import { getContents, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
-import { RenderableLine } from '../ui/render';
+import { ItemRenderableLine, RenderableLine } from '../ui/render';
 import { Attr, Chars } from '../ui/screen';
 import { ColorCode, COLS } from '../ui/ui-constants';
 import { invertAttr, repeat } from '../util/util';
@@ -88,6 +88,10 @@ export type FullLine = RenderableLine & {
   actions: LineActions
 };
 
+export type FullItemLine = ItemRenderableLine & {
+  actions: LineActions
+};
+
 function execActionForItem(ident: Ident, item: Item): ExecLineAction {
   if (canOpen(item))
     return { t: 'descend', ident };
@@ -122,7 +126,7 @@ function dropActionForItem(item: Item, loc: Ident, ix: number): DropLineAction {
   return { t: 'drop', loc, ix };
 }
 
-export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): RenderableLine {
+export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): ItemRenderableLine {
   const str = prefixForItem(item) + item.name;
   const _attr = attrForItem(item);
   // XXX Maybe something other than invertAttr for flash? Not sure.
@@ -140,7 +144,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
   }
 }
 
-export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number): FullLine {
+export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number): FullItemLine {
   return {
     ...getRenderableLineOfItem(ident, item, ticks),
     actions: {
@@ -172,11 +176,10 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
       const elapsed = nowTicks(state.clock) - item.progress.startTicks;
       const numTargets = numTargetsOfExecutable(item);
       lines.push({
-        t: 'special',
+        t: 'item',
         str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
-        noTruncate: true,
         resources: line.resources,
-        size: 0,
+        size: 1,
         inProgress: true,
         attr: { bg: ColorCode.red, fg: ColorCode.yellow },
         actions: {

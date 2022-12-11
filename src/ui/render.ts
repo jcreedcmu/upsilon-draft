@@ -22,18 +22,27 @@ const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 // representation a bit closer in form (compared to the raw state
 // data) to what we need to render.
 
-export type RenderableLine = {
-  t: 'item' | 'special',
+export type ItemRenderableLine = {
+  t: 'item',
   str: string,
-  noTruncate?: boolean, // XXX should refactor to get rid of this
   text?: string,
-  inProgress?: boolean,
   resources: Resources,
   size: number,
   checked?: boolean | undefined,
   chargeNeeded?: number,
   attr: Attr,
-}
+  inProgress?: boolean,
+};
+
+export type SpecialRenderableLine = {
+  t: 'special',
+  str: string,
+  attr: Attr,
+};
+
+export type RenderableLine =
+  | ItemRenderableLine
+  | SpecialRenderableLine
 
 export type FsRenderable = {
   curLine: number,
@@ -65,10 +74,7 @@ function emptyRenderableLine(): RenderableLine {
   return {
     t: 'special',
     str: repeat(boxw, FS_LEN),
-    noTruncate: true,
     attr: { fg: ColorCode.yellow, bg: ColorCode.blue },
-    size: 0,
-    resources: {}
   };
 }
 
@@ -124,19 +130,34 @@ function invertAttrText(x: AttrString): AttrString {
   return { ...x, attr: invertAttr(x.attr) };
 }
 
-function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine, show: Show, invert?: boolean): void {
+function renderSpecialLine(screen: Screen, p: Point, len: number, line: SpecialRenderableLine, show: Show, invert?: boolean): void {
   const { x, y } = p;
-  const str = line.noTruncate ? line.str : truncate(line.str, FILE_COL_SIZE);
-  const cpu = line.resources.cpu ?? 0;
-  const network = line.resources.network ?? 0;
-  const data = line.resources.data ?? 0;
+  const baseAttrs = {
+    base: line.attr,
+  };
+  const attrs = invert ? mapval(baseAttrs, invertAttr) : baseAttrs;
+  screen.drawTagLine(screen.at(x, y), len, line.str, attrs.base);
+}
 
-  const needsResources = (line.chargeNeeded ?? 0) > 0;
+function renderItemLine(screen: Screen, p: Point, len: number, line: ItemRenderableLine, show: Show, invert?: boolean): void {
+  const { x, y } = p;
 
   const baseAttrs = {
     base: line.attr,
   };
   const attrs = invert ? mapval(baseAttrs, invertAttr) : baseAttrs;
+
+  if (line.inProgress) {
+    screen.drawTagLine(screen.at(x, y), len, line.str, attrs.base);
+    return;
+  }
+
+  const str = truncate(line.str, FILE_COL_SIZE);
+  const cpu = line.resources.cpu ?? 0;
+  const network = line.resources.network ?? 0;
+  const data = line.resources.data ?? 0;
+
+  const needsResources = (line.chargeNeeded ?? 0) > 0;
 
   screen.drawTagLine(screen.at(x, y), len, str, attrs.base);
 
@@ -144,7 +165,7 @@ function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine,
   const sizeCol = chargeCol - SIZE_COL_SIZE - MARGIN;
 
   // show cpu quota
-  if (show.charge && !line.inProgress) {
+  if (show.charge) {
     const resText: AttrString[] = [];
     if (needsResources && !line.resources.cpu) resText.push({ str: Chars.EMPTY_DIA, attr: GRAY_ATTR });
     if (line.resources.cpu) resText.push({ str: Chars.DIA, attr: CHARGE_ATTR });
@@ -170,9 +191,19 @@ function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine,
   }
 }
 
+function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine, show: Show, invert?: boolean): void {
+  switch (line.t) {
+    case 'item': renderItemLine(screen, p, len, line, show, invert); break;
+    case 'special': renderSpecialLine(screen, p, len, line, show, invert); break;
+  }
+}
+
+
 type RenderableResources = { name: string, count: number, attr: Attr, symbol: string };
 
 export function getRenderableResources(line: RenderableLine): RenderableResources[] {
+  if (line.t != 'item')
+    return [];
   const rv: RenderableResources[] = [];
   if (line.resources.cpu) {
     rv.push({ name: 'CPU', count: line.resources.cpu, attr: CHARGE_ATTR, symbol: Chars.DIA });
@@ -194,6 +225,13 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number): [Rendera
   return [lines.slice(offset, offset + FS_ROWS), offset];
 }
 
+function textOfRenderableLine(line: RenderableLine): string | undefined {
+  switch (line.t) {
+    case 'item': return line.text;
+    case 'special': return undefined;
+  }
+}
+
 export function renderFsView(rend: FsRenderable): Screen {
   const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
   logger('renderFsView', rend);
@@ -205,8 +243,9 @@ export function renderFsView(rend: FsRenderable): Screen {
     const lineIndex = i + offset;
     const selected = lineIndex == rend.curLine;
     if (rend.show.info) {
-      if (line.text && selected) {
-        screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), line.text, INV_ATTR);
+      const text = textOfRenderableLine(line);
+      if (text !== undefined && selected) {
+        screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), text, INV_ATTR);
       }
       if (selected) {
         const rrs = getRenderableResources(line);
