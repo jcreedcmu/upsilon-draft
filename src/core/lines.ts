@@ -129,6 +129,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
   const attr = (item.flashUntilTick != undefined && ticks < item.flashUntilTick) ? invertAttr(_attr) : _attr;
 
   return {
+    t: 'item',
     str,
     text: (item.content.t == 'text' ? item.content.text : ''),
     size: item.size,
@@ -171,6 +172,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
       const elapsed = nowTicks(state.clock) - item.progress.startTicks;
       const numTargets = numTargetsOfExecutable(item);
       lines.push({
+        t: 'special',
         str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
         noTruncate: true,
         resources: line.resources,
@@ -188,6 +190,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
 
   if (loc != SpecialId.root) {
     lines.push({
+      t: 'item',
       str: '  ..',
       size: 0,
       actions: {
@@ -201,6 +204,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
   }
   else {
     lines.push({
+      t: 'item',
       str: '',
       size: 0,
       actions: {

@@ -23,6 +23,7 @@ const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 // data) to what we need to render.
 
 export type RenderableLine = {
+  t: 'item' | 'special',
   str: string,
   noTruncate?: boolean, // XXX should refactor to get rid of this
   text?: string,
@@ -62,6 +63,7 @@ function truncate(name: string, len: number) {
 function emptyRenderableLine(): RenderableLine {
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   return {
+    t: 'special',
     str: repeat(boxw, FS_LEN),
     noTruncate: true,
     attr: { fg: ColorCode.yellow, bg: ColorCode.blue },
