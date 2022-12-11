@@ -18,3 +18,11 @@ export function logger(level: keyof (typeof DEBUG), ...args: any[]) {
     console.log(...args);
   }
 }
+
+const done: Record<string, boolean> = {};
+export function doOnce(tag: string, k: () => void): void {
+  if (!done[tag]) {
+    done[tag] = true;
+    k();
+  }
+}

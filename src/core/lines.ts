@@ -174,6 +174,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
       lines.push({
         str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
         itemType: 'plain',
+        noTruncate: true,
         resources: line.resources,
         size: 0,
         inProgress: true,

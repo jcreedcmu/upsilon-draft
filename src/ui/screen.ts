@@ -6,6 +6,11 @@ export type Attr = { fg: ColorCode, bg: ColorCode };
 export type Rect = { x: number, y: number, w: number, h: number };
 export type AttrString = { str: string, attr: Attr };
 
+export const BOXN = 1;
+export const BOXE = 2;
+export const BOXS = 4;
+export const BOXW = 8;
+
 // special characters
 export const Chars = {
   LOCK: '\x04',
@@ -19,14 +24,13 @@ export const Chars = {
   SHADE4: '\x00',
   CHECKMARK: '\xa4',
   SPEAKER: '\xa5',
+  BOXN: String.fromCharCode(0x10 + BOXN),
+  BOXS: String.fromCharCode(0x10 + BOXS),
+  BOXW: String.fromCharCode(0x10 + BOXW),
+  BOXE: String.fromCharCode(0x10 + BOXE),
 }
 
 export const arrowChars = '\xa0\xa1\xa2\xa3';
-
-export const BOXN = 1;
-export const BOXE = 2;
-export const BOXS = 4;
-export const BOXW = 8;
 
 type StrState = {
   start: Point,

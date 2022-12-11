@@ -1,4 +1,4 @@
-import { logger } from '../util/debug';
+import { doOnce, logger } from '../util/debug';
 import { Resources } from '../fs/resources';
 import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
 import { Point } from '../util/types';
@@ -15,6 +15,7 @@ const FS_LEN = int(COLS / 2) - 1;
 const CHARGE_COL_SIZE = 3;
 const SIZE_COL_SIZE = 3;
 const MARGIN = 1;
+const FILE_COL_SIZE = FS_LEN - CHARGE_COL_SIZE - SIZE_COL_SIZE - MARGIN;
 const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 
 // Everything with "Renderable" in its name is a sort of convenience
@@ -23,6 +24,7 @@ const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 
 export type RenderableLine = {
   str: string,
+  noTruncate?: boolean, // XXX should refactor to get rid of this
   itemType: ItemType,
   text?: string,
   inProgress?: boolean,
@@ -49,21 +51,20 @@ export type Renderable =
   | { t: 'fsView' } & FsRenderable
   | { t: 'textDialogView' } & TextDialogRenderable;
 
-function defaultLine(name: string): RenderableLine {
-  return {
-    itemType: 'plain',
-    resources: {},
-    attr: { fg: 15, bg: 0 },
-    size: 1,
-    str: '  ' + name,
-    text: '...'
-  };
+function truncate(name: string, len: number) {
+  if (name.length > len) {
+    return name.substring(0, len - 1) + Chars.BOXW;
+  }
+  else {
+    return name;
+  }
 }
 
 function emptyRenderableLine(): RenderableLine {
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   return {
     str: repeat(boxw, FS_LEN),
+    noTruncate: true,
     itemType: 'plain',
     attr: { fg: ColorCode.yellow, bg: ColorCode.blue },
     size: 0,
@@ -125,7 +126,7 @@ function invertAttrText(x: AttrString): AttrString {
 
 function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine, show: Show, invert?: boolean): void {
   const { x, y } = p;
-  const str = line.str;
+  const str = line.noTruncate ? line.str : truncate(line.str, FILE_COL_SIZE);
   const cpu = line.resources.cpu ?? 0;
   const network = line.resources.network ?? 0;
   const data = line.resources.data ?? 0;
