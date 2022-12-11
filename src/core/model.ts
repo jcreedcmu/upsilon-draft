@@ -14,7 +14,7 @@ export type Acl =
   | 'exec'
   | 'instr'
   | 'unlock'
-  | 'checked';
+  ;
 export type Acls = { [P in Acl]?: boolean };
 
 export type UserError = {
@@ -48,12 +48,12 @@ export type Value = number | string;
 
 export type ItemType =
   | 'plain'
-  | 'checkbox'
   | 'sound'
   ;
 
 export type ItemContent =
-  | { t: 'text', text: string };
+  | { t: 'text', text: string }
+  | { t: 'checkbox', checked: boolean };
 
 export type Item = {
   name: string, // displayable name
@@ -219,9 +219,18 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
   }
   const rv: Record<string, SoundEffect> = {};
 
-  const ix = cont.findIndex(item => item.itemType == 'checkbox' && item.name == 'sounds');
-  if (!(ix != -1 && cont[ix].acls.checked))
-    return {}; // disable all sounds
+
+  const ix = cont.findIndex(item => item.content.t == 'checkbox' && item.name == 'sounds');
+  if (ix == -1)
+    return {};
+  else {
+    const content = cont[ix].content;
+    if (content.t != 'checkbox') {
+      throw new Error(`invariant violation, found checkbox but wasn't checkbox somehow?`);
+    }
+    if (!content.checked)
+      return {};
+  }
 
   cont.forEach(item => {
     if (item.contents.length >= 1) {

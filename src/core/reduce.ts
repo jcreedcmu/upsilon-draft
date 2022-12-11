@@ -146,7 +146,12 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
 export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]] {
   const loc = getLocation(state.fs, ident);
   state = produce(state, s => {
-    modifyItemꜝ(s.fs, ident, item => { item.acls.checked = !item.acls.checked; });
+    modifyItemꜝ(s.fs, ident, item => {
+      const content = item.content;
+      if (content.t != 'checkbox')
+        throw new Error(`invariant violation, tried to toggle a non-checkbox`);
+      content.checked = !content.checked;
+    });
   });
   state = processHooks(state, hooksOfLocation(state.fs, loc));
   return [state,

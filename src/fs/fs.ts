@@ -181,11 +181,11 @@ export function itemOfPlan(plan: ItemPlan): Item {
     };
 
     case 'checkbox': return {
-      itemType: 'checkbox',
+      itemType: 'plain',
       name: plan.name,
-      acls: { pickup: true, checked: plan.checked },
+      acls: { pickup: true },
       contents: [],
-      content: textContent(''),
+      content: { t: 'checkbox', checked: plan.checked },
       resources: {},
       size: 1,
     };

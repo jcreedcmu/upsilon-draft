@@ -95,7 +95,7 @@ function execActionForItem(ident: Ident, item: Item): ExecLineAction {
   if (item.itemType == 'sound') {
     return { t: 'play', ident };
   }
-  else if (item.itemType == 'checkbox') {
+  else if (item.content.t == 'checkbox') {
     return { t: 'toggle', ident };
   }
   if (canExec(item))
@@ -136,7 +136,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
     resources: item.resources,
     chargeNeeded: item.acls.exec ? 1 : 0,
     attr,
-    checked: item.itemType == 'checkbox' ? item.acls.checked : undefined,
+    checked: item.content.t == 'checkbox' ? item.content.checked : undefined,
   }
 }
 
