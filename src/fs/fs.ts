@@ -2,7 +2,7 @@ import { produce } from "../util/produce";
 import { Resources } from './resources';
 import { SpecialId } from "./initialFs";
 import { canOpen } from '../core/lines';
-import { Hook, Ident, Item, ItemContent, ItemType, Location } from '../core/model';
+import { Hook, Ident, Item, ItemContent, Location } from '../core/model';
 import { getVirtualItem, getVirtualItemLocation } from "./vfs";
 import { logger } from "../util/debug";
 
@@ -26,7 +26,7 @@ export type Fs = {
 export type ItemPlan =
   | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[], resources?: Resources }
   | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, numTargets?: number, resources?: Resources }
-  | { t: 'file', name: string, content?: ItemContent, size?: number, resources?: Resources, forceId?: Ident, itemType?: ItemType }
+  | { t: 'file', name: string, content?: ItemContent, size?: number, resources?: Resources, forceId?: Ident }
   | { t: 'instr', name: string }
   | { t: 'checkbox', name: string, checked: boolean, forceId?: Ident };
 
@@ -103,7 +103,6 @@ export function getItemIdsAfter(fs: Fs, ident: Ident, howMany: number): Ident[] 
 function makeInsertRootItem(fs: Fs, name: SpecialId): Fs {
   [fs,] = insertRootItem(fs, name, {
     name,
-    itemType: 'plain',
     acls: {},
     contents: [],
     content: textContent(''),
@@ -133,7 +132,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
 
     case 'dir': {
       return {
-        itemType: 'plain',
         name: plan.name,
         acls: { open: true },
         // XXX This is a little sketchy.
@@ -150,7 +148,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
 
     case 'exec': {
       return {
-        itemType: 'plain',
         name: plan.name,
         acls: { exec: true, pickup: true },
         contents: [],
@@ -161,7 +158,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
     }
 
     case 'file': return {
-      itemType: plan.itemType ?? 'plain',
       name: plan.name,
       acls: { pickup: true },
       contents: [],
@@ -171,7 +167,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
     };
 
     case 'instr': return {
-      itemType: 'plain',
       name: plan.name,
       acls: { instr: true, pickup: true },
       content: textContent(''),
@@ -181,7 +176,6 @@ export function itemOfPlan(plan: ItemPlan): Item {
     };
 
     case 'checkbox': return {
-      itemType: 'plain',
       name: plan.name,
       acls: { pickup: true },
       contents: [],

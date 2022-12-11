@@ -7,7 +7,7 @@ import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
 import { getContents, getInventoryItem, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
-import { GameState, Show, SceneState, UserError, ItemType } from '../core/model';
+import { GameState, Show, SceneState, UserError } from '../core/model';
 import { nowTicks } from '../core/clock';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 
@@ -25,7 +25,6 @@ const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 export type RenderableLine = {
   str: string,
   noTruncate?: boolean, // XXX should refactor to get rid of this
-  itemType: ItemType,
   text?: string,
   inProgress?: boolean,
   resources: Resources,
@@ -65,7 +64,6 @@ function emptyRenderableLine(): RenderableLine {
   return {
     str: repeat(boxw, FS_LEN),
     noTruncate: true,
-    itemType: 'plain',
     attr: { fg: ColorCode.yellow, bg: ColorCode.blue },
     size: 0,
     resources: {}

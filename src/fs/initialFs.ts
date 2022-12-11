@@ -77,7 +77,7 @@ function soundsDir(): ItemPlan {
     const { name, soundEffect } = sound;
     return {
       t: 'dir', name, contents: [
-        { t: 'file', itemType: 'plain', name: soundEffect + '.snd', content: { t: 'sound', effect: soundEffect } }
+        { t: 'file', name: soundEffect + '.snd', content: { t: 'sound', effect: soundEffect } }
       ], hooks: ['SOUND']
     }
   }
