@@ -130,23 +130,13 @@ function invertAttrText(x: AttrString): AttrString {
   return { ...x, attr: invertAttr(x.attr) };
 }
 
-function renderSpecialLine(screen: Screen, p: Point, len: number, line: SpecialRenderableLine, show: Show, invert?: boolean): void {
+function renderSpecialLine(screen: Screen, p: Point, len: number, line: SpecialRenderableLine, attrs: LineAttrs): void {
   const { x, y } = p;
-  const baseAttrs = {
-    base: line.attr,
-  };
-  const attrs = invert ? mapval(baseAttrs, invertAttr) : baseAttrs;
   screen.drawTagLine(screen.at(x, y), len, line.str, attrs.base);
 }
 
-function renderItemLine(screen: Screen, p: Point, len: number, line: ItemRenderableLine, show: Show, invert?: boolean): void {
+function renderItemLine(screen: Screen, p: Point, len: number, line: ItemRenderableLine, show: Show, attrs: LineAttrs, invert: boolean): void {
   const { x, y } = p;
-
-  const baseAttrs = {
-    base: line.attr,
-  };
-  const attrs = invert ? mapval(baseAttrs, invertAttr) : baseAttrs;
-
   if (line.inProgress) {
     screen.drawTagLine(screen.at(x, y), len, line.str, attrs.base);
     return;
@@ -191,10 +181,20 @@ function renderItemLine(screen: Screen, p: Point, len: number, line: ItemRendera
   }
 }
 
+type LineAttrs = {
+  base: Attr
+};
+
 function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine, show: Show, invert?: boolean): void {
+
+  const baseAttrs: LineAttrs = {
+    base: line.attr,
+  };
+  const attrs: LineAttrs = invert ? mapval(baseAttrs, invertAttr) as LineAttrs : baseAttrs;
+
   switch (line.t) {
-    case 'item': renderItemLine(screen, p, len, line, show, invert); break;
-    case 'special': renderSpecialLine(screen, p, len, line, show, invert); break;
+    case 'item': renderItemLine(screen, p, len, line, show, attrs, invert || false); break;
+    case 'special': renderSpecialLine(screen, p, len, line, attrs); break;
   }
 }
 
