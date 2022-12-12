@@ -46,3 +46,7 @@ export function debugOnce(level: DebugLevel) {
   DEBUG[level] = false;
   doOnce('_' + level, () => { DEBUG[level] = true; });
 }
+
+export function logOnce(...msg: any[]) {
+  doOnce('logOnce', () => { console.log(...msg); });
+}

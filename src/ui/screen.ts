@@ -24,6 +24,8 @@ export const Chars = {
   SHADE4: '\x00',
   CHECKMARK: '\xa4',
   SPEAKER: '\xa5',
+  TOP_HALF: '\xa6',
+  BOTTOM_HALF: '\xa7',
   BOXN: String.fromCharCode(0x10 + BOXN),
   BOXS: String.fromCharCode(0x10 + BOXS),
   BOXW: String.fromCharCode(0x10 + BOXW),

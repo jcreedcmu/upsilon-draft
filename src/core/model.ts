@@ -1,6 +1,7 @@
 import { Fs, getContents, getFullContents, getItem, itemContents } from '../fs/fs';
 import { initialFs, SpecialId } from '../fs/initialFs';
 import { Resources } from '../fs/resources';
+import { ImgData } from '../ui/image';
 import { AbstractSoundEffect, allSoundEffects, SoundEffect } from '../ui/sound';
 import { DEBUG } from '../util/debug';
 import { produce } from '../util/produce';
@@ -51,7 +52,7 @@ export type ItemContent =
   | { t: 'dir', contents: Ident[] }
   | { t: 'checkbox', checked: boolean }
   | { t: 'sound', effect: SoundEffect }
-  | { t: 'image', data: number[] }
+  | { t: 'image', data: ImgData }
   ;
 
 export type Item = {

@@ -48,3 +48,7 @@ export function lerp(a: number, b: number, t: number) {
 export function mlerp(a: number, b: number, t: number) {
   return Math.exp(lerp(Math.log(a), Math.log(b), t));
 }
+
+export function unreachable(x: never): void {
+
+}

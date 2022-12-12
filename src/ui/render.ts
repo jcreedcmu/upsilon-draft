@@ -4,9 +4,10 @@ import { GameState, SceneState, Show, UserError } from '../core/model';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 import { getInventoryItem, getItem } from '../fs/fs';
 import { Resources } from '../fs/resources';
-import { doOnce, logger } from '../util/debug';
+import { doOnce, logger, logOnce } from '../util/debug';
 import { Point } from '../util/types';
 import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
+import { ImgData, tagStrOfImg } from './image';
 import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
 import { ColorCode, COLS, ROWS } from './ui-constants';
 
@@ -22,10 +23,14 @@ const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
 // representation a bit closer in form (compared to the raw state
 // data) to what we need to render.
 
+export type InfoBox =
+  | { t: 'text', text: string }
+  | { t: 'image', data: ImgData };
+
 export type ItemRenderableLine = {
   t: 'item',
   str: string,
-  text?: string,
+  infobox?: InfoBox,
   resources: Resources,
   size: number,
   checked?: boolean | undefined,
@@ -123,7 +128,7 @@ const DATA_ATTR = { fg: ColorCode.bgreen, bg: ColorCode.blue };
 
 const MODELINE_ATTR = { fg: ColorCode.yellow, bg: ColorCode.black };
 const ERROR_ATTR = { fg: ColorCode.yellow, bg: ColorCode.red };
-const INV_ATTR = { fg: ColorCode.yellow, bg: ColorCode.blue };
+const INV_ATTR = { fg: ColorCode.yellow, bg: ColorCode.blue }; // "inventory attr"? but it's more broadly used than that
 const GRAY_ATTR = { fg: ColorCode.bblack, bg: ColorCode.blue };
 
 function invertAttrText(x: AttrString): AttrString {
@@ -253,32 +258,39 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number): [Rendera
   return [itemLines, offset];
 }
 
-function textOfRenderableLine(line: RenderableLine): string | undefined {
-  switch (line.t) {
-    case 'item': return line.text;
-    case 'special': return undefined;
+function renderLineInfo(screen: Screen, line: RenderableLine) {
+  // draw the info the line content wants us to
+  if (line.t == 'special')
+    return;
+  if (line.infobox == undefined)
+    return;
+  switch (line.infobox.t) {
+    case 'text': {
+      const text = line.infobox.text;
+      screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), text, INV_ATTR);
+      break;
+    }
+    case 'image': {
+      screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), tagStrOfImg(line.infobox.data), INV_ATTR);
+      break;
+    }
   }
-}
 
-function renderLineInfo(screen: Screen, line: RenderableLine, selected: boolean) {
-  const text = textOfRenderableLine(line);
-  if (text !== undefined && selected) {
-    screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), text, INV_ATTR);
-  }
-  if (selected) {
-    const rrs = getRenderableResources(line);
-    rrs.forEach((rr, ix) => {
-      const nameStr = `${rr.name}:`;
-      screen.drawTagStr(screen.at(FS_LEN + 1, screen.rows - 3 - ix), nameStr, INV_ATTR);
-      if (rr.count >= 5)
-        screen.drawAttrStr(
-          screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix),
-          [{ str: rr.count + '', attr: INV_ATTR }, { str: rr.symbol, attr: rr.attr }]
-        );
-      else
-        screen.drawTagStr(screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
-    });
-  }
+  // draw resources info
+  const rrs = getRenderableResources(line);
+  rrs.forEach((rr, ix) => {
+    const nameStr = `${rr.name}:`;
+    screen.drawTagStr(screen.at(FS_LEN + 1, screen.rows - 3 - ix), nameStr, INV_ATTR);
+    if (rr.count >= 5)
+      screen.drawAttrStr(
+        screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix),
+        [{ str: rr.count + '', attr: INV_ATTR }, { str: rr.symbol, attr: rr.attr }]
+      );
+    else
+      screen.drawTagStr(screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
+  });
+
+
 }
 
 export function renderFsView(rend: FsRenderable): Screen {
@@ -291,8 +303,8 @@ export function renderFsView(rend: FsRenderable): Screen {
   displayableLines.forEach((line, i) => {
     const lineIndex = i + offset;
     const selected = lineIndex == rend.curLine;
-    if (rend.show.info) {
-      renderLineInfo(screen, line, selected);
+    if (rend.show.info && selected) {
+      renderLineInfo(screen, line);
     }
     renderLine(screen, { x: 0, y: i }, FS_LEN, line, rend.show, selected);
   });

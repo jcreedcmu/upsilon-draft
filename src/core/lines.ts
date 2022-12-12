@@ -1,12 +1,12 @@
 import { getContents, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initialFs';
-import { ItemRenderableLine, RenderableLine } from '../ui/render';
+import { InfoBox, ItemRenderableLine, RenderableLine } from '../ui/render';
 import { Attr, Chars } from '../ui/screen';
 import { ColorCode, COLS } from '../ui/ui-constants';
-import { invertAttr, repeat } from '../util/util';
+import { invertAttr, repeat, unreachable } from '../util/util';
 import { nowTicks } from './clock';
 import { ErrorCode } from './errors';
-import { GameState, Ident, Item, numTargetsOfExecutable } from './model';
+import { GameState, Ident, Item, ItemContent, numTargetsOfExecutable } from './model';
 
 export type Action =
   | { t: 'back' }
@@ -126,6 +126,18 @@ function dropActionForItem(item: Item, loc: Ident, ix: number): DropLineAction {
   return { t: 'drop', loc, ix };
 }
 
+function renderInfoBox(content: ItemContent): InfoBox | undefined {
+  switch (content.t) {
+    case 'text': return { t: 'text', text: content.text };
+    case 'image': return { t: 'image', data: content.data };
+    case 'dir': return undefined;
+    case 'checkbox': return undefined;
+    case 'sound': return undefined;
+  }
+  // wouldn't get nonexhaustivity check otherwise because fallthrough would return undefined
+  unreachable(content);
+}
+
 export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): ItemRenderableLine {
   const str = prefixForItem(item) + item.name;
   const _attr = attrForItem(item);
@@ -135,7 +147,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
   return {
     t: 'item',
     str,
-    text: (item.content.t == 'text' ? item.content.text : ''),
+    infobox: renderInfoBox(item.content),
     size: item.size,
     resources: item.resources,
     chargeNeeded: item.acls.exec ? 1 : 0,
