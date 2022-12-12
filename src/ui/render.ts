@@ -260,6 +260,27 @@ function textOfRenderableLine(line: RenderableLine): string | undefined {
   }
 }
 
+function renderLineInfo(screen: Screen, line: RenderableLine, selected: boolean) {
+  const text = textOfRenderableLine(line);
+  if (text !== undefined && selected) {
+    screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), text, INV_ATTR);
+  }
+  if (selected) {
+    const rrs = getRenderableResources(line);
+    rrs.forEach((rr, ix) => {
+      const nameStr = `${rr.name}:`;
+      screen.drawTagStr(screen.at(FS_LEN + 1, screen.rows - 3 - ix), nameStr, INV_ATTR);
+      if (rr.count >= 5)
+        screen.drawAttrStr(
+          screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix),
+          [{ str: rr.count + '', attr: INV_ATTR }, { str: rr.symbol, attr: rr.attr }]
+        );
+      else
+        screen.drawTagStr(screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
+    });
+  }
+}
+
 export function renderFsView(rend: FsRenderable): Screen {
   const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
   logger('renderFsView', rend);
@@ -271,24 +292,7 @@ export function renderFsView(rend: FsRenderable): Screen {
     const lineIndex = i + offset;
     const selected = lineIndex == rend.curLine;
     if (rend.show.info) {
-      const text = textOfRenderableLine(line);
-      if (text !== undefined && selected) {
-        screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), text, INV_ATTR);
-      }
-      if (selected) {
-        const rrs = getRenderableResources(line);
-        rrs.forEach((rr, ix) => {
-          const nameStr = `${rr.name}:`;
-          screen.drawTagStr(screen.at(FS_LEN + 1, screen.rows - 3 - ix), nameStr, INV_ATTR);
-          if (rr.count >= 5)
-            screen.drawAttrStr(
-              screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix),
-              [{ str: rr.count + '', attr: INV_ATTR }, { str: rr.symbol, attr: rr.attr }]
-            );
-          else
-            screen.drawTagStr(screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
-        });
-      }
+      renderLineInfo(screen, line, selected);
     }
     renderLine(screen, { x: 0, y: i }, FS_LEN, line, rend.show, selected);
   });

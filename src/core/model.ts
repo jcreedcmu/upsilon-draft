@@ -50,7 +50,9 @@ export type ItemContent =
   | { t: 'text', text: string }
   | { t: 'dir', contents: Ident[] }
   | { t: 'checkbox', checked: boolean }
-  | { t: 'sound', effect: SoundEffect };
+  | { t: 'sound', effect: SoundEffect }
+  | { t: 'image', data: number[] }
+  ;
 
 export type Item = {
   name: string, // displayable name

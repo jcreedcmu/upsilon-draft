@@ -180,8 +180,9 @@ function initialPlans(): VirtualItemPlan[] {
         },
         { t: 'file', name: 'bar', content: textContent('Here is some {white}white text{/} and here is some {red}red text{/}.') },
         { t: 'file', name: 'mumble', size: 23 },
-        { t: 'checkbox', name: 'toggle', checked: true },
-        { t: 'checkbox', name: 'toggle', checked: false },
+        { t: 'checkbox', name: 'toggle1', checked: true },
+        { t: 'checkbox', name: 'toggle2', checked: false },
+        { t: 'file', name: 'image', content: { t: 'image', data: [0, 1, 2] } },
       ]
     },
     {
