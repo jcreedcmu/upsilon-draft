@@ -4,7 +4,7 @@ import { GameState, SceneState, Show, UserError } from '../core/model';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 import { getInventoryItem, getItem } from '../fs/fs';
 import { Resources } from '../fs/resources';
-import { logger } from '../util/debug';
+import { doOnce, logger } from '../util/debug';
 import { Point } from '../util/types';
 import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
 import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
@@ -217,12 +217,86 @@ export function getRenderableResources(line: RenderableLine): RenderableResource
   return rv;
 }
 
+/*
+Depending on how many things are inserted, we want to insert varying
+amounts of guides. For the sake of example, suppose FS_ROWS is 4.
+Asymptotically the thing we want to divide by is FS_ROWS - 2.
+                      offset, numLinesToShow, prev, next
+#                     (0, 1)
+##                    (0, 2)
+###                   (0, 3)
+####                  (0, 4)
+###N P##              (0, 3, N), (2, 2, P)
+###N P###             (0, 3, N), (2, 3, P)
+###N P##N P##         (0, 3, N), (2, 2, PN), (4, 2, P)
+###N P##N P###        (0, 3, N), (2, 2, PN), (4, 3, P)
+###N P##N P##N P##    (0, 3, N), (2, 2, PN), (4, 2, PN), (6, 2, P)
+
+Now think about FS_ROWS=5, and compute which page we're on
+0
+00
+000
+0000
+00000
+0000N P11
+0000N P111
+0000N P1111
+0000N P111N P2222
+-012   345   6789
+
+*/
+
+function getLastPage(numLines: number, FS_ROWS: number): number {
+  return Math.max(0, Math.floor(numLines / (FS_ROWS - 2)) - 1);
+}
+
+function getWhichPage(lastPage: number, curLine: number, numLines: number, FS_ROWS: number): number {
+  const tweak = (curLine == numLines - 1 && (curLine) % (FS_ROWS - 2) == 1) ? 1 : 0;
+  const pageEstimate = Math.floor((curLine - 1) / (FS_ROWS - 2)) - tweak;
+  // which page is curLine actually on
+  const whichPage =
+    Math.min(lastPage, Math.max(0, pageEstimate));
+
+  return whichPage;
+}
+
+function go() {
+  let output = '';
+  const FS_ROWS = 5;
+
+  for (let numLines = 0; numLines < 20; numLines++) {
+    const lastPage = getLastPage(numLines, FS_ROWS);
+    output += lastPage + ' ';
+    for (let curLine = 0; curLine < numLines; curLine++) {
+      const whichPage = getWhichPage(lastPage, curLine, numLines, FS_ROWS);
+      output += whichPage + '';
+    }
+    output += "\n";
+  }
+  console.log(output);
+}
+go();
+
 function getDisplayableLines(lines: RenderableLine[], curLine: number): [RenderableLine[], number] {
-  if (lines.length <= FS_ROWS)
+  const numLines = lines.length;
+  if (numLines <= FS_ROWS)
     return [lines, 0];
-  const page = Math.floor(curLine / FS_ROWS);
-  const offset = page * FS_ROWS;
-  return [lines.slice(offset, offset + FS_ROWS), offset];
+
+  const lastPage = getLastPage(numLines, FS_ROWS);
+  const whichPage = getWhichPage(lastPage, curLine, numLines, FS_ROWS);
+  const shouldInsertPrevGuard = whichPage > 0;
+  const shouldInsertNextGuard = whichPage < lastPage;
+  const numLinesToShow = FS_ROWS - (shouldInsertNextGuard ? 1 : 0) - (shouldInsertPrevGuard ? 1 : 0);
+  const offset = whichPage * (FS_ROWS - 2);
+  const ioffset = offset + (shouldInsertPrevGuard ? 1 : 0);
+  const itemLines: RenderableLine[] = lines.slice(ioffset, ioffset + numLinesToShow);
+  if (shouldInsertPrevGuard) {
+    itemLines.unshift({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_UP, FS_LEN) });
+  }
+  if (shouldInsertNextGuard) {
+    itemLines.push({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_DOWN, FS_LEN) });
+  }
+  return [itemLines, offset];
 }
 
 function textOfRenderableLine(line: RenderableLine): string | undefined {

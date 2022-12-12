@@ -28,6 +28,10 @@ export const Chars = {
   BOXS: String.fromCharCode(0x10 + BOXS),
   BOXW: String.fromCharCode(0x10 + BOXW),
   BOXE: String.fromCharCode(0x10 + BOXE),
+  ARROW_UP: '\xa0',
+  ARROW_LEFT: '\xa1',
+  ARROW_DOWN: '\xa2',
+  ARROW_RIGHT: '\xa3',
 }
 
 export const arrowChars = '\xa0\xa1\xa2\xa3';

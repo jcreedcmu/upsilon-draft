@@ -172,7 +172,7 @@ function initialPlans(): VirtualItemPlan[] {
       t: 'dir', name: 'home', contents: [
         { t: 'file', name: 'foo', resources: { cpu: 5 } },
         {
-          t: 'dir', name: 'bigdir', contents: [...Array(80).keys()].map(ix => {
+          t: 'dir', name: 'bigdir', contents: [...Array(31).keys()].map(ix => {
             return { t: 'file', name: ix + '', content: textContent('') };
           })
         },
