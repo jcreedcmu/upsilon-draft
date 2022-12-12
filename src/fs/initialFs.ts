@@ -3,6 +3,7 @@ import { ExecutableName, executables } from '../core/executables';
 import { KeyAction } from '../core/model';
 import { arrowChars } from '../ui/screen';
 import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
+import { isDev } from '../util/debug';
 import { Fs, insertPlans, ItemPlan, mkFs, textContent, VirtualItemPlan } from './fs';
 import { Resources } from './resources';
 
@@ -46,7 +47,7 @@ function keysDir(): ItemPlan {
     { name: 'd', keyAction: KeyAction.exec },
     { name: 's', keyAction: KeyAction.nextLine },
     { name: 'w', keyAction: KeyAction.prevLine },
-    { name: 'z', keyAction: KeyAction.debug },
+    ...(isDev ? [{ name: 'z', keyAction: KeyAction.debug }] : []),
   ];
   function keyDir(key: { name: string, keyAction: KeyAction }): ItemPlan {
     const { name, keyAction } = key;

@@ -217,35 +217,6 @@ export function getRenderableResources(line: RenderableLine): RenderableResource
   return rv;
 }
 
-/*
-Depending on how many things are inserted, we want to insert varying
-amounts of guides. For the sake of example, suppose FS_ROWS is 4.
-Asymptotically the thing we want to divide by is FS_ROWS - 2.
-                      offset, numLinesToShow, prev, next
-#                     (0, 1)
-##                    (0, 2)
-###                   (0, 3)
-####                  (0, 4)
-###N P##              (0, 3, N), (2, 2, P)
-###N P###             (0, 3, N), (2, 3, P)
-###N P##N P##         (0, 3, N), (2, 2, PN), (4, 2, P)
-###N P##N P###        (0, 3, N), (2, 2, PN), (4, 3, P)
-###N P##N P##N P##    (0, 3, N), (2, 2, PN), (4, 2, PN), (6, 2, P)
-
-Now think about FS_ROWS=5, and compute which page we're on
-0
-00
-000
-0000
-00000
-0000N P11
-0000N P111
-0000N P1111
-0000N P111N P2222
--012   345   6789
-
-*/
-
 function getLastPage(numLines: number, FS_ROWS: number): number {
   return Math.max(0, Math.floor((numLines - 3) / (FS_ROWS - 2)));
 }
@@ -259,23 +230,6 @@ function getWhichPage(lastPage: number, curLine: number, numLines: number, FS_RO
 
   return whichPage;
 }
-
-function go() {
-  let output = '';
-  const FS_ROWS = 4;
-
-  for (let numLines = 0; numLines < 20; numLines++) {
-    const lastPage = getLastPage(numLines, FS_ROWS);
-    output += lastPage + ' ';
-    for (let curLine = 0; curLine < numLines; curLine++) {
-      const whichPage = getWhichPage(lastPage, curLine, numLines, FS_ROWS);
-      output += whichPage + '';
-    }
-    output += "\n";
-  }
-  console.log(output);
-}
-// go();
 
 function getDisplayableLines(lines: RenderableLine[], curLine: number): [RenderableLine[], number] {
   const numLines = lines.length;
@@ -296,20 +250,6 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number): [Rendera
   if (shouldInsertNextGuard) {
     itemLines.push({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_DOWN, FS_LEN) });
   }
-
-  doOnce('...', () => {
-    console.log(`FS_ROWS ${FS_ROWS}`);
-    console.log(`curLine ${curLine}`);
-    console.log(`numLines ${numLines}`);
-    console.log(`numLinesToShow ${numLinesToShow}`);
-    console.log(`lastPage ${lastPage}`);
-    console.log(`whichPage ${whichPage}`);
-    console.log(`prev ${shouldInsertPrevGuard}`);
-    console.log(`next ${shouldInsertNextGuard}`);
-    console.log(`offset ${offset}`);
-    console.log(`ioffset ${ioffset}`);
-  });
-
   return [itemLines, offset];
 }
 
