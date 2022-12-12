@@ -12,6 +12,10 @@ describe('screen utilities', () => {
       { attr: { bg: 0, fg: 7 }, str: "hello\nworld" }
     ]);
 
+    expect(parse('{black}{bg-white}hello\nworld{/}')).toEqual([
+      { attr: { bg: 7, fg: 0 }, str: "hello\nworld" }
+    ]);
+
     expect(parse('x{bg-bblue}hello world{/}!')).toEqual([
       { attr: { bg: 0, fg: 15 }, str: "x" },
       { attr: { bg: 12, fg: 15 }, str: "hello world" },
