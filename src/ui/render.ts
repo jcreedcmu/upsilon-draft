@@ -271,7 +271,7 @@ function renderLineInfo(screen: Screen, line: RenderableLine) {
       break;
     }
     case 'image': {
-      screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), tagStrOfImg(line.infobox.data), INV_ATTR);
+      screen.drawTagStr(screen.at(FS_LEN + 2, INFO_SECTION_START_Y + 1, FS_LEN), tagStrOfImg(line.infobox.data), INV_ATTR);
       break;
     }
   }

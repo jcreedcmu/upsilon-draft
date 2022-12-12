@@ -206,7 +206,7 @@ function initialPlans(): VirtualItemPlan[] {
         { t: 'file', name: 'mumble', size: 23 },
         { t: 'checkbox', name: 'toggle1', checked: true },
         { t: 'checkbox', name: 'toggle2', checked: false },
-        { t: 'file', name: 'portrait.bit', content: { t: 'image', data: initialImage }, resources: { data: 3 } },
+        { t: 'file', name: 'portrait.bmp', content: { t: 'image', data: initialImage }, resources: { data: 3, cpu: 2 } },
       ]
     },
     {

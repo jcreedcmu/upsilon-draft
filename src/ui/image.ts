@@ -15,5 +15,5 @@ export function tagStrOfImg(dat: ImgData): string {
     }
     rv += '\n';
   }
-  return `{black}${rv}`;
+  return `{black}{bg-white}${rv}`;
 }
