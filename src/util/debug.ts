@@ -30,12 +30,16 @@ export function logger(level: DebugLevel, ...args: any[]) {
   }
 }
 
-const done: Record<string, boolean> = {};
+const debugDone: Record<string, boolean> = {};
 export function doOnce(tag: string, k: () => void): void {
-  if (!done[tag]) {
-    done[tag] = true;
+  if (!debugDone[tag]) {
+    debugDone[tag] = true;
     k();
   }
+}
+
+export function doAgain(tag: string): void {
+  debugDone[tag] = false;
 }
 
 export function debugOnce(level: DebugLevel) {

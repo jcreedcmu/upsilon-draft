@@ -247,7 +247,7 @@ Now think about FS_ROWS=5, and compute which page we're on
 */
 
 function getLastPage(numLines: number, FS_ROWS: number): number {
-  return Math.max(0, Math.floor(numLines / (FS_ROWS - 2)) - 1);
+  return Math.max(0, Math.floor((numLines - 3) / (FS_ROWS - 2)));
 }
 
 function getWhichPage(lastPage: number, curLine: number, numLines: number, FS_ROWS: number): number {
@@ -262,7 +262,7 @@ function getWhichPage(lastPage: number, curLine: number, numLines: number, FS_RO
 
 function go() {
   let output = '';
-  const FS_ROWS = 5;
+  const FS_ROWS = 4;
 
   for (let numLines = 0; numLines < 20; numLines++) {
     const lastPage = getLastPage(numLines, FS_ROWS);
@@ -275,7 +275,7 @@ function go() {
   }
   console.log(output);
 }
-go();
+// go();
 
 function getDisplayableLines(lines: RenderableLine[], curLine: number): [RenderableLine[], number] {
   const numLines = lines.length;
@@ -296,6 +296,20 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number): [Rendera
   if (shouldInsertNextGuard) {
     itemLines.push({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_DOWN, FS_LEN) });
   }
+
+  doOnce('...', () => {
+    console.log(`FS_ROWS ${FS_ROWS}`);
+    console.log(`curLine ${curLine}`);
+    console.log(`numLines ${numLines}`);
+    console.log(`numLinesToShow ${numLinesToShow}`);
+    console.log(`lastPage ${lastPage}`);
+    console.log(`whichPage ${whichPage}`);
+    console.log(`prev ${shouldInsertPrevGuard}`);
+    console.log(`next ${shouldInsertNextGuard}`);
+    console.log(`offset ${offset}`);
+    console.log(`ioffset ${ioffset}`);
+  });
+
   return [itemLines, offset];
 }
 

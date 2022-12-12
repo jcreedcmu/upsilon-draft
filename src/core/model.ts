@@ -106,7 +106,8 @@ export enum KeyAction {
   nextLine = 'next-line',
   back = 'back',
   exec = 'exec',
-  pickupDrop = 'pickup-drop', // Maybe want separate pickup and drop actions?
+  pickupDrop = 'pickup-drop', // Maybe want separate pickup and drop actions?,
+  debug = 'debug',
 }
 
 export type Effect =

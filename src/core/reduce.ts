@@ -4,7 +4,7 @@ import { getContents, getFullContents, getInventoryItem, getItem, getItemIdsAfte
 import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
-import { logger } from '../util/debug';
+import { DEBUG, doAgain, logger } from '../util/debug';
 import { getResource, modifyResourceꜝ } from '../fs/resources';
 import { cancelRecurꜝ, ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ } from './executables';
 import { SpecialId } from '../fs/initialFs';
@@ -333,6 +333,10 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
     case KeyAction.nextInventorySlot:
       return [produce(state, s => { modifyInventorySlotꜝ(s, 1) }),
       [{ t: 'playAbstractSound', effect: 'change-slot', loc: undefined }]];
+    case KeyAction.debug: {
+      doAgain('...');
+      return [state, [{ t: 'playSound', effect: 'high', loc: undefined }]];
+    }
   }
 }
 

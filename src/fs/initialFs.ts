@@ -46,6 +46,7 @@ function keysDir(): ItemPlan {
     { name: 'd', keyAction: KeyAction.exec },
     { name: 's', keyAction: KeyAction.nextLine },
     { name: 'w', keyAction: KeyAction.prevLine },
+    { name: 'z', keyAction: KeyAction.debug },
   ];
   function keyDir(key: { name: string, keyAction: KeyAction }): ItemPlan {
     const { name, keyAction } = key;
