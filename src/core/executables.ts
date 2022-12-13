@@ -139,6 +139,15 @@ export function cancelRecurꜝ(state: GameState, ident: Ident) {
   delete state.recurring[ident];
 }
 
+/*
+This is a wrapper around executeInstructionsWithTargets. It is called
+after a binary completes its "progress bar" timeout. The job of
+executeInstructions is to do any work around the particular action of
+the particular executable. Right now this includes:
+
+- gathering what its targets (i.e., arguments) are
+- doing a little ui flash of the targets if execution is successful.
+*/
 export function executeInstructions(state: GameState, instr: ExecutableName, id: Ident): [GameState, Effect[], ErrorInfo | undefined] {
   const numTargets = numTargetsOfExecutableName(instr);
   const loc = getLocation(state.fs, id);
@@ -172,6 +181,11 @@ export function executeInstructions(state: GameState, instr: ExecutableName, id:
   return [state, effects, error];
 }
 
+/*
+executeInstructionswithTargets assumes we know what a binary's targets
+are, and actually updates the state (well, functionally returns an
+updated state) with the real effect of the binary.
+*/
 export function executeInstructionsWithTargets(state: GameState, instr: ExecutableName, actor: Ident, targets: Ident[]): [GameState, Effect[], ErrorInfo | undefined] {
   const loc = getLocation(state.fs, actor);
 
