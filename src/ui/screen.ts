@@ -34,6 +34,14 @@ export const Chars = {
   ARROW_LEFT: '\xa1',
   ARROW_DOWN: '\xa2',
   ARROW_RIGHT: '\xa3',
+  TRI_UP: '\xc0',
+  TRI_LEFT: '\xc1',
+  TRI_DOWN: '\xc2',
+  TRI_RIGHT: '\xc3',
+  LTRI_UP: '\xc4',
+  LTRI_LEFT: '\xc5',
+  LTRI_DOWN: '\xc6',
+  LTRI_RIGHT: '\xc7',
 }
 
 export const arrowChars = '\xa0\xa1\xa2\xa3';

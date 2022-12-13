@@ -338,7 +338,7 @@ export function renderFsView(rend: FsRenderable): Screen {
     screen.drawRect({ x: FS_LEN, y: 0, w: FS_LEN + 1, h: rend.inventoryState.numSlots + 1 }, INV_ATTR);
     screen.drawTagStr(screen.at(FS_LEN + 2, 0), `${boxw}Holding${boxe}`, INV_ATTR);
     if (rend.inventoryState.numSlots > 1)
-      screen.drawTagStr(screen.at(FS_LEN, rend.inventoryState.curSlot + 1), Chars.ARROW_RIGHT, INV_ATTR);
+      screen.drawTagStr(screen.at(FS_LEN, rend.inventoryState.curSlot + 1), Chars.LTRI_RIGHT, INV_ATTR);
   }
   if (rend.show.info) {
     const row = infoSectionStartRow(rend);
