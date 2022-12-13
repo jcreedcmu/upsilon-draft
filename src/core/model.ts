@@ -148,6 +148,11 @@ export type ViewState =
   | { t: 'fsView' }
   | { t: 'textDialogView', back: ViewState };
 
+export type InventoryState = {
+  curSlot: number, // active inventory slot index
+  numSlots: number,
+};
+
 export type GameState = {
   power: boolean, // are we powered on
   fs: Fs,
@@ -158,7 +163,7 @@ export type GameState = {
   error: UserError | undefined,
   path: string[],
 
-  inventorySlot: number, // active inventory slot index
+  inventoryState: InventoryState,
 
   // Timing-related state
   clock: ClockState,
@@ -268,7 +273,10 @@ export function gameStateOfFs(fs: Fs): GameState {
     path: [],
     futures: [],
     recurring: {},
-    inventorySlot: 0,
+    inventoryState: {
+      curSlot: 0,
+      numSlots: 3,
+    },
     _cached_keybindings: keybindingsOfFs(fs),
     _cached_sounds: soundsOfFs(fs),
     _cached_show: showOfFs(fs),

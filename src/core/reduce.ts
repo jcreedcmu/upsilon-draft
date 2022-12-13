@@ -233,7 +233,7 @@ function reducePickupAction(state: GameState, action: PickupLineAction): [GameSt
       let ident, hooks;
       // FIXME: abstract this away into an fs move function
       [fs, ident, hooks] = removeId(fs, action.loc, action.ix);
-      fs = insertIntoInventory(fs, ident, state.inventorySlot);
+      fs = insertIntoInventory(fs, ident, state.inventoryState.curSlot);
       state = produce(state, s => { s.fs = fs; });
       state = processHooks(state, hooks);
       return [
@@ -253,7 +253,7 @@ function reduceDropAction(state: GameState, action: DropLineAction): [GameState,
     case 'drop': {
       let fs = state.fs;
       let ident, hooks1, hooks;
-      [fs, ident] = removeFromInventory(fs, state.inventorySlot);
+      [fs, ident] = removeFromInventory(fs, state.inventoryState.curSlot);
       [fs, hooks] = insertId(fs, action.loc, action.ix, ident);
       state = produce(state, s => { s.fs = fs; });
       state = processHooks(state, hooks);
@@ -282,11 +282,12 @@ function actionOfKey(state: GameState, keyCode: string): KeyAction | undefined {
 }
 
 function modifyInventorySlotꜝ(state: GameState, increment: number): void {
-  state.inventorySlot = (state.inventorySlot + increment + INVENTORY_MAX_ITEMS) % INVENTORY_MAX_ITEMS;
+  const numItems = state.inventoryState.numSlots;
+  state.inventoryState.curSlot = (state.inventoryState.curSlot + increment + numItems) % numItems;
 }
 
 function shouldDropVersusPickup(state: GameState): boolean {
-  return getInventoryItem(state.fs, state.inventorySlot) != undefined;
+  return getInventoryItem(state.fs, state.inventoryState.curSlot) != undefined;
 }
 
 export function reduceKeyAction(state: GameState, action: KeyAction): [GameState, Effect[]] {

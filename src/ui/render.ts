@@ -1,6 +1,6 @@
 import { nowTicks } from '../core/clock';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
-import { GameState, SceneState, Show, UserError } from '../core/model';
+import { GameState, InventoryState, SceneState, Show, UserError } from '../core/model';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 import { getInventoryItem, getItem } from '../fs/fs';
 import { Resources } from '../fs/resources';
@@ -17,7 +17,10 @@ const CHARGE_COL_SIZE = 3;
 const SIZE_COL_SIZE = 3;
 const MARGIN = 1;
 const FILE_COL_SIZE = FS_LEN - CHARGE_COL_SIZE - SIZE_COL_SIZE - MARGIN;
-const INFO_SECTION_START_Y = INVENTORY_MAX_ITEMS + 1;
+
+function infoSectionStartRow(rend: FsRenderable) {
+  return rend.inventoryState.numSlots + 1;
+}
 
 // Everything with "Renderable" in its name is a sort of convenience
 // representation a bit closer in form (compared to the raw state
@@ -56,7 +59,7 @@ export type FsRenderable = {
   path: string[],
   error: UserError | undefined,
   invLines: RenderableLine[],
-  inventorySlot: number,
+  inventoryState: InventoryState,
 };
 
 export type TextDialogRenderable = {};
@@ -85,7 +88,7 @@ function emptyRenderableLine(): RenderableLine {
 
 function getInventoryLines(state: GameState): RenderableLine[] {
   const rv: RenderableLine[] = [];
-  for (let i = 0; i < INVENTORY_MAX_ITEMS; i++) {
+  for (let i = 0; i < state.inventoryState.numSlots; i++) {
     const id = getInventoryItem(state.fs, i);
     if (id != undefined) {
       const invItem = getItem(state.fs, id);
@@ -96,10 +99,6 @@ function getInventoryLines(state: GameState): RenderableLine[] {
     }
   }
   return rv;
-}
-
-function getInventorySlot(state: GameState): number {
-  return state.inventorySlot;
 }
 
 function getRenderable(state: GameState): Renderable {
@@ -114,7 +113,7 @@ function getRenderable(state: GameState): Renderable {
         path: state.path,
         show: state._cached_show,
         invLines: getInventoryLines(state),
-        inventorySlot: getInventorySlot(state),
+        inventoryState: state.inventoryState,
       };
     }
     case 'textDialogView':
@@ -258,7 +257,7 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number): [Rendera
   return [itemLines, offset];
 }
 
-function renderLineInfo(screen: Screen, line: RenderableLine) {
+function renderLineInfo(rend: FsRenderable, screen: Screen, line: RenderableLine) {
   // draw the info the line content wants us to
   if (line.t == 'special')
     return;
@@ -267,11 +266,11 @@ function renderLineInfo(screen: Screen, line: RenderableLine) {
   switch (line.infobox.t) {
     case 'text': {
       const text = line.infobox.text;
-      screen.drawTagStr(screen.at(FS_LEN + 1, INFO_SECTION_START_Y + 1, FS_LEN), text, INV_ATTR);
+      screen.drawTagStr(screen.at(FS_LEN + 1, infoSectionStartRow(rend) + 1, FS_LEN), text, INV_ATTR);
       break;
     }
     case 'image': {
-      screen.drawTagStr(screen.at(FS_LEN + 2, INFO_SECTION_START_Y + 1, FS_LEN), tagStrOfImg(line.infobox.data), INV_ATTR);
+      screen.drawTagStr(screen.at(FS_LEN + 2, infoSectionStartRow(rend) + 1, FS_LEN), tagStrOfImg(line.infobox.data), INV_ATTR);
       break;
     }
   }
@@ -304,7 +303,7 @@ export function renderFsView(rend: FsRenderable): Screen {
     const lineIndex = i + offset;
     const selected = lineIndex == rend.curLine;
     if (rend.show.info && selected) {
-      renderLineInfo(screen, line);
+      renderLineInfo(rend, screen, line);
     }
     renderLine(screen, { x: 0, y: i }, FS_LEN, line, rend.show, selected);
   });
@@ -336,13 +335,15 @@ export function renderFsView(rend: FsRenderable): Screen {
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   const boxe = String.fromCharCode(boxify(BOXE)(0));
   if (rend.show.inventory) {
-    screen.drawRect({ x: FS_LEN, y: 0, w: FS_LEN + 1, h: INVENTORY_MAX_ITEMS + 1 }, INV_ATTR);
+    screen.drawRect({ x: FS_LEN, y: 0, w: FS_LEN + 1, h: rend.inventoryState.numSlots + 1 }, INV_ATTR);
     screen.drawTagStr(screen.at(FS_LEN + 2, 0), `${boxw}Holding${boxe}`, INV_ATTR);
-    screen.drawTagStr(screen.at(FS_LEN, rend.inventorySlot + 1), `>`, INV_ATTR);
+    if (rend.inventoryState.numSlots > 1)
+      screen.drawTagStr(screen.at(FS_LEN, rend.inventoryState.curSlot + 1), Chars.ARROW_RIGHT, INV_ATTR);
   }
   if (rend.show.info) {
-    screen.drawRect({ x: FS_LEN, y: INFO_SECTION_START_Y, w: FS_LEN + 1, h: screen.rows - 2 - INFO_SECTION_START_Y }, INV_ATTR);
-    screen.drawTagStr(screen.at(FS_LEN + 2, INFO_SECTION_START_Y), `${boxw}Info${boxe}`, INV_ATTR);
+    const row = infoSectionStartRow(rend);
+    screen.drawRect({ x: FS_LEN, y: row, w: FS_LEN + 1, h: screen.rows - 2 - row }, INV_ATTR);
+    screen.drawTagStr(screen.at(FS_LEN + 2, row), `${boxw}Info${boxe}`, INV_ATTR);
   }
   return screen;
 }
