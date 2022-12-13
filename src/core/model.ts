@@ -53,6 +53,7 @@ export type ItemContent =
   | { t: 'checkbox', checked: boolean }
   | { t: 'sound', effect: SoundEffect }
   | { t: 'image', data: ImgData }
+  | { t: 'inventorySlot' }
   ;
 
 export type Item = {
@@ -275,7 +276,7 @@ export function gameStateOfFs(fs: Fs): GameState {
     recurring: {},
     inventoryState: {
       curSlot: 0,
-      numSlots: 3,
+      numSlots: 1,
     },
     _cached_keybindings: keybindingsOfFs(fs),
     _cached_sounds: soundsOfFs(fs),

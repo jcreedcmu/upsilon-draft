@@ -72,6 +72,7 @@ export type ExecLineAction =
 
 export type PickupLineAction =
   | { t: 'pickup', loc: Ident, ix: number }
+  | { t: 'addInventorySlot', loc: Ident, ix: number }
   | { t: 'error', code: ErrorCode }
 
 export type DropLineAction =
@@ -109,6 +110,10 @@ function execActionForItem(ident: Ident, item: Item): ExecLineAction {
 }
 
 function pickupActionForItem(item: Item, loc: Ident, ix: number): PickupLineAction {
+  if (item.content.t == 'inventorySlot') {
+    return { t: 'addInventorySlot', loc, ix };
+  }
+
   if (!canPickup(item)) {
     if (canOpen(item)) {
       return { t: 'error', code: 'cantPickUpDir' };
@@ -133,6 +138,7 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
     case 'dir': return undefined;
     case 'checkbox': return undefined;
     case 'sound': return undefined;
+    case 'inventorySlot': return undefined;
   }
   // wouldn't get nonexhaustivity check otherwise because fallthrough would return undefined
   unreachable(content);

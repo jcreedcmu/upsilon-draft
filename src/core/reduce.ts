@@ -243,6 +243,24 @@ function reducePickupAction(state: GameState, action: PickupLineAction): [GameSt
         ]
       ];
     }
+
+    case 'addInventorySlot': {
+      let fs = state.fs;
+      let ident, hooks;
+      // FIXME: abstract this away into an fs move function
+      [fs, ident, hooks] = removeId(fs, action.loc, action.ix);
+      state = produce(state, s => {
+        s.fs = fs;
+        s.inventoryState.numSlots = Math.min(INVENTORY_MAX_ITEMS, state.inventoryState.numSlots + 1);
+      });
+      state = processHooks(state, hooks);
+      return [
+        state,
+        [
+          { t: 'playAbstractSound', effect: 'pickup', loc: undefined },
+        ]
+      ];
+    }
   }
 }
 
