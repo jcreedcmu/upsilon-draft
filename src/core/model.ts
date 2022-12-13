@@ -149,17 +149,23 @@ export type ViewState =
   | { t: 'textDialogView', back: ViewState };
 
 export type GameState = {
-  power: boolean,
-  viewState: ViewState,
-  curId: Ident,
-  curLine: number,
+  power: boolean, // are we powered on
   fs: Fs,
+  viewState: ViewState,
+
+  curId: Ident, // maybe these things belong in fsView ViewState
+  curLine: number,
   error: UserError | undefined,
-  clock: ClockState,
   path: string[],
+
+  inventorySlot: number, // active inventory slot index
+
+  // Timing-related state
+  clock: ClockState,
   futures: Future[], // generic future events that happen on a timer
   recurring: Recurring, // active executables that execute recurringly
-  inventorySlot: number, // active inventory slot index
+
+  // Cached copies of some derived state. For now, all of it is Hooks-related.
   _cached_keybindings: Record<string, KeyAction>,
   _cached_sounds: Record<string, SoundEffect>,
   _cached_show: Show,
