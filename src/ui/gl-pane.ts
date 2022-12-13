@@ -207,9 +207,9 @@ export class Pane {
   start_time_s: number = Date.now() / 1000;
   frame: number = 0;
 
-  draw(screen: Screen, drawParams: DrawParams) {
+  draw(screen: Screen | undefined, drawParams: DrawParams) {
     this.frame++;
-    if (this.frame % 3 != 0) return;
+    if (screen == undefined && this.frame % 3 != 0) return;
 
     if (this.env == null)
       throw 'Uninitialized graphics environment';
@@ -219,16 +219,21 @@ export class Pane {
     const query = gl.createQuery()!;
     const actuallyRender = () => {
 
-      gl.useProgram(progText);
+      // If screen is undefined it means we haven't rerendered it since last
+      // draw call. Therefore we can
+      // - retain the old texture state for the texture that represents the text page data
+      // - retain the old framebuffer state for the fully-rendered text page
+      if (screen != undefined) {
+        gl.useProgram(progText);
 
-      // XXX maybe do some dirty-checking here
-      gl.activeTexture(gl.TEXTURE1);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen.imdat);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen.imdat);
 
-      // Render to framebuffer first
-      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-      gl.viewport(0, 0, screen_size.x, screen_size.y);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        // Render to framebuffer first
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+        gl.viewport(0, 0, screen_size.x, screen_size.y);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
 
       // Then apply post-processing effects
       gl.useProgram(progPost);
@@ -245,8 +250,8 @@ export class Pane {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, screen_size.x, screen_size.y);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
     }
+
     if (DEBUG.glTiming) {
       gl.beginQuery(ext.TIME_ELAPSED_EXT, query);
       for (let i = 0; i < 100; i++) {

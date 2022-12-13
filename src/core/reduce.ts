@@ -37,7 +37,7 @@ export function reduce(state: SceneState, action: Action): [SceneState, Effect[]
       else {
         if (state.gameState.power) {
           const [gameState, effects] = reduceGameState(state.gameState, action);
-          return [produce(state, s => { s.gameState = gameState; }), effects];
+          return [produce(state, s => { s.gameState = gameState; s.revision++; }), effects];
         }
         else {
           return [state, []];

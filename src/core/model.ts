@@ -122,7 +122,14 @@ export type Effect =
 // If I need to add more state around settings, menus, saving, etc.,
 // it might go here.
 export type SceneState =
-  | { t: 'game', gameState: GameState };
+  | {
+    t: 'game', gameState: GameState,
+
+    // NOTE: this is sort of unused for now, but I'm leaving it here
+    // in case I need a finer-grained equality check on SceneState.
+    // It's updated in reduce.ts.
+    revision: number,
+  };
 
 export type State = {
   sceneState: SceneState,
@@ -263,7 +270,7 @@ export function gameStateOfFs(fs: Fs): GameState {
 }
 
 export function mkGameState(): SceneState {
-  return { t: 'game', gameState: gameStateOfFs(initialFs()) };
+  return { t: 'game', gameState: gameStateOfFs(initialFs()), revision: 0 };
 }
 
 export function getSelectedId(state: GameState): Ident {

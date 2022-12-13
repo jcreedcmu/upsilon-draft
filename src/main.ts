@@ -9,6 +9,7 @@ import { reduce } from './core/reduce';
 import { render } from "./ui/render";
 import { initSound, playSound } from './ui/sound';
 import { lerp } from "./util/util";
+import { Screen } from "./ui/screen";
 
 // Do a little startup-time preprocessing on the font image so I can
 // edit it more conveniently.
@@ -107,6 +108,8 @@ async function go() {
 
   const sound = initSound();
 
+  let prevSceneState: SceneState | null = null; // think about optimizing rendering
+
   const c = document.getElementById('c') as HTMLCanvasElement;
   const pane = await make_pane(c);
   const state: State[] = [mkState()];
@@ -148,7 +151,7 @@ async function go() {
 
   function maybeReschedule(priorState: SceneState, state: SceneState): SceneState {
     if (state.t == 'game' && priorState.t == 'game') {
-      return { t: 'game', gameState: maybeRescheduleGame(priorState.gameState, state.gameState) };
+      return { t: 'game', gameState: maybeRescheduleGame(priorState.gameState, state.gameState), revision: state.revision };
     }
     else return state;
   }
@@ -183,7 +186,20 @@ async function go() {
   }
 
   function repaint() {
-    const screen = render(state[0].sceneState);
+    let screen: Screen | undefined = undefined;
+    if (state[0].sceneState == prevSceneState) {
+      // Do nothing here. We don't need to rerender the Screen.
+      //
+      // this equality check seems to work ok, but I'm a little
+      // nervous about whether immer (and/or my pattern of use of it)
+      // really guarantees different data
+      // to be referentially different.
+    }
+    else {
+      logger('rendering', `Rendering screen. This shouldn't be constant.`);
+      screen = render(state[0].sceneState);
+      prevSceneState = state[0].sceneState;
+    }
     pane.draw(screen, drawParamsOfState(state[0]));
 
     const ga = state[0].globalAnimationState;
