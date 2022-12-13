@@ -33,6 +33,7 @@ export const executables = {
   modify: 'modify',
   copy: 'copy',
   automate: 'automate',
+  robot: 'robot',
 } as const;
 
 export type ExecutablesType = typeof executables;
@@ -57,6 +58,7 @@ export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'modify': { cycles: 5, cpuCost: 1 },
   'copy': { cycles: 5, cpuCost: 1 },
   'automate': { cycles: 5, cpuCost: 1 },
+  'robot': { cycles: 5, cpuCost: 1 },
 }
 
 export function modificationOrder(): readonly ExecutableName[] {
@@ -83,7 +85,8 @@ export function modificationOrder(): readonly ExecutableName[] {
     executables.magnet,
     executables.modify,
     executables.copy,
-    executables.automate
+    executables.automate,
+    executables.robot
   ];
 
   // We don't ever expect to call this function, but it will only typecheck if
@@ -268,6 +271,10 @@ export function executeInstructions(state: GameState, instr: ExecutableName, tar
         }
       }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
 
+    }
+
+    case executables.robot: {
+      return [state, [], undefined];
     }
   }
 
