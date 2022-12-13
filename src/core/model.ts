@@ -23,7 +23,6 @@ export type UserError = {
 };
 
 export type ExecProgress = {
-  targetIds: Ident[],
   totalTicks: number,
   startTicks: number,
 }
@@ -92,7 +91,7 @@ export type Item = {
 export type GameAction =
   | { t: 'key', code: string }
   | { t: 'clockUpdate', tick: number }
-  | { t: 'finishExecution', actorId: Ident, targetIds: Ident[], instr: ExecutableName }
+  | { t: 'finishExecution', actorId: Ident, instr: ExecutableName }
   | { t: 'clearError' }
   | { t: 'none' }
   | { t: 'recur', ident: Ident }
@@ -303,6 +302,7 @@ export function getSelectedLine(state: GameState): FullLine {
   // return getLineOfItem(ident, getItem(state.fs, ident), state.curLine);
 }
 
+/// XXX Unreachable code? is .numTargets obsolete entirely?
 export function numTargetsOfExecutable(item: Item): number {
   return item.numTargets ?? 1;
 }

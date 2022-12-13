@@ -1,9 +1,10 @@
-import { createAndInsertItem, getItem, getLocation, maybeGetItem, moveIdTo, reifyId, textContent } from "../fs/fs";
+import { createAndInsertItem, getItem, getItemIdsAfter, getLocation, maybeGetItem, modifyItemꜝ, moveIdTo, reifyId, textContent } from "../fs/fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
 import { ErrorInfo } from "./errors";
-import { Effect, GameState, Ident, Item, Location, nextLocation } from "./model";
+import { canPickup } from "./lines";
+import { Effect, GameState, Ident, Item, Location, nextLocation, numTargetsOfExecutable } from "./model";
 import { addFutureꜝ, processHooks, withError } from "./reduce";
 
 export const RECURRENCE_LENGTH = 10;
@@ -59,6 +60,10 @@ export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'copy': { cycles: 5, cpuCost: 1 },
   'automate': { cycles: 5, cpuCost: 1 },
   'robot': { cycles: 5, cpuCost: 1 },
+}
+
+export function numTargetsOfExecutableName(name: ExecutableName): number {
+  return executableProperties[name].numTargets ?? 1;
 }
 
 export function modificationOrder(): readonly ExecutableName[] {
@@ -134,8 +139,40 @@ export function cancelRecurꜝ(state: GameState, ident: Ident) {
   delete state.recurring[ident];
 }
 
-export function executeInstructions(state: GameState, instr: ExecutableName, targets: Ident[], actor: Ident): [GameState, Effect[], ErrorInfo | undefined] {
+export function executeInstructions(state: GameState, instr: ExecutableName, id: Ident): [GameState, Effect[], ErrorInfo | undefined] {
+  const numTargets = numTargetsOfExecutableName(instr);
+  const loc = getLocation(state.fs, id);
 
+  const targetIds = getItemIdsAfter(state.fs, id, numTargets);
+  if (targetIds == undefined) {
+    return withErrorExec(state, { code: 'noArgument', blame: id, loc });
+  }
+
+  const targets = targetIds.map(tid => getItem(state.fs, tid));
+  const actor = getItem(state.fs, id);
+  if (!targets.every(target => canPickup(target, actor))) { // XXX not sure about this logic
+    return withErrorExec(state, { code: 'itemLocked', blame: id, loc });
+  }
+
+  let effects, error;
+  [state, effects, error] = executeInstructionsWithTargets(state, instr, id, targetIds);
+
+  if (error == undefined) {
+    // flash targets if not error
+    const later = nowTicks(state.clock) + 1;
+    state = produce(state, s => {
+      if (targetIds.length > 0)
+        addFutureꜝ(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
+      targetIds.forEach(targetId => {
+        modifyItemꜝ(s.fs, targetId, item => { item.flashUntilTick = later; });
+      });
+    });
+  }
+
+  return [state, effects, error];
+}
+
+export function executeInstructionsWithTargets(state: GameState, instr: ExecutableName, actor: Ident, targets: Ident[]): [GameState, Effect[], ErrorInfo | undefined] {
   const loc = getLocation(state.fs, actor);
 
   function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[], ErrorInfo | undefined] {

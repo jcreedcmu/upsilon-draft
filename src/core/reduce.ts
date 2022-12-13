@@ -90,20 +90,8 @@ export function addFutureꜝ(state: GameState, whenTicks: number, action: GameAc
 
 function startExecutable(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
 
-  const { cycles, cpuCost, numTargets } = executableProperties[name];
+  const { cycles, cpuCost } = executableProperties[name];
   const loc = getLocation(state.fs, id);
-
-  const targetIds = getItemIdsAfter(state.fs, id, numTargets ?? 1);
-  if (targetIds == undefined) {
-    return withError(state, { code: 'noArgument', blame: id, loc });
-  }
-
-  const targets = targetIds.map(tid => getItem(state.fs, tid));
-
-  const actor = getItem(state.fs, id);
-  if (!targets.every(target => canPickup(target, actor))) { // XXX not sure about this logic
-    return withError(state, { code: 'itemLocked', blame: id, loc });
-  }
 
   if (getResource(getItem(state.fs, id), 'cpu') < cpuCost) {
     return withError(state, { code: 'noCharge', blame: id, loc }); // XXX insufficient charge, really
@@ -116,7 +104,6 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
   const action: GameAction = {
     t: 'finishExecution',
     actorId: id,
-    targetIds,
     instr: name,
   };
 
@@ -132,7 +119,6 @@ function startExecutable(state: GameState, id: Ident, name: ExecutableName): [Ga
       modifyItemꜝ(s.fs, id, item => {
         item.progress = {
           startTicks: now,
-          targetIds,
           totalTicks: cycles
         };
       });
@@ -399,7 +385,7 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
 
     case 'finishExecution': {
       let effects, error;
-      [state, effects, error] = executeInstructions(state, action.instr, action.targetIds, action.actorId);
+      [state, effects, error] = executeInstructions(state, action.instr, action.actorId);
 
       // deactivate item's progressbar
       state = produce(state, s => {
@@ -413,17 +399,6 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
       }
       else {
         // successful execution
-
-        // Add argument flash
-        const later = nowTicks(state.clock) + 1;
-        // flash targets if not error
-        state = produce(state, s => {
-          if (action.targetIds.length > 0)
-            addFutureꜝ(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
-          action.targetIds.forEach(targetId => {
-            modifyItemꜝ(s.fs, targetId, item => { item.flashUntilTick = later; });
-          });
-        });
 
         // Schedule recurrent execution if appropriate
         if (isRecurring(state, action.actorId)) {
