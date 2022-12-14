@@ -201,16 +201,16 @@ executeInstructionswithTargets assumes we know what a binary's targets
 are, and actually updates the state (well, functionally returns an
 updated state) with the real effect of the binary.
 */
-export function executeInstructionsWithTargets(state: GameState, instr: ExecutableName, actorId: Ident, targets: Ident[]): ReduceResultErr {
+export function executeInstructionsWithTargets(state: GameState, instr: ExecutableName, actorId: Ident, targetIds: Ident[]): ReduceResultErr {
   const loc = getLocation(state.fs, actorId);
 
   function withModifiedTarget(f: (x: Item) => void): ReduceResultErr {
-    const target = getItem(state.fs, targets[0]);
+    const target = getItem(state.fs, targetIds[0]);
     const ftgt = produce(target, t => { f(t); });
 
     // XXX this is wrong if idToItem doesn't already have a location
     return [produce(state, s => {
-      s.fs.idToItem[targets[0]] = ftgt;
+      s.fs.idToItem[targetIds[0]] = ftgt;
     }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
   }
 
@@ -221,8 +221,8 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       }), [], undefined];
     case executables.combine:
       return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
-    case executables.movCpu5: return movResource(state, targets, 'cpu', 5, loc);
-    case executables.movCpu1: return movResource(state, targets, 'cpu', 1, loc);
+    case executables.movCpu5: return movResource(state, targetIds, 'cpu', 5, loc);
+    case executables.movCpu1: return movResource(state, targetIds, 'cpu', 1, loc);
 
 
     case executables.charge:
@@ -254,7 +254,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       // Creates a new file whose name is the item id of that argument.
       // Sort of like taking the address of a pointer.
       const newItem: Item = {
-        name: targets[0],
+        name: targetIds[0],
         content: textContent(''),
         acls: { pickup: true }, resources: {}, size: 1
       };
@@ -270,7 +270,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     }
 
     case executables.magnet: {
-      const referentId = getItem(state.fs, targets[0]).name;
+      const referentId = getItem(state.fs, targetIds[0]).name;
       const referent: Item | undefined = maybeGetItem(state.fs, referentId);
       if (referent == undefined) {
         return withErrorExec(state, { code: 'badInputs', blame: actorId, loc });
@@ -294,7 +294,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     }
 
     case executables.modify: {
-      let newName = getItem(state.fs, targets[0]).name;
+      let newName = getItem(state.fs, targetIds[0]).name;
       const mo = modificationOrder();
       const found = mo.findIndex(x => x == newName);
       if (found != -1) {
@@ -309,7 +309,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       // Takes one argument.
       // Creates a new file whose name is the same as argument.
       // Doesn't copy attributes or acls or anything.
-      const item = getItem(state.fs, targets[0]);
+      const item = getItem(state.fs, targetIds[0]);
       const newItem: Item = {
         name: item.name,
         content: item.content,
@@ -327,7 +327,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     }
 
     case executables.automate: {
-      const target = targets[0];
+      const target = targetIds[0];
       return [produce(state, s => {
         if (target in state.recurring) {
           cancelRecurꜝ(s, target);
@@ -340,9 +340,19 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     }
 
     case executables.robot: {
-      const [state2, effect, error] = tryStartExecutable(state, targets[0]);
-      const sound: Effect[] = error == undefined ? [{ t: 'playAbstractSound', effect: 'success', loc }] : [];
-      return [state2, [...effect, ...sound], error];
+      const target = getItem(state.fs, targetIds[0]);
+      if (isExecutable(target.name)) {
+        const numTargets = executableProperties[target.name].numTargets;
+        const [state2, effect, error] = tryStartExecutable(state, targetIds[0]);
+        const sound: Effect[] = error == undefined ? [{ t: 'playAbstractSound', effect: 'success', loc }] : [];
+
+        // XXX move robot forward `numTargets` spaces...
+
+        return [state2, [...effect, ...sound], error];
+      }
+      else {
+        return withErrorExec(state, { code: 'illegalInstr', blame: actorId, loc });
+      }
     }
   }
 }

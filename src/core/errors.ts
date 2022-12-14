@@ -19,9 +19,18 @@ export const errorCodes = {
 export type ErrorCode = keyof (typeof errorCodes);
 
 export type ErrorInfo = {
-  code: ErrorCode, // what type of error
-  blame?: Ident, // which binary caused the error
-  loc?: Location, // in what directory the error occurred
+  // What type of error it was
+  code: ErrorCode,
+
+  // Which binary caused the error. The real point of this is to disable
+  // automation for that binary. Conceivably I might want multiple in
+  // the future.
+  blame?: Ident,
+
+  // In what directory the error occurred, for at least the purpose of
+  // determining whether or not to play sound effects depending on whether
+  // the player is looking at that directory right now.
+  loc?: Location,
 };
 
 export function errorCodeText(k: ErrorCode): string {

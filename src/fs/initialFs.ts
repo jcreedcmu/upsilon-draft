@@ -129,7 +129,7 @@ function binDirs(): ItemPlan[] {
     ]
   },
   {
-    t: 'dir', name: 'bin2', contents: [
+    t: 'dir', name: 'sbin', contents: [
       namedExec(executables.extractId, { resources: { cpu: 10 } }),
       namedExec(executables.magnet, { resources: { cpu: 10 } }),
       namedExec(executables.toggleCaps, { resources: { data: 1 } }),
@@ -137,10 +137,20 @@ function binDirs(): ItemPlan[] {
       namedExec(executables.charge, { resources: { cpu: 4, network: 3 } }),
       namedExec(executables.treadmill, { resources: { cpu: 0, network: 0 } }),
       namedExec(executables.modify, { resources: { cpu: 5, network: 0 } }),
+      namedExec(executables.robot, { resources: { cpu: 5, network: 0 } }),
       namedExec(executables.copy, { resources: { cpu: 5, network: 0 } }),
       namedExec(executables.automate, { resources: { cpu: 5, network: 0 } }),
     ]
-  }];
+  },
+  {
+    t: 'dir', name: 'xbin', contents: [
+      namedExec(executables.charge, { resources: { cpu: 40, network: 3 } }),
+      namedExec(executables.modify, { resources: { cpu: 5, network: 0 } }),
+      namedExec(executables.robot, { resources: { cpu: 5, network: 0 } }),
+    ]
+  }
+
+  ];
 }
 
 const readmeText = `
@@ -198,7 +208,6 @@ function initialPlans(): VirtualItemPlan[] {
         { t: 'checkbox', name: 'toggle2', checked: false },
         { t: 'file', name: 'portrait.bmp', content: { t: 'image', data: initialImage }, resources: { data: 3, cpu: 2 } },
         { t: 'file', name: 'inventory.spc', content: { t: 'inventorySlot' } },
-        namedExec(executables.robot, { resources: { cpu: 5, network: 0 } }),
         { t: 'file', name: 'inventory.spc', content: { t: 'inventorySlot' } },
       ]
     },
