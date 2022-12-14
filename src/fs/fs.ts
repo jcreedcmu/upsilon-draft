@@ -84,12 +84,8 @@ export function getLocation(fs: Fs, ident: Ident): Location {
   return location;
 }
 
-export function getItemIdsAfter(fs: Fs, ident: Ident, howMany: number): Ident[] | undefined {
+export function getItemIdsAfter(fs: Fs, loc: Location, howMany: number): Ident[] | undefined {
   const rv: Item[] = [];
-  let loc = getLocation(fs, ident);
-  if (loc == undefined) {
-    throw new Error(`Can't find files following identifier ${ident} which has no location`);
-  }
   if (loc.t !== 'at')
     return undefined;
   const conts = getContents(fs, loc.id);

@@ -8,6 +8,6 @@ module.exports = {
     ]
   },
   testEnvironment: 'node',
-  testRegex: '/tests/.*\\.(ts|tsx)$',
+  testRegex: '/tests/test-.*\\.(ts|tsx)$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
 };

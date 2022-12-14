@@ -2,7 +2,7 @@ import { gameStateOfFs } from '../src/core/model';
 import { reduceExecAction } from '../src/core/reduce';
 import { insertPlans, mkFs } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
-import { testFile } from "./test-utils";
+import { testFile } from "./testing-utils";
 
 const fs = (() => {
   let fs = mkFs();

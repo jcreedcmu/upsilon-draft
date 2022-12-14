@@ -1,4 +1,4 @@
-import { createAndInsertItem, getItem, getItemIdsAfter, getLocation, maybeGetItem, modifyItemꜝ, moveIdTo, reifyId, textContent } from "../fs/fs";
+import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getLocation, maybeGetItem, modifyItemꜝ, moveIdTo, reifyId, textContent } from "../fs/fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
@@ -139,6 +139,11 @@ export function cancelRecurꜝ(state: GameState, ident: Ident) {
   delete state.recurring[ident];
 }
 
+function getTargetsFor(fs: Fs, loc: Location, instr: ExecutableName): Ident[] | undefined {
+  const numTargets = numTargetsOfExecutableName(instr);
+  return getItemIdsAfter(fs, loc, numTargets);
+}
+
 /*
 This is a wrapper around executeInstructionsWithTargets. It is called
 after a binary completes its "progress bar" timeout. The job of
@@ -149,10 +154,11 @@ the particular executable. Right now this includes:
 - doing a little ui flash of the targets if execution is successful.
 */
 export function executeInstructions(state: GameState, instr: ExecutableName, id: Ident): [GameState, Effect[], ErrorInfo | undefined] {
-  const numTargets = numTargetsOfExecutableName(instr);
+
   const loc = getLocation(state.fs, id);
 
-  const targetIds = getItemIdsAfter(state.fs, id, numTargets);
+
+  const targetIds = getTargetsFor(state.fs, loc, instr);
   if (targetIds == undefined) {
     return withErrorExec(state, { code: 'noArgument', blame: id, loc });
   }

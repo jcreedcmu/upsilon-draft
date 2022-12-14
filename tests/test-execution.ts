@@ -4,7 +4,7 @@ import { getFullContents, insertPlans, mkFs, moveId } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initialFs';
 import { getResource } from '../src/fs/resources';
 import { produce } from '../src/util/produce';
-import { testFile } from "./test-utils";
+import { testFile } from "./testing-utils";
 
 const fs = (() => {
   let fs = mkFs();
@@ -43,8 +43,7 @@ describe('mov-cpu-5', () => {
 
     expect(state.futures.length).toEqual(1);
     expect(state.futures[0].action).toEqual({
-      actorId: "mov-cpu-5", instr: "mov-cpu-5", t: "finishExecution",
-      targetIds: ["_gen_vroot/\x81\x95\x83\x9D\x95", "receiver"]
+      actorId: "mov-cpu-5", instr: "mov-cpu-5", t: "finishExecution"
     });
 
     [state, effects] = reduceGameStateFs(state, state.futures[0].action);
