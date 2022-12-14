@@ -333,9 +333,34 @@ export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
   return [fs, id, parent.hooks ?? []];
 }
 
+// If you change this, also change getLines in lines.ts so that the
+// invariant
+//
+//     (getLines(state, loc)).length == getNumLines(state.fs, loc)
+//
+// is maintained.
+export function getNumLines(fs: Fs, loc: Ident): number {
+  let contentsLength = getContents(fs, loc).length;
+  if (loc != SpecialId.root)
+    contentsLength++;
+  return contentsLength;
+}
+
+export function forwardLocation(fs: Fs, loc: Location, spaces: number): Location {
+  if (loc.t != 'at') { throw new Error(`forwardLocation only supports 'at' right now`); }
+  const len = getNumLines(fs, loc.id);
+  return { t: 'at', id: loc.id, pos: (loc.pos + spaces + len) % len };
+}
+
+export function moveIdForward(fs: Fs, id: Ident, spaces: number): [Fs, Hook[]] {
+  const fromLoc = getLocation(fs, id);
+  const toLoc = forwardLocation(fs, fromLoc, spaces);
+  return moveId(fs, fromLoc, toLoc);
+}
+
 export function moveId(fs: Fs, fromLoc: Location, toLoc: Location): [Fs, Hook[]] {
-  if (fromLoc.t != 'at') { throw new Error(`moveId only supports at right now`); }
-  if (toLoc.t != 'at') { throw new Error(`moveId only supports at right now`); }
+  if (fromLoc.t != 'at') { throw new Error(`moveId only supports 'at' right now`); }
+  if (toLoc.t != 'at') { throw new Error(`moveId only supports 'at' right now`); }
   const [fs2, ident, hooks2] = removeId(fs, fromLoc.id, fromLoc.pos);
   const [fs3, hooks3] = insertId(fs2, toLoc.id, toLoc.pos, ident);
   return [fs3, [...hooks2, ...hooks3]];

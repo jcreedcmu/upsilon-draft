@@ -1,4 +1,4 @@
-import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdTo, reifyId, textContent } from "../fs/fs";
+import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdForward, moveIdTo, reifyId, textContent } from "../fs/fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
@@ -342,13 +342,17 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     case executables.robot: {
       const target = getItem(state.fs, targetIds[0]);
       if (isExecutable(target.name)) {
-        const numTargets = executableProperties[target.name].numTargets;
-        const [state2, effect, error] = tryStartExecutable(state, targetIds[0]);
+        const numTargets = executableProperties[target.name].numTargets ?? 1; // XXX this should be a function call to getNumTargets or something
+
+        let effect, error;
+        [state, effect, error] = tryStartExecutable(state, targetIds[0]);
         const sound: Effect[] = error == undefined ? [{ t: 'playAbstractSound', effect: 'success', loc }] : [];
 
-        // XXX move robot forward `numTargets` spaces...
+        const [fs, hooks] = moveIdForward(state.fs, actorId, numTargets);
+        state = produce(state, s => { s.fs = fs; });
+        state = processHooks(state, hooks);
 
-        return [state2, [...effect, ...sound], error];
+        return [state, [...effect, ...sound], error];
       }
       else {
         return withErrorExec(state, { code: 'illegalInstr', blame: actorId, loc });

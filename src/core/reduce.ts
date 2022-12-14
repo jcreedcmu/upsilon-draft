@@ -1,4 +1,4 @@
-import { getInventoryItem, getItem, getLocation, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
+import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
@@ -47,7 +47,8 @@ export function reduce(state: SceneState, action: Action): [SceneState, Effect[]
 }
 
 function advanceLine(state: GameState, amount: number): GameState {
-  const len = getLines(state, state.curId).length;
+  const len = getNumLines(state.fs, state.curId);
+  // XXX refactor to use forwardLocation somehow
   return produce(state, s => { s.curLine = (s.curLine + len + amount) % len; });
 }
 

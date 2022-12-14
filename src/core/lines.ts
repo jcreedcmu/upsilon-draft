@@ -173,6 +173,12 @@ export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, 
   }
 }
 
+// If you change this, also change getNumLines in fs.ts so that the
+// invariant
+//
+//     (getLines(state, loc)).length == getNumLines(state.fs, loc)
+//
+// is maintained.
 export function getLines(state: GameState, loc: Ident): FullLine[] {
   const { fs } = state;
   const contents = getContents(fs, loc);
