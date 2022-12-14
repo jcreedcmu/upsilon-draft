@@ -1,4 +1,4 @@
-import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getLocation, maybeGetItem, modifyItemꜝ, moveIdTo, reifyId, textContent } from "../fs/fs";
+import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdTo, reifyId, textContent } from "../fs/fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
@@ -10,8 +10,11 @@ import { addFutureꜝ, processHooks, withError } from "./reduce";
 export const RECURRENCE_LENGTH = 10;
 
 export type ExecutableSpec = {
-  cycles: number,
-  cpuCost: number,
+  cycles: number, // how long it takes to execute
+  cpuCost: number, // how much cpu quota it costs to execute
+
+  // When `numTargets` is negative, it means "grab `abs(numTargets)`
+  // targets from before executable, rather than after"
   numTargets?: number,
 }
 
@@ -59,7 +62,7 @@ export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'modify': { cycles: 5, cpuCost: 1 },
   'copy': { cycles: 5, cpuCost: 1 },
   'automate': { cycles: 5, cpuCost: 1 },
-  'robot': { cycles: 5, cpuCost: 1 },
+  'robot': { cycles: 5, cpuCost: 1, numTargets: -1 },
 }
 
 export function numTargetsOfExecutableName(name: ExecutableName): number {
@@ -141,7 +144,13 @@ export function cancelRecurꜝ(state: GameState, ident: Ident) {
 
 function getTargetsFor(fs: Fs, loc: Location, instr: ExecutableName): Ident[] | undefined {
   const numTargets = numTargetsOfExecutableName(instr);
-  return getItemIdsAfter(fs, loc, numTargets);
+  const absNumTargets = Math.abs(numTargets);
+  if (numTargets < 0) {
+    return getItemIdsBefore(fs, loc, absNumTargets);
+  }
+  else {
+    return getItemIdsAfter(fs, loc, absNumTargets);
+  }
 }
 
 /*
@@ -331,7 +340,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     }
 
     case executables.robot: {
-      return [state, [], undefined];
+      return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
     }
   }
 

@@ -208,6 +208,7 @@ function initialPlans(): VirtualItemPlan[] {
         { t: 'checkbox', name: 'toggle2', checked: false },
         { t: 'file', name: 'portrait.bmp', content: { t: 'image', data: initialImage }, resources: { data: 3, cpu: 2 } },
         { t: 'file', name: 'inventory.spc', content: { t: 'inventorySlot' } },
+        namedExec(executables.robot, { resources: { cpu: 5, network: 0 } }),
         { t: 'file', name: 'inventory.spc', content: { t: 'inventorySlot' } },
       ]
     },

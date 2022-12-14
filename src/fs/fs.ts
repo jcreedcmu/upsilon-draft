@@ -100,6 +100,22 @@ export function getItemIdsAfter(fs: Fs, loc: Location, howMany: number): Ident[]
   return idents;
 }
 
+export function getItemIdsBefore(fs: Fs, loc: Location, howMany: number): Ident[] | undefined {
+  const rv: Item[] = [];
+  if (loc.t !== 'at')
+    return undefined;
+  const conts = getContents(fs, loc.id);
+
+  if (loc.pos < howMany)
+    return undefined;
+
+  const idents: Ident[] = [];
+  for (let i = 0; i < howMany; i++) {
+    idents.push(conts[loc.pos - 1 - i]);
+  }
+  return idents;
+}
+
 /// Fs Construction
 
 function makeInsertRootItem(fs: Fs, name: SpecialId): Fs {
