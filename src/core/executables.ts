@@ -201,8 +201,8 @@ executeInstructionswithTargets assumes we know what a binary's targets
 are, and actually updates the state (well, functionally returns an
 updated state) with the real effect of the binary.
 */
-export function executeInstructionsWithTargets(state: GameState, instr: ExecutableName, actor: Ident, targets: Ident[]): [GameState, Effect[], ErrorInfo | undefined] {
-  const loc = getLocation(state.fs, actor);
+export function executeInstructionsWithTargets(state: GameState, instr: ExecutableName, actorId: Ident, targets: Ident[]): [GameState, Effect[], ErrorInfo | undefined] {
+  const loc = getLocation(state.fs, actorId);
 
   function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[], ErrorInfo | undefined] {
     const target = getItem(state.fs, targets[0]);
@@ -261,7 +261,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       const newItemLoc = nextLocation(loc);
       if (newItemLoc.t != 'at') {
         // XXX not sure if this is the right error
-        return withErrorExec(state, { code: 'badInputs', blame: actor, loc });
+        return withErrorExec(state, { code: 'badInputs', blame: actorId, loc });
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
@@ -273,10 +273,10 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       const referentId = getItem(state.fs, targets[0]).name;
       const referent: Item | undefined = maybeGetItem(state.fs, referentId);
       if (referent == undefined) {
-        return withErrorExec(state, { code: 'badInputs', blame: actor, loc });
+        return withErrorExec(state, { code: 'badInputs', blame: actorId, loc });
       }
       else {
-        const newItemLoc = nextLocation(getLocation(state.fs, actor));
+        const newItemLoc = nextLocation(getLocation(state.fs, actorId));
         // XXX there is a funny edge case where things go wrong if
         // the old item loc is in the same dir, where the meaning of the new
         // location is invalidated by deleting the old location.
@@ -318,7 +318,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       const newItemLoc = nextLocation(loc);
       if (newItemLoc.t != 'at') {
         // XXX not sure if this is the right error
-        return withErrorExec(state, { code: 'badInputs', blame: actor, loc });
+        return withErrorExec(state, { code: 'badInputs', blame: actorId, loc });
       }
       const [newfs, id, hooks] = createAndInsertItem(state.fs, newItemLoc.id, newItemLoc.pos, newItem);
       state = produce(state, s => { s.fs = newfs; });
@@ -340,7 +340,9 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     }
 
     case executables.robot: {
-      return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
+      const [state2, effect, error] = tryStartExecutable(state, targets[0]);
+      const sound: Effect[] = error == undefined ? [{ t: 'playAbstractSound', effect: 'success', loc }] : [];
+      return [state2, [...effect, ...sound], error];
     }
   }
 
