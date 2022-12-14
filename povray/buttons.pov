@@ -2,6 +2,23 @@
 // assumed_gamma 1.0;
 #include "colors.inc"    // The include files contain
 
+global_settings {
+  radiosity {
+     pretrace_start 0.08
+      pretrace_end   0.01
+      count 150
+      nearest_count 10
+      error_bound 0.5
+      recursion_limit 3
+      low_error_factor 0.5
+      gray_threshold 0.0
+      minimum_reuse 0.005
+      maximum_reuse 0.2
+      brightness 1
+      adc_bailout 0.005
+  }
+}
+default {finish {ambient 0}}
 #declare bigRad = 1;
 #declare smallRad = 0.8;
 #declare medRad = 0.83;
@@ -14,7 +31,12 @@
 
 #declare xoff = -1.5;
 
+#declare pushed = false;
+#if (pushed)
 #declare buttonVerticalDisplace = -0.3;
+#else
+#declare buttonVerticalDisplace = -0.1;
+#end
 
 #declare myCone = cone {
   <0,0.01,0>, bigRad
@@ -23,7 +45,7 @@
 
 #declare myCone2 = cone {
   <0,0.01,0>, bigRad2
-  <0,-coneDepth,0>, 0
+  <0,-bigRad2,0>, 0
   translate <xoff, 0, 0>
 };
 
@@ -34,7 +56,7 @@
   }
 #else
   camera {
-    location <0, 5, -0.01>
+    location <0, 3, -0.01>
     look_at  <0, 0,  0>
   }
 
@@ -65,7 +87,13 @@
     cylinder { <0,0,0>, <0,-2,0>, smallRad }
     translate <0, buttonVerticalDisplace, 0>
   }
-  sphere {  <xoff, 0, 0>, smallRad2 scale <1, sphereFlatten2, 1> }
+  sphere {  <xoff, 0, 0>, smallRad2 scale <1, sphereFlatten2, 1>
+    #if (pushed)
+  texture {finish {emission rgb<0,1,1>} pigment {color White}}
+    #else
+        texture {pigment {color rgb<0.2,0.15,0.1>} }
+    #end
+  }
 
 
 };
@@ -73,9 +101,10 @@
 union {
   formm
   texture {
-    pigment { color  rgb <1.0, 0.8, 0.8> }
+    pigment { color  rgb <1.0, 0.8, 0.6> }
   }
 }
 
-light_source { <-2, 4, 3> color rgb <1,0.9,0.8>}
-light_source { <1, 4, -3> color rgb <1,1.1,1.2>}
+//sphere {<0,0,0>, 1000 texture {finish{emission 0.1} pigment{color White}}}
+light_source { <-2, 4, 3> color rgb <0.5,0.5,0.5>}
+// light_source { <1, 4, -3> color rgb <1,1.1,1.2>}
