@@ -6,7 +6,7 @@ import { ColorCode, COLS } from '../ui/ui-constants';
 import { invertAttr, repeat, unreachable } from '../util/util';
 import { nowTicks } from './clock';
 import { ErrorCode } from './errors';
-import { GameState, Ident, Item, ItemContent, numTargetsOfExecutable } from './model';
+import { GameState, Ident, Item, ItemContent } from './model';
 
 export type Action =
   | { t: 'back' }
@@ -192,7 +192,6 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
     }
     else {
       const elapsed = nowTicks(state.clock) - item.progress.startTicks;
-      const numTargets = numTargetsOfExecutable(item);
       lines.push({
         t: 'item',
         str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),

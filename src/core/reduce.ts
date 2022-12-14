@@ -1,14 +1,11 @@
+import { getInventoryItem, getItem, getLocation, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
+import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
-import { State, Action, Effect, mkGameState, GameState, getSelectedLine, getSelectedId, numTargetsOfExecutable, Ident, KeyAction, Hook, showOfFs, keybindingsOfFs, GameAction, cancelRecur, isNearby, isNearbyGame, SceneState, soundsOfFs } from './model';
-import { getContents, getFullContents, getInventoryItem, getItem, getItemIdsAfter, getLocation, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
-import { canPickup, DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
-import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
-import { DEBUG, doAgain, logger } from '../util/debug';
-import { getResource, modifyResourceꜝ } from '../fs/resources';
-import { cancelRecurꜝ, ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
-import { SpecialId } from '../fs/initialFs';
-import { isAbstractSoundEffect, isSoundEffect } from '../ui/sound';
+import { ErrorCode, errorCodes, ErrorInfo } from './errors';
+import { executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
+import { DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
+import { Action, cancelRecur, Effect, GameAction, GameState, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, showOfFs, soundsOfFs } from './model';
 
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;

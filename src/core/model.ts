@@ -70,10 +70,6 @@ export type Item = {
   // executable.
   progress?: ExecProgress,
 
-  // This is potentially defined for executables,
-  // should be interpreted as default 1 if absent.
-  numTargets?: number,
-
   size: number,
 
   // --- transient animation experiment ---
@@ -300,11 +296,6 @@ export function getSelectedLine(state: GameState): FullLine {
   //
   // const ident = getSelectedId(state);
   // return getLineOfItem(ident, getItem(state.fs, ident), state.curLine);
-}
-
-/// XXX Unreachable code? is .numTargets obsolete entirely?
-export function numTargetsOfExecutable(item: Item): number {
-  return item.numTargets ?? 1;
 }
 
 export function nextLocation(loc: Location): Location {

@@ -15,16 +15,6 @@ export enum SpecialId {
   root = '_root',
 };
 
-function singleExec(name: string, opts?: { numTargets?: number, resources?: Resources }): ItemPlan {
-  return {
-    t: 'exec',
-    name,
-    contents: [{ t: 'file', name: 'cpu100' }, { t: 'instr', name }],
-    numTargets: opts?.numTargets,
-    resources: opts?.resources
-  };
-}
-
 function namedExec(name: ExecutableName, opts?: { resources?: Resources }): ItemPlan {
   return {
     t: 'exec',

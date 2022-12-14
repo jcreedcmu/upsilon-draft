@@ -2,9 +2,9 @@ import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, ge
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
-import { ErrorCode, ErrorInfo } from "./errors";
+import { ErrorInfo } from "./errors";
 import { canPickup } from "./lines";
-import { Effect, GameAction, GameState, Ident, Item, Location, nextLocation, numTargetsOfExecutable } from "./model";
+import { Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
 import { addFutureꜝ, processHooks, reduceGameStateFs, withError } from "./reduce";
 
 export const RECURRENCE_LENGTH = 10;

@@ -25,7 +25,7 @@ export type Fs = {
 
 export type ItemPlan =
   | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[], resources?: Resources }
-  | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, numTargets?: number, resources?: Resources }
+  | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, resources?: Resources }
   | { t: 'file', name: string, content?: ItemContent, size?: number, resources?: Resources, forceId?: Ident }
   | { t: 'instr', name: string }
   | { t: 'checkbox', name: string, checked: boolean, forceId?: Ident };
