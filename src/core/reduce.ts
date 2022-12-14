@@ -10,6 +10,9 @@ import { Action, cancelRecur, Effect, GameAction, GameState, getSelectedId, getS
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;
 
+export type ReduceResult = [GameState, Effect[]];
+export type ReduceResultErr = [GameState, Effect[], ErrorInfo | undefined];
+
 export function reduce(state: SceneState, action: Action): [SceneState, Effect[]] {
   switch (state.t) {
     case 'game':
@@ -61,7 +64,7 @@ function makeErrorBanner(state: GameState, code: ErrorCode): GameState {
   });
 }
 
-export function withError(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[]] {
+export function withError(state: GameState, errorInfo: ErrorInfo): ReduceResult {
   const { code, blame, loc } = errorInfo;
   if (blame != undefined) {
     state = cancelRecur(state, blame);
@@ -85,7 +88,7 @@ export function addFutureꜝ(state: GameState, whenTicks: number, action: GameAc
   state.futures.sort((a, b) => a.whenTicks - b.whenTicks);
 }
 
-export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]] {
+export function toggleItem(state: GameState, ident: Ident): ReduceResult {
   const loc = getLocation(state.fs, ident);
   state = produce(state, s => {
     modifyItemꜝ(s.fs, ident, item => {
@@ -100,7 +103,7 @@ export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]
     [{ t: 'playAbstractSound', effect: 'toggle', loc: loc }]];
 }
 
-export function playAudioItem(state: GameState, ident: Ident): [GameState, Effect[]] {
+export function playAudioItem(state: GameState, ident: Ident): ReduceResult {
   const item = getItem(state.fs, ident);
   const loc = getLocation(state.fs, ident);
   if (item.content.t == 'sound') {
@@ -117,7 +120,7 @@ export function playAudioItem(state: GameState, ident: Ident): [GameState, Effec
 // already when we construct lines for a directory. May want to
 // reconsider this, although it is in some way convenient knowing
 // whether a file is executable very early.
-export function reduceExecAction(state: GameState, action: ExecLineAction): [GameState, Effect[]] {
+export function reduceExecAction(state: GameState, action: ExecLineAction): ReduceResult {
 
   switch (action.t) {
     case 'descend': return [produce(state, s => {
@@ -167,7 +170,7 @@ export function processHooks(state: GameState, hooks: Hook[]): GameState {
   return state;
 }
 
-function reducePickupAction(state: GameState, action: PickupLineAction): [GameState, Effect[]] {
+function reducePickupAction(state: GameState, action: PickupLineAction): ReduceResult {
   switch (action.t) {
     case 'error': return withError(state, { code: action.code });
     case 'pickup': {
@@ -206,7 +209,7 @@ function reducePickupAction(state: GameState, action: PickupLineAction): [GameSt
   }
 }
 
-function reduceDropAction(state: GameState, action: DropLineAction): [GameState, Effect[]] {
+function reduceDropAction(state: GameState, action: DropLineAction): ReduceResult {
   switch (action.t) {
     case 'error':
       return withError(state, { code: action.code });
@@ -227,7 +230,7 @@ function reduceDropAction(state: GameState, action: DropLineAction): [GameState,
   }
 }
 
-function reduceActions(state: GameState, actions: GameAction[]): [GameState, Effect[]] {
+function reduceActions(state: GameState, actions: GameAction[]): ReduceResult {
   let effects: Effect[] = [];
   for (const action of actions) {
     let moreEffects;
@@ -250,7 +253,7 @@ function shouldDropVersusPickup(state: GameState): boolean {
   return getInventoryItem(state.fs, state.inventoryState.curSlot) != undefined;
 }
 
-export function reduceKeyAction(state: GameState, action: KeyAction): [GameState, Effect[]] {
+export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResult {
   switch (action) {
     case KeyAction.prevLine:
       return [advanceLine(state, -1),
@@ -301,7 +304,7 @@ export function reduceKeyAction(state: GameState, action: KeyAction): [GameState
   }
 }
 
-export function reduceGameState(state: GameState, action: GameAction): [GameState, Effect[]] {
+export function reduceGameState(state: GameState, action: GameAction): ReduceResult {
   const vs = state.viewState;
   switch (vs.t) {
     case 'fsView': return reduceGameStateFs(state, action);
@@ -311,7 +314,7 @@ export function reduceGameState(state: GameState, action: GameAction): [GameStat
   }
 }
 
-export function reduceGameStateFs(state: GameState, action: GameAction): [GameState, Effect[]] {
+export function reduceGameStateFs(state: GameState, action: GameAction): ReduceResult {
   switch (action.t) {
     case 'key': {
       logger('keys', action.code);

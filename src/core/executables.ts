@@ -5,7 +5,7 @@ import { nowTicks } from "./clock";
 import { ErrorInfo } from "./errors";
 import { canPickup } from "./lines";
 import { Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
-import { addFutureꜝ, processHooks, reduceGameStateFs, withError } from "./reduce";
+import { addFutureꜝ, processHooks, reduceGameStateFs, ReduceResult, ReduceResultErr, withError } from "./reduce";
 
 export const RECURRENCE_LENGTH = 10;
 
@@ -109,7 +109,7 @@ export function isExecutable(k: string): k is ExecutableName {
   return k in executableProperties;
 }
 
-function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number, loc: Location): [GameState, Effect[], ErrorInfo | undefined] {
+function movResource(state: GameState, targets: Ident[], resource: Resource, amount: number, loc: Location): ReduceResultErr {
   const actualAmount = Math.min(amount, getResource(getItem(state.fs, targets[0]), 'cpu'));
 
   let fs = state.fs;
@@ -122,7 +122,7 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
   }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
 }
 
-function withErrorExec(state: GameState, errorInfo: ErrorInfo): [GameState, Effect[], ErrorInfo | undefined] {
+function withErrorExec(state: GameState, errorInfo: ErrorInfo): ReduceResultErr {
   return [...withError(state, errorInfo), errorInfo];
 }
 
@@ -162,7 +162,7 @@ the particular executable. Right now this includes:
 - gathering what its targets (i.e., arguments) are
 - doing a little ui flash of the targets if execution is successful.
 */
-export function executeInstructions(state: GameState, instr: ExecutableName, id: Ident): [GameState, Effect[], ErrorInfo | undefined] {
+export function executeInstructions(state: GameState, instr: ExecutableName, id: Ident): ReduceResultErr {
 
   const loc = getLocation(state.fs, id);
 
@@ -201,10 +201,10 @@ executeInstructionswithTargets assumes we know what a binary's targets
 are, and actually updates the state (well, functionally returns an
 updated state) with the real effect of the binary.
 */
-export function executeInstructionsWithTargets(state: GameState, instr: ExecutableName, actorId: Ident, targets: Ident[]): [GameState, Effect[], ErrorInfo | undefined] {
+export function executeInstructionsWithTargets(state: GameState, instr: ExecutableName, actorId: Ident, targets: Ident[]): ReduceResultErr {
   const loc = getLocation(state.fs, actorId);
 
-  function withModifiedTarget(f: (x: Item) => void): [GameState, Effect[], ErrorInfo | undefined] {
+  function withModifiedTarget(f: (x: Item) => void): ReduceResultErr {
     const target = getItem(state.fs, targets[0]);
     const ftgt = produce(target, t => { f(t); });
 
@@ -345,16 +345,14 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       return [state2, [...effect, ...sound], error];
     }
   }
-
 }
 
-
-export function startExecutable(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
+export function startExecutable(state: GameState, id: Ident, name: ExecutableName): ReduceResult {
   const [st, effect] = startExecutableWe(state, id, name);
   return [st, effect];
 }
 
-function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[], ErrorInfo | undefined] {
+function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): ReduceResultErr {
 
   const { cycles, cpuCost } = executableProperties[name];
   const loc = getLocation(state.fs, id);
@@ -394,7 +392,7 @@ function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): [
   }
 }
 
-export function tryStartExecutable(state: GameState, id: Ident): [GameState, Effect[], ErrorInfo | undefined] {
+export function tryStartExecutable(state: GameState, id: Ident): ReduceResultErr {
   // XXX more checking should happen here probably
   const actor = getItem(state.fs, id);
   const loc = getLocation(state.fs, id);
