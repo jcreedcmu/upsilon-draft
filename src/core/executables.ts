@@ -2,10 +2,10 @@ import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, ge
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
-import { ErrorInfo } from "./errors";
+import { ErrorCode, ErrorInfo } from "./errors";
 import { canPickup } from "./lines";
-import { Effect, GameState, Ident, Item, Location, nextLocation, numTargetsOfExecutable } from "./model";
-import { addFutureꜝ, processHooks, withError } from "./reduce";
+import { Effect, GameAction, GameState, Ident, Item, Location, nextLocation, numTargetsOfExecutable } from "./model";
+import { addFutureꜝ, processHooks, reduceGameStateFs, withError } from "./reduce";
 
 export const RECURRENCE_LENGTH = 10;
 
@@ -344,4 +344,63 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     }
   }
 
+}
+
+
+export function startExecutable(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
+  const [st, effect] = startExecutableWe(state, id, name);
+  return [st, effect];
+}
+
+function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[], ErrorInfo | undefined] {
+
+  const { cycles, cpuCost } = executableProperties[name];
+  const loc = getLocation(state.fs, id);
+
+  if (getResource(getItem(state.fs, id), 'cpu') < cpuCost) {
+    return withErrorExec(state, { code: 'noCharge', blame: id, loc }); // XXX insufficient charge, really
+  }
+
+  state = produce(state, s => {
+    modifyResourceꜝ(getItem(s.fs, id), 'cpu', x => x - cpuCost);
+  });
+
+  const action: GameAction = {
+    t: 'finishExecution',
+    actorId: id,
+    instr: name,
+  };
+
+  if (cycles == 0) {
+    let effects;
+    [state, effects] = reduceGameStateFs(state, action);
+    return [state, [...effects, { t: 'playAbstractSound', effect: 'execute', loc }], undefined];
+  }
+  else {
+    // defer execution
+    const now = nowTicks(state.clock);
+    state = produce(state, s => {
+      modifyItemꜝ(s.fs, id, item => {
+        item.progress = {
+          startTicks: now,
+          totalTicks: cycles
+        };
+      });
+      addFutureꜝ(s, now + cycles, action, true);
+    });
+    return [state, [{ t: 'playAbstractSound', effect: 'execute', loc }], undefined];
+  }
+}
+
+export function tryStartExecutable(state: GameState, id: Ident): [GameState, Effect[], ErrorInfo | undefined] {
+  // XXX more checking should happen here probably
+  const actor = getItem(state.fs, id);
+  const loc = getLocation(state.fs, id);
+  if (isExecutable(actor.name)) {
+    return startExecutableWe(state, id, actor.name);
+  }
+  else {
+    // XXX not the right error code really
+    return withErrorExec(state, { code: 'illegalInstr', blame: id, loc });
+  }
 }

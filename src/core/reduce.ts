@@ -6,7 +6,7 @@ import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { nowTicks } from './clock';
 import { DEBUG, doAgain, logger } from '../util/debug';
 import { getResource, modifyResourceꜝ } from '../fs/resources';
-import { cancelRecurꜝ, ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ } from './executables';
+import { cancelRecurꜝ, ExecutableName, executableProperties, ExecutableSpec, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { SpecialId } from '../fs/initialFs';
 import { isAbstractSoundEffect, isSoundEffect } from '../ui/sound';
 
@@ -87,47 +87,6 @@ export function addFutureꜝ(state: GameState, whenTicks: number, action: GameAc
   // FIXME could be more efficient
   state.futures.sort((a, b) => a.whenTicks - b.whenTicks);
 }
-
-function startExecutable(state: GameState, id: Ident, name: ExecutableName): [GameState, Effect[]] {
-
-  const { cycles, cpuCost } = executableProperties[name];
-  const loc = getLocation(state.fs, id);
-
-  if (getResource(getItem(state.fs, id), 'cpu') < cpuCost) {
-    return withError(state, { code: 'noCharge', blame: id, loc }); // XXX insufficient charge, really
-  }
-
-  state = produce(state, s => {
-    modifyResourceꜝ(getItem(s.fs, id), 'cpu', x => x - cpuCost);
-  });
-
-  const action: GameAction = {
-    t: 'finishExecution',
-    actorId: id,
-    instr: name,
-  };
-
-  if (cycles == 0) {
-    let effects;
-    [state, effects] = reduceGameStateFs(state, action);
-    return [state, [...effects, { t: 'playAbstractSound', effect: 'execute', loc }]];
-  }
-  else {
-    // defer execution
-    const now = nowTicks(state.clock);
-    state = produce(state, s => {
-      modifyItemꜝ(s.fs, id, item => {
-        item.progress = {
-          startTicks: now,
-          totalTicks: cycles
-        };
-      });
-      addFutureꜝ(s, now + cycles, action, true);
-    });
-    return [state, [{ t: 'playAbstractSound', effect: 'execute', loc }]];
-  }
-}
-
 
 export function toggleItem(state: GameState, ident: Ident): [GameState, Effect[]] {
   const loc = getLocation(state.fs, ident);
@@ -419,17 +378,8 @@ export function reduceGameStateFs(state: GameState, action: GameAction): [GameSt
       return [state, []];
 
     case 'recur': {
-      // XXX more checking should happen here probably
-      const id = action.ident;
-      const actor = getItem(state.fs, id);
-      const loc = getLocation(state.fs, id);
-      if (isExecutable(actor.name)) {
-        return startExecutable(state, id, actor.name);
-      }
-      else {
-        // XXX not the right error code really
-        return withError(state, { code: 'illegalInstr', blame: id, loc });
-      }
+      const [st, effect, undefined] = tryStartExecutable(state, action.ident);
+      return [st, effect];
     }
   }
 }
