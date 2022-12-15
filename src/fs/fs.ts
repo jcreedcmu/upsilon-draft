@@ -294,6 +294,12 @@ export function createAndInsertItem(fs: Fs, loc: Ident, ix: number, item: Item):
   return [fs, id, hooks];
 }
 
+export function addMark(fs: Fs, name: string, mark: Location): Fs {
+  return produce(fs, fsd => {
+    fsd.marks[name] = mark;
+  });
+}
+
 // insertCount can be -1 for a delete
 function maybeShiftMark(markLoc: Location, insertLoc: Ident, insertIx: number, insertCount: number): Location {
   if (markLoc.t == 'at' && insertLoc == markLoc.id && insertIx <= markLoc.pos) {

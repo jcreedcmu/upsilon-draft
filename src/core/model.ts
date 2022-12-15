@@ -1,4 +1,4 @@
-import { Fs, getContents, getFullContents, getItem, itemContents } from '../fs/fs';
+import { addMark, Fs, getContents, getFullContents, getItem, itemContents } from '../fs/fs';
 import { initialFs, SpecialId } from '../fs/initialFs';
 import { Resources } from '../fs/resources';
 import { ImgData } from '../ui/image';
@@ -274,14 +274,22 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
 
 export function gameStateOfFs(fs: Fs): GameState {
   const root = getContents(fs, SpecialId.root);
+
+  // add mark for current line
+  fs = addMark(fs, SpecialId.cursorMark, {
+    t: 'at',
+    id: SpecialId.root,
+    pos: root.length - 1,
+  });
+
   return {
     power: false || DEBUG.quickStart,
     viewState: { t: 'fsView' },
     clock: mkClockState(),
     error: undefined,
-    curId: SpecialId.root, // XXX should be a mark
-    curLine: root.length - 1, // XXX should be a mark
     fs,
+    curId: SpecialId.root, // XXX delete in favor of mark
+    curLine: root.length - 1, // XXX delete in favor of mark
     path: [],
     futures: [],
     recurring: {},

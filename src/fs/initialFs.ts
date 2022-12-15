@@ -13,6 +13,7 @@ export enum SpecialId {
   sounds = '_sounds',
   lens = '_lens',
   root = '_root',
+  cursorMark = '_cursorMark', // XXX not really an ident in the same sense?
 };
 
 function namedExec(name: ExecutableName, opts?: { resources?: Resources }): ItemPlan {
