@@ -1,4 +1,5 @@
-import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdForward, moveIdTo, reifyId, textContent } from "../fs/fs";
+import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdForward, moveIdTo, moveIdToRelMark, reifyId, setMark, textContent } from "../fs/fs";
+import { SpecialId } from "../fs/initialFs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
@@ -277,18 +278,9 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
         return withErrorExec(state, { code: 'badInputs', blame: actorId, loc });
       }
       else {
-        const newItemLoc = nextLocation(getLocation(state.fs, actorId));
-        // XXX there is a funny edge case where things go wrong if
-        // the old item loc is in the same dir, where the meaning of the new
-        // location is invalidated by deleting the old location.
-        // Maybe moveIdTo needs to take a call back that returns a location,
-        // so that I can capture the intent that the new location is
-        // nextLocation(getLocation(... actor)) in a more robust way?
-
-        // Similarly the "currently selected line" should be sort of robust
-        // against insertions.
-        const [newfs, hooks] = moveIdTo(state.fs, referentId, newItemLoc);
-        state = produce(state, s => { s.fs = newfs; });
+        const fs2 = setMark(state.fs, SpecialId.tmpMark, getLocation(state.fs, actorId));
+        const [fs3, hooks] = moveIdToRelMark(fs2, referentId, SpecialId.tmpMark, nextLocation);
+        state = produce(state, s => { s.fs = fs3; });
         state = processHooks(state, hooks);
         return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
       }

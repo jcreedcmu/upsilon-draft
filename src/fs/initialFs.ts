@@ -14,6 +14,7 @@ export enum SpecialId {
   lens = '_lens',
   root = '_root',
   cursorMark = '_cursorMark', // XXX not really an ident in the same sense?
+  tmpMark = '_tmpMark', // XXX this is like a caller-save register
 };
 
 function namedExec(name: ExecutableName, opts?: { resources?: Resources }): ItemPlan {

@@ -418,6 +418,23 @@ export function moveIdTo(fs: Fs, id: Ident, toLoc: Location): [Fs, Hook[]] {
   return moveId(fs, getLocation(fs, id), toLoc);
 }
 
+// Move an id relative to a mark. Specifically, the insertion is computed
+// relative to the position of the mark *after* removeId is called.
+export function moveIdToRelMark(fs: Fs, id: Ident, mark: Ident, toLocRelMark: (loc: Location) => Location): [Fs, Hook[]] {
+
+  const fromLoc = getLocation(fs, id);
+
+  if (fromLoc.t != 'at') { throw new Error(`movIdToRelMark only supports 'at' right now`); }
+
+  const [fs2, ident, hooks2] = removeId(fs, fromLoc.id, fromLoc.pos);
+
+  const toLoc = toLocRelMark(getMark(fs2, mark));
+  if (toLoc.t != 'at') { throw new Error(`movIdToRelMark only supports 'at' right now`); }
+
+  const [fs3, hooks3] = insertId(fs2, toLoc.id, toLoc.pos, ident);
+  return [fs3, [...hooks2, ...hooks3]];
+}
+
 // ensures ident is really mapped to a real item
 export function reifyId(fs: Fs, ident: Ident): Fs {
   if (fs.idToItem[ident] == undefined) {
