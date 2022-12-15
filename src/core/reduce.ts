@@ -5,7 +5,7 @@ import { nowTicks } from './clock';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurLineꜝ, showOfFs, soundsOfFs } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs } from './model';
 
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;
@@ -47,7 +47,7 @@ export function reduce(state: SceneState, action: Action): [SceneState, Effect[]
 }
 
 function advanceLine(state: GameState, amount: number): GameState {
-  const len = getNumLines(state.fs, state.curId);
+  const len = getNumLines(state.fs, getCurId(state));
   // XXX refactor to use forwardLocation somehow
   return produce(state, s => {
     setCurLineꜝ(s, (getCurLine(state) + len + amount) % len);
@@ -128,8 +128,8 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): Redu
 
   switch (action.t) {
     case 'descend': return [produce(state, s => {
-      s.curId = getSelectedId(state);
-      const item = getItem(state.fs, s.curId);
+      setCurIdꜝ(s, getSelectedId(state));
+      const item = getItem(state.fs, getCurId(state));
       setCurLineꜝ(s, item.stickyCurrentPos ?? 0);
       s.path.push(item.name);
     }), [
@@ -278,16 +278,16 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
         return reducePickupAction(state, getSelectedLine(state).actions.pickup);
 
     case KeyAction.back: {
-      const loc = getLocation(state.fs, state.curId);
+      const loc = getLocation(state.fs, getCurId(state));
       if (loc == undefined || loc.t == 'is_root' || loc.t == 'inventory') {
         return withError(state, { code: 'cantGoBack' });
       }
       else {
         return [produce(state, s => {
-          modifyItemꜝ(s.fs, state.curId, item => {
+          modifyItemꜝ(s.fs, getCurId(state), item => {
             item.stickyCurrentPos = getCurLine(state);
           });
-          s.curId = loc.id;
+          setCurIdꜝ(s, loc.id);
           setCurLineꜝ(s, loc.pos);
           s.path.pop();
         }), [

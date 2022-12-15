@@ -157,6 +157,14 @@ export function setCurLineꜝ(state: GameState, curline: number): void {
   state.curLine = curline;
 }
 
+export function getCurId(state: GameState): Ident {
+  return state.curId;
+}
+
+export function setCurIdꜝ(state: GameState, curid: Ident): void {
+  state.curId = curid;
+}
+
 export type GameState = {
   power: boolean, // are we powered on
   fs: Fs,
@@ -271,7 +279,7 @@ export function gameStateOfFs(fs: Fs): GameState {
     viewState: { t: 'fsView' },
     clock: mkClockState(),
     error: undefined,
-    curId: SpecialId.root,
+    curId: SpecialId.root, // XXX should be a mark
     curLine: root.length - 1, // XXX should be a mark
     fs,
     path: [],
@@ -292,13 +300,13 @@ export function mkGameState(): SceneState {
 }
 
 export function getSelectedId(state: GameState): Ident {
-  const contents = getContents(state.fs, state.curId);
+  const contents = getContents(state.fs, getCurId(state));
   return contents[getCurLine(state)];
 }
 
 export function getSelectedLine(state: GameState): FullLine {
   // This is kind of inefficient, since we compute all lines, discarding most.
-  return getLines(state, state.curId)[getCurLine(state)];
+  return getLines(state, getCurId(state))[getCurLine(state)];
 
   //// Not sure what I was thinking here; doesn't work for '..'
   //
@@ -359,7 +367,7 @@ export function isNearbyGame(state: GameState, loc: Location | undefined): boole
     console.error(`unexpected isNearby check for ${loc.t}`);
     return false; // XXX this would also be a surprising case
   }
-  return (state.curId == loc.id);
+  return (getCurId(state) == loc.id);
 }
 
 export function getConcreteSound(state: GameState, sound: AbstractSoundEffect): SoundEffect | undefined {

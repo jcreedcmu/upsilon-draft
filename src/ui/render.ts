@@ -1,6 +1,6 @@
 import { nowTicks } from '../core/clock';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
-import { GameState, getCurLine, InventoryState, SceneState, Show, UserError } from '../core/model';
+import { GameState, getCurId, getCurLine, InventoryState, SceneState, Show, UserError } from '../core/model';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 import { getInventoryItem, getItem } from '../fs/fs';
 import { Resources } from '../fs/resources';
@@ -104,7 +104,7 @@ function getInventoryLines(state: GameState): RenderableLine[] {
 function getRenderable(state: GameState): Renderable {
   switch (state.viewState.t) {
     case 'fsView': {
-      const lines = getLines(state, state.curId);
+      const lines = getLines(state, getCurId(state));
       return {
         t: 'fsView',
         curLine: getCurLine(state),
