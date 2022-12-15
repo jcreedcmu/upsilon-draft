@@ -149,6 +149,14 @@ export type InventoryState = {
   numSlots: number,
 };
 
+export function getCurLine(state: GameState): number {
+  return state.curLine;
+}
+
+export function setCurLineꜝ(state: GameState, curline: number): void {
+  state.curLine = curline;
+}
+
 export type GameState = {
   power: boolean, // are we powered on
   fs: Fs,
@@ -264,7 +272,7 @@ export function gameStateOfFs(fs: Fs): GameState {
     clock: mkClockState(),
     error: undefined,
     curId: SpecialId.root,
-    curLine: root.length - 1,
+    curLine: root.length - 1, // XXX should be a mark
     fs,
     path: [],
     futures: [],
@@ -285,12 +293,12 @@ export function mkGameState(): SceneState {
 
 export function getSelectedId(state: GameState): Ident {
   const contents = getContents(state.fs, state.curId);
-  return contents[state.curLine];
+  return contents[getCurLine(state)];
 }
 
 export function getSelectedLine(state: GameState): FullLine {
   // This is kind of inefficient, since we compute all lines, discarding most.
-  return getLines(state, state.curId)[state.curLine];
+  return getLines(state, state.curId)[getCurLine(state)];
 
   //// Not sure what I was thinking here; doesn't work for '..'
   //

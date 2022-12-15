@@ -5,7 +5,7 @@ import { nowTicks } from './clock';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, showOfFs, soundsOfFs } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurLineꜝ, showOfFs, soundsOfFs } from './model';
 
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;
@@ -49,7 +49,10 @@ export function reduce(state: SceneState, action: Action): [SceneState, Effect[]
 function advanceLine(state: GameState, amount: number): GameState {
   const len = getNumLines(state.fs, state.curId);
   // XXX refactor to use forwardLocation somehow
-  return produce(state, s => { s.curLine = (s.curLine + len + amount) % len; });
+  return produce(state, s => {
+    setCurLineꜝ(s, (getCurLine(state) + len + amount) % len);
+  });
+
 }
 
 function makeErrorBanner(state: GameState, code: ErrorCode): GameState {
@@ -127,7 +130,7 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): Redu
     case 'descend': return [produce(state, s => {
       s.curId = getSelectedId(state);
       const item = getItem(state.fs, s.curId);
-      s.curLine = item.stickyCurrentPos ?? 0;
+      setCurLineꜝ(s, item.stickyCurrentPos ?? 0);
       s.path.push(item.name);
     }), [
       { t: 'playAbstractSound', effect: 'go-into', loc: undefined }
@@ -282,10 +285,10 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
       else {
         return [produce(state, s => {
           modifyItemꜝ(s.fs, state.curId, item => {
-            item.stickyCurrentPos = state.curLine;
+            item.stickyCurrentPos = getCurLine(state);
           });
           s.curId = loc.id;
-          s.curLine = loc.pos;
+          setCurLineꜝ(s, loc.pos);
           s.path.pop();
         }), [
           { t: 'playAbstractSound', effect: 'go-back', loc: undefined }
