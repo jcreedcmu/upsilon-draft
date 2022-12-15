@@ -1,4 +1,4 @@
-import { addMark, Fs, getContents, getFullContents, getItem, itemContents } from '../fs/fs';
+import { setMark, Fs, getContents, getFullContents, getItem, itemContents, getMark } from '../fs/fs';
 import { initialFs, SpecialId } from '../fs/initialFs';
 import { Resources } from '../fs/resources';
 import { ImgData } from '../ui/image';
@@ -149,20 +149,30 @@ export type InventoryState = {
   numSlots: number,
 };
 
+// This returns an reference to the mark's data that is safe to update
+// inside a produce()
+function getCursorMark(state: GameState): { id: Ident, pos: number } {
+  const mark = getMark(state.fs, SpecialId.cursorMark);
+  if (mark.t != 'at') {
+    throw new Error(`invariant violation: cursor mark isn't of 'at' type`);
+  }
+  return mark;
+}
+
 export function getCurLine(state: GameState): number {
-  return state.curLine;
+  return getCursorMark(state).pos;
 }
 
 export function setCurLineꜝ(state: GameState, curline: number): void {
-  state.curLine = curline;
+  getCursorMark(state).pos = curline;
 }
 
 export function getCurId(state: GameState): Ident {
-  return state.curId;
+  return getCursorMark(state).id;
 }
 
 export function setCurIdꜝ(state: GameState, curid: Ident): void {
-  state.curId = curid;
+  getCursorMark(state).id = curid;
 }
 
 export type GameState = {
@@ -276,7 +286,7 @@ export function gameStateOfFs(fs: Fs): GameState {
   const root = getContents(fs, SpecialId.root);
 
   // add mark for current line
-  fs = addMark(fs, SpecialId.cursorMark, {
+  fs = setMark(fs, SpecialId.cursorMark, {
     t: 'at',
     id: SpecialId.root,
     pos: root.length - 1,

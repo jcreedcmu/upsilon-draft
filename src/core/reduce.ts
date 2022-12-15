@@ -1,4 +1,5 @@
-import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
+import { getInventoryItem, getItem, getLocation, getMark, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId, setMark } from '../fs/fs';
+import { SpecialId } from '../fs/initialFs';
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
@@ -221,7 +222,7 @@ function reduceDropAction(state: GameState, action: DropLineAction): ReduceResul
       let fs = state.fs;
       let ident, hooks1, hooks;
       [fs, ident] = removeFromInventory(fs, state.inventoryState.curSlot);
-      [fs, hooks] = insertId(fs, action.loc, action.ix, ident);
+      [fs, hooks] = insertId(fs, action.loc, action.ix, ident, { noUpdateCursorMark: true });
       state = produce(state, s => { s.fs = fs; });
       state = processHooks(state, hooks);
       return [

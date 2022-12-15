@@ -294,10 +294,14 @@ export function createAndInsertItem(fs: Fs, loc: Ident, ix: number, item: Item):
   return [fs, id, hooks];
 }
 
-export function addMark(fs: Fs, name: string, mark: Location): Fs {
+export function setMark(fs: Fs, name: string, mark: Location): Fs {
   return produce(fs, fsd => {
     fsd.marks[name] = mark;
   });
+}
+
+export function getMark(fs: Fs, name: string): Location {
+  return fs.marks[name];
 }
 
 // insertCount can be -1 for a delete
@@ -306,8 +310,7 @@ function maybeShiftMark(markLoc: Location, insertLoc: Ident, insertIx: number, i
     if (insertIx > markLoc.pos + insertCount) {
       // I think this has to be a deletion that actually deletes the mark itself!
       // XXX should write some tests probably
-      console.error('mark deleted... is this right?');
-      return { t: 'is_root' };
+      return { t: 'at', id: markLoc.id, pos: markLoc.pos };
     }
     return { t: 'at', id: markLoc.id, pos: markLoc.pos + insertCount };
   }
@@ -317,7 +320,10 @@ function maybeShiftMark(markLoc: Location, insertLoc: Ident, insertIx: number, i
 }
 
 // This doesn't create the item itself, just inserts the id in the right place
-export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]] {
+export function insertId(
+  fs: Fs, loc: Ident, ix: number, id: Ident,
+  opt?: { noUpdateCursorMark: boolean }
+): [Fs, Hook[]] {
   logger('movement', `insertId ${loc}[${ix}] id ${id}`);
   const parent = getItem(fs, loc);
   const contents = [...itemContents(parent)];
@@ -334,6 +340,8 @@ export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]
   // update marks
   fs = produce(fs, fsd => {
     Object.keys(fs.marks).forEach(mark => {
+      if (opt?.noUpdateCursorMark && mark == SpecialId.cursorMark)
+        return;
       fsd.marks[mark] = maybeShiftMark(fs.marks[mark], loc, ix, 1);
     });
   });
