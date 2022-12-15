@@ -18,6 +18,8 @@ export type Fs = {
   idToItem: Record<Ident, Item>;
   inventory: (Ident | undefined)[];
 
+  marks: Record<string, Location>;
+
   // Any field that is named _cached_* is a computed
   // view that is not part of the fundamental state.
   _cached_locmap: Record<Ident, Location>;
@@ -134,6 +136,7 @@ export function mkFs(): Fs {
   let fs: Fs = {
     counter: 0,
     idToItem: {},
+    marks: {},
     _cached_locmap: {},
     inventory: [],
   };
@@ -291,6 +294,22 @@ export function createAndInsertItem(fs: Fs, loc: Ident, ix: number, item: Item):
   return [fs, id, hooks];
 }
 
+// insertCount can be -1 for a delete
+function maybeShiftMark(markLoc: Location, insertLoc: Ident, insertIx: number, insertCount: number): Location {
+  if (markLoc.t == 'at' && insertLoc == markLoc.id && insertIx <= markLoc.pos) {
+    if (insertIx > markLoc.pos + insertCount) {
+      // I think this has to be a deletion that actually deletes the mark itself!
+      // XXX should write some tests probably
+      console.error('mark deleted... is this right?');
+      return { t: 'is_root' };
+    }
+    return { t: 'at', id: markLoc.id, pos: markLoc.pos + insertCount };
+  }
+  else {
+    return markLoc;
+  }
+}
+
 // This doesn't create the item itself, just inserts the id in the right place
 export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]] {
   logger('movement', `insertId ${loc}[${ix}] id ${id}`);
@@ -304,6 +323,13 @@ export function insertId(fs: Fs, loc: Ident, ix: number, id: Ident): [Fs, Hook[]
     for (let i = ix; i < contents.length; i++) {
       fsd._cached_locmap[contents[i]] = { t: 'at', id: loc, pos: i + 1 };
     }
+  });
+
+  // update marks
+  fs = produce(fs, fsd => {
+    Object.keys(fs.marks).forEach(mark => {
+      fsd.marks[mark] = maybeShiftMark(fs.marks[mark], loc, ix, 1);
+    });
   });
   return [fs, parent.hooks ?? []];
 }
@@ -330,6 +356,14 @@ export function removeId(fs: Fs, loc: Ident, ix: number): [Fs, Ident, Hook[]] {
       fsd._cached_locmap[contents[i]] = { t: 'at', id: loc, pos: i - 1 };
     }
   });
+
+  // update marks
+  fs = produce(fs, fsd => {
+    Object.keys(fs.marks).forEach(mark => {
+      fsd.marks[mark] = maybeShiftMark(fs.marks[mark], loc, ix, -1);
+    });
+  });
+
   return [fs, id, parent.hooks ?? []];
 }
 
