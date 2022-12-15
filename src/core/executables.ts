@@ -178,6 +178,7 @@ export function executeInstructions(state: GameState, instr: ExecutableName, id:
     return withErrorExec(state, { code: 'itemLocked', blame: id, loc });
   }
 
+  // Here's where the actual execution happens:
   let effects, error;
   [state, effects, error] = executeInstructionsWithTargets(state, instr, id, targetIds);
 
