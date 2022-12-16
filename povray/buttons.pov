@@ -1,8 +1,8 @@
 #version 3.7;
-// assumed_gamma 1.0;
 #include "colors.inc"    // The include files contain
 
 global_settings {
+  assumed_gamma 1.0
   radiosity {
      pretrace_start 0.08
       pretrace_end   0.01
@@ -31,7 +31,12 @@ default {finish {ambient 0}}
 
 #declare xoff = -1.5;
 
+#ifdef (PUSH)
+#declare pushed = true;
+#else
 #declare pushed = false;
+#end
+
 #if (pushed)
 #declare buttonVerticalDisplace = -0.3;
 #else
@@ -62,6 +67,8 @@ default {finish {ambient 0}}
 
 #end
 
+background { colour srgbt <0.0, 0.0, 0.0, 1.0> }
+
 #declare pillHeight = 0.3;
 #declare pillRad = 0.06;
 #declare pill = union {
@@ -72,7 +79,7 @@ default {finish {ambient 0}}
 };
 #declare formm = union {
   difference {
-    plane {  <0, 1, 0>, 0 }
+    plane {  <0, 1, 0>, 0         texture {pigment {color srgbt<0,0,0,1>} } }
     myCone
     cylinder {<0,0.01,0>, <0,-10,0>, medRad }
     myCone2
