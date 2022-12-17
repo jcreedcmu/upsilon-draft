@@ -47,8 +47,8 @@ export type Hook =
 export type Value = number | string;
 
 export type ItemContent =
-  | { t: 'text', text: string }
-  | { t: 'dir', contents: Ident[] }
+  // 'file' is inclusive of plain files and directories
+  | { t: 'file', text: string, contents: Ident[] }
   | { t: 'checkbox', checked: boolean }
   | { t: 'sound', effect: SoundEffect }
   | { t: 'image', data: ImgData }

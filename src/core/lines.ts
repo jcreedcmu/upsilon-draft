@@ -133,9 +133,8 @@ function dropActionForItem(item: Item, loc: Ident, ix: number): DropLineAction {
 
 function renderInfoBox(content: ItemContent): InfoBox | undefined {
   switch (content.t) {
-    case 'text': return { t: 'text', text: content.text };
+    case 'file': return { t: 'text', text: content.text };
     case 'image': return { t: 'image', data: content.data };
-    case 'dir': return undefined;
     case 'checkbox': return undefined;
     case 'sound': return undefined;
     case 'inventorySlot': return undefined;

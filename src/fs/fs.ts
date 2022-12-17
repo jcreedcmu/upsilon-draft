@@ -38,7 +38,7 @@ export type VirtualItemPlan = ItemPlan
 /// Fs Read Utilities
 
 export function itemContents(item: Item): Ident[] {
-  if (item.content.t == 'dir')
+  if (item.content.t == 'file')
     return item.content.contents;
   else
     return []; // XXX should warn if we get here?
@@ -124,8 +124,7 @@ function makeInsertRootItem(fs: Fs, name: SpecialId): Fs {
   [fs,] = insertRootItem(fs, name, {
     name,
     acls: {},
-
-    content: { t: 'dir', contents: [] },
+    content: { t: 'file', text: '', contents: [] },
     resources: {},
     size: 0
   });
@@ -145,7 +144,7 @@ export function mkFs(): Fs {
 }
 
 export function textContent(text: string): ItemContent {
-  return { t: 'text', text };
+  return { t: 'file', text, contents: [] };
 }
 
 export function itemOfPlan(plan: ItemPlan): Item {
@@ -159,7 +158,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
         //
         // I think it depends on the invariant that virtual
         // directories only have virtual contents.
-        content: { t: 'dir', contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []) },
+        content: { t: 'file', text: '', contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []) },
         resources: plan.resources ?? {},
         size: 1,
         hooks: plan.hooks,
@@ -179,7 +178,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
     case 'file': return {
       name: plan.name,
       acls: { pickup: true },
-      content: plan.content ?? { t: 'text', text: '' },
+      content: plan.content ?? textContent(''),
       resources: plan.resources ?? {},
       size: 1,
     };
