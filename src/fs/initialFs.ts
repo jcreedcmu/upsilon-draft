@@ -1,6 +1,6 @@
 import { errorCodes, errorCodeText } from '../core/errors';
 import { ExecutableName, executables } from '../core/executables';
-import { KeyAction } from '../core/model';
+import { Ident, KeyAction } from '../core/model';
 import { ImgData } from '../ui/image';
 import { arrowChars } from '../ui/screen';
 import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
@@ -17,12 +17,13 @@ export enum SpecialId {
   tmpMark = '_tmpMark', // XXX this is like a caller-save register
 };
 
-function namedExec(name: ExecutableName, opts?: { resources?: Resources }): ItemPlan {
+export function namedExec(name: ExecutableName, opts?: { resources?: Resources, forceId?: Ident }): ItemPlan {
   return {
     t: 'exec',
     name,
     contents: [],
-    resources: opts?.resources
+    resources: opts?.resources,
+    forceId: opts?.forceId
   };
 }
 

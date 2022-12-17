@@ -303,6 +303,7 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
       return [produce(state, s => { modifyInventorySlotꜝ(s, 1) }),
       [{ t: 'playAbstractSound', effect: 'change-slot', loc: undefined }]];
     case KeyAction.debug: {
+      console.log(state.fs.marks);
       doAgain('...');
       return [state, [{ t: 'playSound', effect: 'high', loc: undefined }]];
     }
