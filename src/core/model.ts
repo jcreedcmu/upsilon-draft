@@ -10,13 +10,13 @@ import { cancelRecurꜝ, ExecutableName } from './executables';
 import { FullLine, getLines } from './lines';
 
 export type Acl =
-  | 'open'
-  | 'pickup'
-  | 'exec'
-  | 'instr'
-  | 'unlock'
-  | 'read'
+  | 'open' // item can be opened
+  | 'pickup' // item can be picked up
+  | 'exec' // item can be executed
+  | 'instr' // item is an instruction [obsolete]
+  | 'unlock' // item can operate on locked arguments
   ;
+
 export type Acls = { [P in Acl]?: boolean };
 
 export type UserError = {
