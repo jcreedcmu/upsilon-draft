@@ -52,6 +52,12 @@ export type RenderableLine =
   | ItemRenderableLine
   | SpecialRenderableLine
 
+type DirRenderable = {
+  curLine: number,
+  lines: RenderableLine[],
+  show: Show,
+}
+
 export type FsRenderable = {
   curLine: number,
   lines: RenderableLine[],
@@ -288,13 +294,9 @@ function renderLineInfo(rend: FsRenderable, screen: Screen, line: RenderableLine
     else
       screen.drawTagStr(screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
   });
-
-
 }
 
-export function renderFsView(rend: FsRenderable): Screen {
-  const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
-  logger('renderFsView', rend);
+function renderDir(screen: Screen, p: Point, rend: DirRenderable): void {
   const lines = rend.lines;
 
   const [displayableLines, offset] = getDisplayableLines(lines, rend.curLine);
@@ -302,11 +304,19 @@ export function renderFsView(rend: FsRenderable): Screen {
   displayableLines.forEach((line, i) => {
     const lineIndex = i + offset;
     const selected = lineIndex == rend.curLine;
-    if (rend.show.info && selected) {
-      renderLineInfo(rend, screen, line);
-    }
-    renderLine(screen, { x: 0, y: i }, FS_LEN, line, rend.show, selected);
+    renderLine(screen, { x: p.x, y: p.y + i }, FS_LEN, line, rend.show, selected);
   });
+}
+
+export function renderFsView(rend: FsRenderable): Screen {
+  const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
+  logger('renderFsView', rend);
+
+  renderDir(screen, { x: 0, y: 0 }, rend);
+
+  if (rend.show.info) {
+    renderLineInfo(rend, screen, rend.lines[rend.curLine]);
+  }
 
   if (rend.show.inventory) {
     rend.invLines.forEach((line, ix) => {
