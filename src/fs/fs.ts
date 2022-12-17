@@ -8,6 +8,9 @@ import { logger } from "../util/debug";
 
 /// Constants
 
+// The idea is that every virtual item doesn't have a normal abstract
+// id, but rather an id that tells us enough information that we're
+// able to regenerate its hereditary contents deterministically.
 const VIRTUAL_ITEM_PATTERN = /^_gen_/;
 const VIRTUAL_ITEM_PREFIX = '_gen_';
 
@@ -207,8 +210,8 @@ export function insertPlan(fs: Fs, loc: Ident, plan: VirtualItemPlan): [Fs, Iden
   if (plan.t == 'virtual') {
     ident = virtualId(plan.id);
     // XXX factor this out as insertIdLast?
-    const ix = getContents(fs, loc).length; // ignore hooks during init
-    [fs,] = insertId(fs, loc, ix, ident);
+    const ix = getContents(fs, loc).length;
+    [fs,] = insertId(fs, loc, ix, ident); // ignore hooks during init
   }
   else {
     [fs, ident] = insertItem(fs, loc, itemOfPlan(plan),
