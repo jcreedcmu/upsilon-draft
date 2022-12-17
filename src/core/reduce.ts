@@ -341,7 +341,13 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
           result.effects
         ]
         case 'quit': return [
-          produce(state, s => { s.viewState = vs.back }),
+          produce(state, s => {
+            s.viewState = vs.back;
+            // The following is a hack. Error-clearing clock-updates
+            // can get swallowed by text dialog reduce handler, so we
+            // clear them manually.
+            s.error = undefined;
+          }),
           [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
         ];
       }
