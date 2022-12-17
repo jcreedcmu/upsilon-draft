@@ -141,16 +141,16 @@ export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
 export type Recurring = Record<Ident, { periodTicks: number }>;
 
+export type TextDialogViewState = {
+  text: string,
+  cursor: Point,
+};
+
 // This is for alternate modal states within the game interface, which
 // are triggered by "diagetic" controls.
 export type ViewState =
   | { t: 'fsView' }
-  | {
-    t: 'textDialogView',
-    text: string,
-    cursor: Point,
-    back: ViewState
-  };
+  | { t: 'textDialogView', back: ViewState } & TextDialogViewState;
 
 export type InventoryState = {
   curSlot: number, // active inventory slot index

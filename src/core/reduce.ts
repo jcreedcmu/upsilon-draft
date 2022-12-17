@@ -6,7 +6,7 @@ import { nowTicks } from './clock';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs, TextDialogViewState } from './model';
 
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;
@@ -318,13 +318,34 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
   }
 }
 
+type TextDialogReduceResult =
+  | { t: 'normal', state: TextDialogViewState, effects: Effect[] }
+  | { t: 'quit', text: string };
+
+function reduceTextDialogView(state: TextDialogViewState, action: GameAction): TextDialogReduceResult {
+  switch (action.t) {
+    case 'key': return { t: 'quit', text: state.text };
+    default: return { t: 'normal', state, effects: [] };
+  }
+}
+
 export function reduceGameState(state: GameState, action: GameAction): ReduceResult {
   const vs = state.viewState;
   switch (vs.t) {
     case 'fsView': return reduceGameStateFs(state, action);
-    case 'textDialogView': return [produce(state, s => {
-      s.viewState = vs.back;
-    }), [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]];
+    case 'textDialogView': {
+      const result = reduceTextDialogView(vs, action);
+      switch (result.t) {
+        case 'normal': return [
+          produce(state, s => { s.viewState = { t: 'textDialogView', back: vs.back, ...result.state } }),
+          result.effects
+        ]
+        case 'quit': return [
+          produce(state, s => { s.viewState = vs.back }),
+          [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+        ];
+      }
+    }
   }
 }
 
