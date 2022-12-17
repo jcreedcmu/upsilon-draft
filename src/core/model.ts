@@ -181,8 +181,6 @@ export type GameState = {
   fs: Fs,
   viewState: ViewState,
 
-  curId: Ident, // maybe these things belong in fsView ViewState
-  curLine: number,
   error: UserError | undefined,
   path: string[],
 
@@ -299,8 +297,6 @@ export function gameStateOfFs(fs: Fs): GameState {
     clock: mkClockState(),
     error: undefined,
     fs,
-    curId: SpecialId.root, // XXX delete in favor of mark
-    curLine: root.length - 1, // XXX delete in favor of mark
     path: [],
     futures: [],
     recurring: {},
