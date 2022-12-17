@@ -258,3 +258,20 @@ Two outstanding bugs/infelicities that might require some rethink:
    Come to think of it, I'm not sure if that's robust against remote
    insertions/deletions either. Maybe I should have some notion of
    invisible "mark"?
+
+=== 2022.12.17 META: (:id 5b779cee-7577-4c68-a4da-031b6fab2b13)
+
+Q: Why can't I do something like
+<<<
+  if ((window as any).f !== undefined) {
+        ((window as any).f)(state);
+      }
+>>>
+in reduce.ts for KeyAction.debug?
+A: The problem is actually the concrete name `f`: in the path
+node_modules/immer/dist/immer.esm.mjs
+I find the code
+<<<
+function f(n,r,t){var e=o(n);2===e?n.set(r,t):3===e?(n.delete(r),n.add(t)):n[r]=t}
+>>>
+so that function exists at the toplevel already. I'll just use ff, I guess.

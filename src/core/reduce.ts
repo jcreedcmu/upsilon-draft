@@ -306,8 +306,8 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
       return [produce(state, s => { modifyInventorySlotꜝ(s, 1) }),
       [{ t: 'playAbstractSound', effect: 'change-slot', loc: undefined }]];
     case KeyAction.debug: {
-      if ((window as any).f !== undefined) {
-        (window as any).f(state);
+      if ((window as any).ff !== undefined) {
+        ((window as any).ff)(state);
       }
       else {
         console.log(state);
