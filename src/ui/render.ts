@@ -68,7 +68,7 @@ export type FsRenderable = {
   inventoryState: InventoryState,
 };
 
-export type TextDialogRenderable = {};
+export type TextDialogRenderable = { text: string, cursor: Point };
 
 export type Renderable =
   | { t: 'fsView' } & FsRenderable
@@ -123,7 +123,7 @@ function getRenderable(state: GameState): Renderable {
       };
     }
     case 'textDialogView':
-      return { t: 'textDialogView' };
+      return state.viewState;
   }
 }
 
@@ -359,10 +359,11 @@ export function renderFsView(rend: FsRenderable): Screen {
   return screen;
 }
 
-export function renderTextDialogView(state: Renderable): Screen {
+export function renderTextDialogView(state: TextDialogRenderable): Screen {
   const screen = new Screen();
   screen.fillRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, { fg: ColorCode.white, bg: ColorCode.blue }, 32);
   screen.drawRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, { fg: ColorCode.white, bg: ColorCode.blue });
+  screen.drawStr(screen.at(1, 1), state.text, { fg: ColorCode.yellow, bg: ColorCode.blue });
   return screen;
 }
 

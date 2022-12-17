@@ -3,7 +3,7 @@ import { SpecialId } from "../fs/initialFs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
-import { ErrorCode, ErrorCodeException, ErrorInfo } from "./errors";
+import { ErrorCode, ErrorCodeException, errorCodes, ErrorInfo } from "./errors";
 import { canPickup } from "./lines";
 import { Acls, Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
 import { addFutureꜝ, processHooks, reduceGameStateFs, ReduceResult, ReduceResultErr, withError } from "./reduce";
@@ -53,7 +53,7 @@ export type ExecutablesType = typeof executables;
 export type ExecutableName = ExecutablesType[keyof ExecutablesType];
 
 export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
-  'text-dialog': { cycles: 3, cpuCost: 0, numTargets: 0 },
+  'text-dialog': { cycles: 3, cpuCost: 0, numTargets: 1 },
   'combine': { cycles: 10, cpuCost: 1, numTargets: 2 },
   'mov-cpu-5': { cycles: 5, cpuCost: 1, numTargets: 2 },
   'mov-cpu-1': { cycles: 5, cpuCost: 1, numTargets: 2 },
@@ -313,10 +313,16 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
   }
 
   switch (instr) {
-    case executables.textDialog:
+    case executables.textDialog: {
+      const tgt = getItem(state.fs, targetIds[0]);
+      if (tgt.content.t != 'file') {
+        return withErrorExec(state, { code: 'badInputs', loc, blame: actorId });
+      }
+      const text = tgt.content.text;
       return [produce(state, s => {
-        s.viewState = { t: 'textDialogView', back: state.viewState };
+        s.viewState = { t: 'textDialogView', text, cursor: { x: 0, y: 0 }, back: state.viewState };
       }), [], undefined];
+    }
     case executables.combine:
       return [state, [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
     case executables.movCpu5: return movResource(state, targetIds, 'cpu', 5, loc);

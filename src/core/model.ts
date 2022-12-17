@@ -5,6 +5,7 @@ import { ImgData } from '../ui/image';
 import { AbstractSoundEffect, allSoundEffects, SoundEffect } from '../ui/sound';
 import { DEBUG } from '../util/debug';
 import { produce } from '../util/produce';
+import { Point } from '../util/types';
 import { ClockState, mkClockState } from './clock';
 import { cancelRecurꜝ, ExecutableName } from './executables';
 import { FullLine, getLines } from './lines';
@@ -144,7 +145,12 @@ export type Recurring = Record<Ident, { periodTicks: number }>;
 // are triggered by "diagetic" controls.
 export type ViewState =
   | { t: 'fsView' }
-  | { t: 'textDialogView', back: ViewState };
+  | {
+    t: 'textDialogView',
+    text: string,
+    cursor: Point,
+    back: ViewState
+  };
 
 export type InventoryState = {
   curSlot: number, // active inventory slot index
