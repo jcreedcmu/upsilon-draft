@@ -4,11 +4,19 @@ import { Rand } from '../util/util';
 import { Fs, itemOfPlan, ItemPlan, virtualId } from "./fs";
 import { Resources } from './resources';
 
-// a virtual id looks like
-// vroot
-// vroot/foo1
-// vroot/foo1/foo2
-// vroot/foo1/foo3
+/// Constants
+
+// The idea is that every virtual item doesn't have a normal abstract
+// id, but rather an id that tells us enough information that we're
+// able to regenerate its hereditary contents deterministically.
+export const VIRTUAL_ITEM_PATTERN = /^_gen_/;
+export const VIRTUAL_ITEM_PREFIX = '_gen_';
+
+// In practice, a virtual id looks like
+// _gen_vroot
+// _gen_vroot/foo1
+// _gen_vroot/foo1/foo2
+// _gen_vroot/foo1/foo3
 // etc.
 
 type VirtualItemPlan =

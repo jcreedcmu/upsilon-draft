@@ -1,18 +1,9 @@
-import { produce } from "../util/produce";
-import { Resources } from './resources';
-import { SpecialId } from "./initialFs";
-import { canOpen } from '../core/lines';
 import { Hook, Ident, Item, ItemContent, Location } from '../core/model';
-import { getVirtualItem, getVirtualItemLocation } from "./vfs";
 import { logger } from "../util/debug";
-
-/// Constants
-
-// The idea is that every virtual item doesn't have a normal abstract
-// id, but rather an id that tells us enough information that we're
-// able to regenerate its hereditary contents deterministically.
-const VIRTUAL_ITEM_PATTERN = /^_gen_/;
-const VIRTUAL_ITEM_PREFIX = '_gen_';
+import { produce } from "../util/produce";
+import { SpecialId } from "./initialFs";
+import { Resources } from './resources';
+import { getVirtualItem, getVirtualItemLocation, VIRTUAL_ITEM_PATTERN, VIRTUAL_ITEM_PREFIX } from "./vfs";
 
 /// Types
 
