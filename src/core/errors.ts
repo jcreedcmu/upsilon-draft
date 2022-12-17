@@ -15,6 +15,7 @@ export const errorCodes = {
   badInputs: 111,
   badExecutable: 112,
   badArchive: 113,
+  permissionDenied: 114,
 };
 
 export type ErrorCode = keyof (typeof errorCodes);
@@ -50,6 +51,7 @@ export function errorCodeText(k: ErrorCode): string {
     case 'badInputs': return `Bad inputs`;
     case 'badExecutable': return `Bad executable`;
     case 'badArchive': return `Bad archive`;
+    case 'permissionDenied': return `Permission denied`;
   }
 }
 

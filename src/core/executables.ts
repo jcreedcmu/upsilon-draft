@@ -5,7 +5,7 @@ import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
 import { ErrorCode, ErrorCodeException, ErrorInfo } from "./errors";
 import { canPickup } from "./lines";
-import { Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
+import { Acls, Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
 import { addFutureꜝ, processHooks, reduceGameStateFs, ReduceResult, ReduceResultErr, withError } from "./reduce";
 
 export const RECURRENCE_LENGTH = 10;
@@ -17,7 +17,13 @@ export type ExecutableSpec = {
   // When `numTargets` is negative, it means "grab `abs(numTargets)`
   // targets from before executable, rather than after"
   numTargets?: number,
+
+  aclRequirements?: AclRequirement[],
 }
+
+// This type captures what level of permissions is *required* for an
+// operation that an executable wants to perform. The default is 'write'.
+export type AclRequirement = 'write' | 'read';
 
 export const executables = {
   textDialog: 'text-dialog',
@@ -60,7 +66,7 @@ export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'prefix': { cycles: 5, cpuCost: 1 },
   'charge': { cycles: 5, cpuCost: 1 },
   'treadmill': { cycles: 50, cpuCost: 0 },
-  'extract-id': { cycles: 5, cpuCost: 1 },
+  'extract-id': { cycles: 5, cpuCost: 1, aclRequirements: ['read'] },
   'magnet': { cycles: 5, cpuCost: 1 },
   'modify': { cycles: 5, cpuCost: 1 },
   'copy': { cycles: 5, cpuCost: 1 },
@@ -160,6 +166,18 @@ function getTargetsFor(fs: Fs, loc: Location, instr: ExecutableName): Ident[] | 
   }
 }
 
+function itemSatisfiesRequirement(target: Item, actor: Item, aclRequirement: AclRequirement): boolean {
+  switch (aclRequirement) {
+    case 'write': return canPickup(target, actor);
+    case 'read': return true;
+  }
+}
+
+function satisfiesAclRequirements(target: Item, actor: Item, instr: ExecutableName, targetIx: number): boolean {
+  const aclRequirement = (executableProperties[instr].aclRequirements ?? [])[targetIx] ?? 'write';
+  return itemSatisfiesRequirement(target, actor, aclRequirement);
+}
+
 /*
 This is a wrapper around executeInstructionsWithTargets. It is called
 after a binary completes its "progress bar" timeout. The job of
@@ -181,8 +199,9 @@ export function executeInstructions(state: GameState, instr: ExecutableName, id:
 
   const targets = targetIds.map(tid => getItem(state.fs, tid));
   const actor = getItem(state.fs, id);
-  if (!targets.every(target => canPickup(target, actor))) { // XXX not sure about this logic
-    return withErrorExec(state, { code: 'itemLocked', blame: id, loc });
+
+  if (!targets.every((target, ix) => satisfiesAclRequirements(target, actor, instr, ix))) {
+    return withErrorExec(state, { code: 'permissionDenied', blame: id, loc });
   }
 
   // Here's where the actual execution happens:

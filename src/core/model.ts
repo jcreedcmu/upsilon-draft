@@ -15,6 +15,7 @@ export type Acl =
   | 'exec'
   | 'instr'
   | 'unlock'
+  | 'read'
   ;
 export type Acls = { [P in Acl]?: boolean };
 
