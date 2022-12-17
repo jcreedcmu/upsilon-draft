@@ -241,24 +241,25 @@ function getWhichPage(lastPage: number, curLine: number, numLines: number, FS_RO
   return whichPage;
 }
 
-function getDisplayableLines(lines: RenderableLine[], curLine: number): [RenderableLine[], number] {
+function getDisplayableLines(lines: RenderableLine[], curLine: number, sz: Point): [RenderableLine[], number] {
+  const { x: numCols, y: numRows } = sz;
   const numLines = lines.length;
-  if (numLines <= FS_ROWS)
+  if (numLines <= numRows)
     return [lines, 0];
 
-  const lastPage = getLastPage(numLines, FS_ROWS);
-  const whichPage = getWhichPage(lastPage, curLine, numLines, FS_ROWS);
+  const lastPage = getLastPage(numLines, numRows);
+  const whichPage = getWhichPage(lastPage, curLine, numLines, numRows);
   const shouldInsertPrevGuard = whichPage > 0;
   const shouldInsertNextGuard = whichPage < lastPage;
-  const numLinesToShow = FS_ROWS - (shouldInsertNextGuard ? 1 : 0) - (shouldInsertPrevGuard ? 1 : 0);
-  const offset = whichPage * (FS_ROWS - 2);
+  const numLinesToShow = numRows - (shouldInsertNextGuard ? 1 : 0) - (shouldInsertPrevGuard ? 1 : 0);
+  const offset = whichPage * (numRows - 2);
   const ioffset = offset + (shouldInsertPrevGuard ? 1 : 0);
   const itemLines: RenderableLine[] = lines.slice(ioffset, ioffset + numLinesToShow);
   if (shouldInsertPrevGuard) {
-    itemLines.unshift({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_UP, FS_LEN) });
+    itemLines.unshift({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_UP, numCols) });
   }
   if (shouldInsertNextGuard) {
-    itemLines.push({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_DOWN, FS_LEN) });
+    itemLines.push({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_DOWN, numCols) });
   }
   return [itemLines, offset];
 }
@@ -296,15 +297,15 @@ function renderLineInfo(rend: FsRenderable, screen: Screen, line: RenderableLine
   });
 }
 
-function renderDir(screen: Screen, p: Point, rend: DirRenderable): void {
+function renderDir(screen: Screen, p: Point, sz: Point, rend: DirRenderable): void {
   const lines = rend.lines;
 
-  const [displayableLines, offset] = getDisplayableLines(lines, rend.curLine);
+  const [displayableLines, offset] = getDisplayableLines(lines, rend.curLine, sz);
 
   displayableLines.forEach((line, i) => {
     const lineIndex = i + offset;
     const selected = lineIndex == rend.curLine;
-    renderLine(screen, { x: p.x, y: p.y + i }, FS_LEN, line, rend.show, selected);
+    renderLine(screen, { x: p.x, y: p.y + i }, sz.x, line, rend.show, selected);
   });
 }
 
@@ -312,7 +313,7 @@ export function renderFsView(rend: FsRenderable): Screen {
   const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
   logger('renderFsView', rend);
 
-  renderDir(screen, { x: 0, y: 0 }, rend);
+  renderDir(screen, { x: 0, y: 0 }, { x: FS_LEN, y: FS_ROWS }, rend);
 
   if (rend.show.info) {
     renderLineInfo(rend, screen, rend.lines[rend.curLine]);
