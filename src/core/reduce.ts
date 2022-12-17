@@ -4,7 +4,7 @@ import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
-import { executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
+import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
 import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs, TextDialogViewState } from './model';
 
@@ -183,11 +183,14 @@ function reducePickupAction(state: GameState, action: PickupLineAction): ReduceR
     case 'error': return withError(state, { code: action.code });
     case 'pickup': {
       let fs = state.fs;
-      let ident, hooks;
+      let ident: Ident, hooks: Hook[];
       // FIXME: abstract this away into an fs move function
       [fs, ident, hooks] = removeId(fs, action.loc, action.ix);
       fs = insertIntoInventory(fs, ident, state.inventoryState.curSlot);
-      state = produce(state, s => { s.fs = fs; });
+      state = produce(state, s => {
+        s.fs = fs;
+        cancelRecurꜝ(s, ident); // automation doesn't play nice in inventory
+      });
       state = processHooks(state, hooks);
       return [
         state,
