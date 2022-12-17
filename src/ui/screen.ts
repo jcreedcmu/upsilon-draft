@@ -26,6 +26,7 @@ export const Chars = {
   SPEAKER: '\xa5',
   TOP_HALF: '\xa6',
   BOTTOM_HALF: '\xa7',
+  ARCHIVE: '\xa8',
   BOXN: String.fromCharCode(0x10 + BOXN),
   BOXS: String.fromCharCode(0x10 + BOXS),
   BOXW: String.fromCharCode(0x10 + BOXW),

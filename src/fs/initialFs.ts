@@ -149,6 +149,8 @@ function binDirs(): ItemPlan[] {
       namedExec(executables.charge, { resources: { cpu: 40, network: 3 } }),
       namedExec(executables.modify, { resources: { cpu: 5, network: 0 } }),
       namedExec(executables.robot, { resources: { cpu: 5, network: 0 } }),
+      namedExec(executables.compress, { resources: { cpu: 5, network: 0 } }),
+      namedExec(executables.uncompress, { resources: { cpu: 5, network: 0 } }),
     ]
   }
 

@@ -14,6 +14,7 @@ export const errorCodes = {
   notExecutable: 110,
   badInputs: 111,
   badExecutable: 112,
+  badArchive: 113,
 };
 
 export type ErrorCode = keyof (typeof errorCodes);
@@ -48,5 +49,10 @@ export function errorCodeText(k: ErrorCode): string {
     case 'notExecutable': return `Not executable`;
     case 'badInputs': return `Bad inputs`;
     case 'badExecutable': return `Bad executable`;
+    case 'badArchive': return `Bad archive`;
   }
+}
+
+export class ErrorCodeException extends Error {
+  constructor(public code: ErrorCode) { super(); }
 }

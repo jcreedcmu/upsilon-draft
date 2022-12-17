@@ -3,7 +3,7 @@ import { SpecialId } from "../fs/initialFs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
-import { ErrorInfo } from "./errors";
+import { ErrorCode, ErrorCodeException, ErrorInfo } from "./errors";
 import { canPickup } from "./lines";
 import { Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
 import { addFutureꜝ, processHooks, reduceGameStateFs, ReduceResult, ReduceResultErr, withError } from "./reduce";
@@ -39,6 +39,8 @@ export const executables = {
   copy: 'copy',
   automate: 'automate',
   robot: 'robot',
+  compress: 'compress',
+  uncompress: 'uncompress',
 } as const;
 
 export type ExecutablesType = typeof executables;
@@ -64,6 +66,8 @@ export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'copy': { cycles: 5, cpuCost: 1 },
   'automate': { cycles: 5, cpuCost: 1 },
   'robot': { cycles: 5, cpuCost: 1, numTargets: -1 },
+  'compress': { cycles: 15, cpuCost: 1 },
+  'uncompress': { cycles: 15, cpuCost: 1 },
 }
 
 export function numTargetsOfExecutableName(name: ExecutableName): number {
@@ -95,7 +99,9 @@ export function modificationOrder(): readonly ExecutableName[] {
     executables.modify,
     executables.copy,
     executables.automate,
-    executables.robot
+    executables.robot,
+    executables.compress,
+    executables.uncompress,
   ];
 
   // We don't ever expect to call this function, but it will only typecheck if
@@ -198,6 +204,64 @@ export function executeInstructions(state: GameState, instr: ExecutableName, id:
   return [state, effects, error];
 }
 
+export function startExecutable(state: GameState, id: Ident, name: ExecutableName): ReduceResult {
+  const [st, effect] = startExecutableWe(state, id, name);
+  return [st, effect];
+}
+
+function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): ReduceResultErr {
+
+  const { cycles, cpuCost } = executableProperties[name];
+  const loc = getLocation(state.fs, id);
+
+  if (getResource(getItem(state.fs, id), 'cpu') < cpuCost) {
+    return withErrorExec(state, { code: 'noCharge', blame: id, loc }); // XXX insufficient charge, really
+  }
+
+  state = produce(state, s => {
+    modifyResourceꜝ(getItem(s.fs, id), 'cpu', x => x - cpuCost);
+  });
+
+  const action: GameAction = {
+    t: 'finishExecution',
+    actorId: id,
+    instr: name,
+  };
+
+  if (cycles == 0) {
+    let effects;
+    [state, effects] = reduceGameStateFs(state, action);
+    return [state, [...effects, { t: 'playAbstractSound', effect: 'execute', loc }], undefined];
+  }
+  else {
+    // defer execution
+    const now = nowTicks(state.clock);
+    state = produce(state, s => {
+      modifyItemꜝ(s.fs, id, item => {
+        item.progress = {
+          startTicks: now,
+          totalTicks: cycles
+        };
+      });
+      addFutureꜝ(s, now + cycles, action, true);
+    });
+    return [state, [{ t: 'playAbstractSound', effect: 'execute', loc }], undefined];
+  }
+}
+
+export function tryStartExecutable(state: GameState, id: Ident): ReduceResultErr {
+  // XXX more checking should happen here probably
+  const actor = getItem(state.fs, id);
+  const loc = getLocation(state.fs, id);
+  if (isExecutable(actor.name)) {
+    return startExecutableWe(state, id, actor.name);
+  }
+  else {
+    // XXX not the right error code really
+    return withErrorExec(state, { code: 'illegalInstr', blame: id, loc });
+  }
+}
+
 /*
 executeInstructionswithTargets assumes we know what a binary's targets
 are, and actually updates the state (well, functionally returns an
@@ -207,13 +271,26 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
   const loc = getLocation(state.fs, actorId);
 
   function withModifiedTarget(f: (x: Item) => void): ReduceResultErr {
-    const target = getItem(state.fs, targetIds[0]);
-    const ftgt = produce(target, t => { f(t); });
+    return withReplacedTarget(target => produce(target, t => { f(t); }));
+  }
 
-    // XXX this is wrong if idToItem doesn't already have a location
-    return [produce(state, s => {
-      s.fs.idToItem[targetIds[0]] = ftgt;
-    }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
+  function withReplacedTarget(f: (x: Item) => Item): ReduceResultErr {
+    const target = getItem(state.fs, targetIds[0]);
+    try {
+      const ftgt = f(target);
+      // XXX this is wrong if idToItem doesn't already have a location
+      return [produce(state, s => {
+        s.fs.idToItem[targetIds[0]] = ftgt;
+      }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
+    }
+    catch (e) {
+      if (e instanceof ErrorCodeException) {
+        return withErrorExec(state, { code: e.code, blame: actorId, loc });
+      }
+      else {
+        throw e;
+      }
+    }
   }
 
   switch (instr) {
@@ -351,63 +428,27 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
         return withErrorExec(state, { code: 'illegalInstr', blame: actorId, loc });
       }
     }
-  }
-}
 
-export function startExecutable(state: GameState, id: Ident, name: ExecutableName): ReduceResult {
-  const [st, effect] = startExecutableWe(state, id, name);
-  return [st, effect];
-}
+    case executables.compress: {
+      return withReplacedTarget(tgt => ({
+        name: tgt.name + '.cmp', content: { t: 'compressed', body: tgt.content, acls: tgt.acls },
+        acls: { pickup: true }, resources: tgt.resources, size: tgt.size,
+      }));
+    }
 
-function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): ReduceResultErr {
-
-  const { cycles, cpuCost } = executableProperties[name];
-  const loc = getLocation(state.fs, id);
-
-  if (getResource(getItem(state.fs, id), 'cpu') < cpuCost) {
-    return withErrorExec(state, { code: 'noCharge', blame: id, loc }); // XXX insufficient charge, really
-  }
-
-  state = produce(state, s => {
-    modifyResourceꜝ(getItem(s.fs, id), 'cpu', x => x - cpuCost);
-  });
-
-  const action: GameAction = {
-    t: 'finishExecution',
-    actorId: id,
-    instr: name,
-  };
-
-  if (cycles == 0) {
-    let effects;
-    [state, effects] = reduceGameStateFs(state, action);
-    return [state, [...effects, { t: 'playAbstractSound', effect: 'execute', loc }], undefined];
-  }
-  else {
-    // defer execution
-    const now = nowTicks(state.clock);
-    state = produce(state, s => {
-      modifyItemꜝ(s.fs, id, item => {
-        item.progress = {
-          startTicks: now,
-          totalTicks: cycles
-        };
+    case executables.uncompress: {
+      return withReplacedTarget(tgt => {
+        if (tgt.name.match(/\.cmp$/) && tgt.content.t == 'compressed') {
+          return {
+            name: tgt.name.replace(/\.cmp$/, ''), content: tgt.content.body,
+            acls: tgt.content.acls, resources: tgt.resources, size: tgt.size,
+          };
+        }
+        else {
+          throw new ErrorCodeException('badArchive');
+        }
       });
-      addFutureꜝ(s, now + cycles, action, true);
-    });
-    return [state, [{ t: 'playAbstractSound', effect: 'execute', loc }], undefined];
-  }
-}
+    }
 
-export function tryStartExecutable(state: GameState, id: Ident): ReduceResultErr {
-  // XXX more checking should happen here probably
-  const actor = getItem(state.fs, id);
-  const loc = getLocation(state.fs, id);
-  if (isExecutable(actor.name)) {
-    return startExecutableWe(state, id, actor.name);
-  }
-  else {
-    // XXX not the right error code really
-    return withErrorExec(state, { code: 'illegalInstr', blame: id, loc });
   }
 }

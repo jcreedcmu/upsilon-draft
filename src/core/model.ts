@@ -53,6 +53,7 @@ export type ItemContent =
   | { t: 'sound', effect: SoundEffect }
   | { t: 'image', data: ImgData }
   | { t: 'inventorySlot' }
+  | { t: 'compressed', body: ItemContent, acls: Acls }
   ;
 
 export type Item = {

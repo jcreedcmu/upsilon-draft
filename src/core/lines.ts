@@ -33,6 +33,9 @@ export function typeCharForItem(item: Item): string {
   if (item.content.t == 'sound') {
     return Chars.SPEAKER;
   }
+  if (item.content.t == 'compressed') {
+    return Chars.ARCHIVE;
+  }
   if (canOpen(item))
     return '+';
   else if (!item.acls.pickup)
@@ -138,6 +141,7 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
     case 'checkbox': return undefined;
     case 'sound': return undefined;
     case 'inventorySlot': return undefined;
+    case 'compressed': return undefined;
   }
   // wouldn't get nonexhaustivity check otherwise because fallthrough would return undefined
   unreachable(content);
