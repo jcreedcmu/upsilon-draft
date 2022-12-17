@@ -148,10 +148,10 @@ export function scheduleRecurꜝ(state: GameState, ident: Ident) {
   // NOTE: this periodTicks data is currently unused, but it feels right to me
   // that it should be introspectable.
   state.recurring[ident] = { periodTicks: RECURRENCE_LENGTH };
-
 }
 
 export function cancelRecurꜝ(state: GameState, ident: Ident) {
+  state.futures = state.futures.filter(item => !(item.action.t == 'recur' && item.action.ident == ident));
   delete state.recurring[ident];
 }
 
