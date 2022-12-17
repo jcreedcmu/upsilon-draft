@@ -3,7 +3,7 @@ import { translit } from '../util/alphabet';
 import { Rand } from '../util/util';
 import { Fs, itemOfPlan, ItemPlan, virtualId } from "./fs";
 import { Resources } from './resources';
-
+import { GeneralItemPlan as GeneralItemPlan } from './fs';
 /// Constants
 
 // The idea is that every virtual item doesn't have a normal abstract
@@ -35,15 +35,38 @@ function planOfVirtualPlan(ident: Ident, vip: VirtualItemPlan): ItemPlan {
     case 'file': return {
       t: 'file', name: vip.name, resources: resourcesOfIdent(vip.name)
     };
-    case 'dir': return {
-      t: 'dir',
-      name: vip.name == 'vroot' ? 'virtual' : vip.name,
-      contents: vip.contents.map(id => ({ t: 'virtual', id: `${ident}/${id}` }))
-    };
+    case 'dir': {
+      const contents: GeneralItemPlan[] = vip.contents.map(id => ({ t: 'virtual', id: `${ident}/${id}` }));
+      return {
+        t: 'dir',
+        name: vip.name == 'vroot' ? 'virtual' : vip.name,
+        contents,
+      };
+    }
   }
 }
 export function getVirtualItem(ident: Ident): Item {
-  return itemOfPlan(planOfVirtualPlan(ident, getVirtualItemPlan(ident)));
+  const plan = planOfVirtualPlan(ident, getVirtualItemPlan(ident))
+  const item = itemOfPlan(plan);
+  // XXX I don't love this special case, but this is what I want out of a virtual item dir:
+  // that it already knows its contents.
+  if (plan.t == 'dir') {
+    return {
+      ...item, content: {
+        t: 'file', text: '', contents: plan.contents.map(x => {
+          if (x.t == 'virtual') {
+            return virtualId(x.id);
+          }
+          else {
+            throw new Error(`nonvirtual item plan inside virtual item plan`);
+          }
+        })
+      }
+    };
+  }
+  else {
+    return item;
+  }
 }
 
 function virtualPlanOfIdent(ident: Ident): VirtualItemPlan {

@@ -20,13 +20,13 @@ export type Fs = {
 };
 
 export type ItemPlan =
-  | { t: 'dir', name: string, contents: VirtualItemPlan[], forceId?: Ident, hooks?: Hook[], resources?: Resources }
+  | { t: 'dir', name: string, contents: GeneralItemPlan[], forceId?: Ident, hooks?: Hook[], resources?: Resources }
   | { t: 'exec', name: string, contents: ItemPlan[], forceId?: Ident, resources?: Resources }
   | { t: 'file', name: string, content?: ItemContent, size?: number, resources?: Resources, forceId?: Ident }
   | { t: 'instr', name: string }
   | { t: 'checkbox', name: string, checked: boolean, forceId?: Ident };
 
-export type VirtualItemPlan = ItemPlan
+export type GeneralItemPlan = ItemPlan
   | { t: 'virtual', id: Ident };
 
 /// Fs Read Utilities
@@ -141,18 +141,14 @@ export function textContent(text: string): ItemContent {
   return { t: 'file', text, contents: [] };
 }
 
+// This returns the immediate item of a plan, without descending into its child nodes.
 export function itemOfPlan(plan: ItemPlan): Item {
   switch (plan.t) {
-
     case 'dir': {
       return {
         name: plan.name,
         acls: { open: true },
-        // XXX This is a little sketchy.
-        //
-        // I think it depends on the invariant that virtual
-        // directories only have virtual contents.
-        content: { t: 'file', text: '', contents: plan.contents.flatMap(x => x.t == 'virtual' ? [virtualId(x.id)] : []) },
+        content: { t: 'file', text: '', contents: [] },
         resources: plan.resources ?? {},
         size: 1,
         hooks: plan.hooks,
@@ -196,10 +192,14 @@ export function itemOfPlan(plan: ItemPlan): Item {
   }
 }
 
-export function insertPlan(fs: Fs, loc: Ident, plan: VirtualItemPlan): [Fs, Ident] {
+export function insertPlan(fs: Fs, loc: Ident, plan: GeneralItemPlan): [Fs, Ident] {
   let ident;
   if (plan.t == 'virtual') {
-    ident = virtualId(plan.id);
+    const vid = virtualId(plan.id);
+    ident = vid;
+    // reify the virtual item
+    fs = reifyId(fs, vid);
+
     // XXX factor this out as insertIdLast?
     const ix = getContents(fs, loc).length;
     [fs,] = insertId(fs, loc, ix, ident); // ignore hooks during init
@@ -215,7 +215,7 @@ export function insertPlan(fs: Fs, loc: Ident, plan: VirtualItemPlan): [Fs, Iden
   return [fs, ident];
 }
 
-export function insertPlans(fs: Fs, loc: Ident, plans: VirtualItemPlan[]): [Fs, Ident[]] {
+export function insertPlans(fs: Fs, loc: Ident, plans: GeneralItemPlan[]): [Fs, Ident[]] {
   const idents: Ident[] = [];
   for (const plan of plans) {
     let ident;

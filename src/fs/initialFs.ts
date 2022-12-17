@@ -5,7 +5,7 @@ import { ImgData } from '../ui/image';
 import { arrowChars } from '../ui/screen';
 import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
 import { isDev } from '../util/debug';
-import { Fs, insertPlans, ItemPlan, mkFs, textContent, VirtualItemPlan } from './fs';
+import { Fs, insertPlans, ItemPlan, mkFs, textContent, GeneralItemPlan } from './fs';
 import { Resources } from './resources';
 
 export enum SpecialId {
@@ -186,7 +186,7 @@ const initialImage: ImgData = [
   1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
-function initialPlans(): VirtualItemPlan[] {
+function initialPlans(): GeneralItemPlan[] {
   return [
     {
       t: 'dir', name: 'sys',
@@ -198,7 +198,11 @@ function initialPlans(): VirtualItemPlan[] {
       ]
     },
     ...binDirs(),
-    { t: 'virtual', id: 'vroot' },
+    {
+      t: 'dir', name: 'cont', contents: [
+        { t: 'virtual', id: 'vroot' },
+      ]
+    },
     {
       t: 'dir', name: 'home', contents: [
         { t: 'file', name: 'foo', resources: { cpu: 5 } },
