@@ -128,14 +128,17 @@ export function playAudioItem(state: GameState, ident: Ident): ReduceResult {
 export function reduceExecAction(state: GameState, action: ExecLineAction): ReduceResult {
 
   switch (action.t) {
-    case 'descend': return [produce(state, s => {
-      setCurIdꜝ(s, getSelectedId(state));
-      const item = getItem(state.fs, getCurId(state));
-      setCurLineꜝ(s, item.stickyCurrentPos ?? 0);
-      s.path.push(item.name);
-    }), [
-      { t: 'playAbstractSound', effect: 'go-into', loc: undefined }
-    ]];
+    case 'descend': {
+      const selectedId = getSelectedId(state);
+      const item = getItem(state.fs, selectedId);
+      return [produce(state, s => {
+        setCurIdꜝ(s, selectedId);
+        setCurLineꜝ(s, item.stickyCurrentPos ?? 0);
+        s.path.push(item.name);
+      }), [
+        { t: 'playAbstractSound', effect: 'go-into', loc: undefined }
+      ]];
+    }
     case 'none': return [state, []];
     case 'error': return withError(state, { code: action.code }); // XXX does this arise? does withError want an id?
     case 'exec': {

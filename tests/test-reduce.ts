@@ -45,6 +45,7 @@ describe('reduce', () => {
     expect(state.fs.marks).toEqual({ _cursorMark: { t: 'at', id: 'foo', pos: 0 } });
     [state] = reduceKeyAction(state, KeyAction.nextLine);
     expect(state.fs.marks).toEqual({ _cursorMark: { t: 'at', id: 'foo', pos: 0 } });
+    expect(state.path).toEqual(['foo']);
     [state] = reduceKeyAction(state, KeyAction.back);
     expect(state.fs.marks).toEqual({ _cursorMark: { t: 'at', id: '_root', pos: 1 } });
   });
