@@ -314,13 +314,19 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
 
   switch (instr) {
     case executables.textDialog: {
-      const tgt = getItem(state.fs, targetIds[0]);
+      const tgtId = targetIds[0];
+      const tgt = getItem(state.fs, tgtId);
       if (tgt.content.t != 'file') {
         return withErrorExec(state, { code: 'badInputs', loc, blame: actorId });
       }
       const text = tgt.content.text;
       return [produce(state, s => {
-        s.viewState = { t: 'textDialogView', text, cursor: { x: 0, y: 0 }, back: state.viewState };
+        s.viewState = {
+          t: 'textDialogView',
+          target: tgtId,
+          state: { text, cursor: { x: 0, y: 0 } },
+          back: state.viewState
+        };
       }), [], undefined];
     }
     case executables.combine:

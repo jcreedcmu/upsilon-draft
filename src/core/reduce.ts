@@ -1,11 +1,11 @@
-import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
+import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId, setTextꜝ } from '../fs/fs';
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs, TextDialogViewState } from './model';
 import { reduceTextDialogView } from './text-dialog';
 
 export const EXEC_TICKS = 6;
@@ -326,22 +326,31 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
   switch (vs.t) {
     case 'fsView': return reduceGameStateFs(state, action);
     case 'textDialogView': {
-      const result = reduceTextDialogView(vs, action);
+      const orig: TextDialogViewState = vs;
+      const result = reduceTextDialogView(vs.state, action);
       switch (result.t) {
-        case 'normal': return [
-          produce(state, s => { s.viewState = { t: 'textDialogView', back: vs.back, ...result.state } }),
-          result.effects
-        ]
-        case 'quit': return [
-          produce(state, s => {
-            s.viewState = vs.back;
-            // The following is a hack. Error-clearing clock-updates
-            // can get swallowed by text dialog reduce handler, so we
-            // clear them manually.
-            s.error = undefined;
-          }),
-          [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
-        ];
+        case 'normal': {
+          const nvs = produce(orig, s => { s.state = result.state; });
+          return [
+            produce(state, s => {
+              s.viewState = nvs;
+            }),
+            result.effects
+          ]
+        }
+        case 'quit': {
+          return [
+            produce(state, s => {
+              s.viewState = vs.back;
+              setTextꜝ(s.fs, vs.target, vs.state.text);
+              // The following is a hack. Error-clearing clock-updates
+              // can get swallowed by text dialog reduce handler, so we
+              // clear them manually.
+              s.error = undefined;
+            }),
+            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+          ];
+        }
       }
     }
   }

@@ -1,6 +1,6 @@
 import { Char, COLS, ROWS, ColorCode, colorCodeOfName, ncolors, TEXT_PAGE_W, TEXT_PAGE_H } from './ui-constants';
 import { Point } from '../util/types';
-import { repeat } from '../util/util';
+import { invertAttr, repeat } from '../util/util';
 
 export type Attr = { fg: ColorCode, bg: ColorCode };
 export type Rect = { x: number, y: number, w: number, h: number };
@@ -66,6 +66,10 @@ export function boxify(x: number): (charcode: number) => number {
 
 function codeOfAttr(attr: Attr): number {
   return attr.fg + 16 * attr.bg;
+}
+
+function attrOfCode(code: number): Attr {
+  return { fg: code & 15, bg: (code >> 4) & 15 };
 }
 
 export function parseStr(str: string, init: Attr): AttrString[] {
@@ -147,6 +151,11 @@ export class Screen {
     const j = 4 * (y * TEXT_PAGE_W + x);
     this.imdat.data[j] = f(this.imdat.data[j]);
     this.imdat.data[j + 1] = codeOfAttr(attr);
+  }
+
+  invertAt(x: number, y: number): void {
+    const j = 4 * (y * TEXT_PAGE_W + x);
+    this.imdat.data[j + 1] = codeOfAttr(invertAttr(attrOfCode(this.imdat.data[j + 1])));
   }
 
   at(x: number, y: number, wrapLen?: number): StrState {

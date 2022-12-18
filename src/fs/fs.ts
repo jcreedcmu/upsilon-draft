@@ -273,6 +273,12 @@ export function modifyItemꜝ(fs: Fs, ident: Ident, f: (x: Item) => void): void 
   fs.idToItem[ident] = item;
 }
 
+export function setTextꜝ(fs: Fs, ident: Ident, txt: string): void {
+  modifyItemꜝ(fs, ident, x => {
+    x.content = { t: 'file', contents: [], text: txt }; // XXX erases contents!
+  });
+}
+
 
 export function createAndInsertItem(fs: Fs, loc: Ident, ix: number, item: Item): [Fs, Ident, Hook[]] {
   const id = currentId(fs);

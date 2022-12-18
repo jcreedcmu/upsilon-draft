@@ -123,7 +123,7 @@ function getRenderable(state: GameState): Renderable {
       };
     }
     case 'textDialogView':
-      return state.viewState;
+      return { t: 'textDialogView', ...state.viewState.state };
   }
 }
 
@@ -361,9 +361,14 @@ export function renderFsView(rend: FsRenderable): Screen {
 
 export function renderTextDialogView(state: TextDialogRenderable): Screen {
   const screen = new Screen();
-  screen.fillRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, { fg: ColorCode.white, bg: ColorCode.blue }, 32);
-  screen.drawRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, { fg: ColorCode.white, bg: ColorCode.blue });
-  screen.drawStr(screen.at(1, 1), state.text, { fg: ColorCode.yellow, bg: ColorCode.blue });
+  const yellowFg = { fg: ColorCode.yellow, bg: ColorCode.blue };
+  const whiteFg = { fg: ColorCode.white, bg: ColorCode.blue };
+  const offset: Point = { x: 1, y: 1 };
+  screen.fillRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, whiteFg, 32);
+  screen.drawRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, whiteFg);
+  screen.drawStr(screen.at(offset.x, offset.y, screen.cols - 2), state.text, yellowFg);
+  screen.drawStr(screen.at(3, screen.rows - 1, screen.cols - 2), "<esc> to quit", yellowFg);
+  screen.invertAt(state.cursor.x + offset.x, state.cursor.y + offset.y);
   return screen;
 }
 
