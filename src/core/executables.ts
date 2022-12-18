@@ -26,7 +26,7 @@ export type ExecutableSpec = {
 export type AclRequirement = 'write' | 'read';
 
 export const executables = {
-  textDialog: 'text-dialog',
+  textEdit: 'text-edit',
   combine: 'combine',
   movCpu5: 'mov-cpu-5',
   movCpu1: 'mov-cpu-1',
@@ -53,7 +53,7 @@ export type ExecutablesType = typeof executables;
 export type ExecutableName = ExecutablesType[keyof ExecutablesType];
 
 export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
-  'text-dialog': { cycles: 3, cpuCost: 0, numTargets: 1 },
+  'text-edit': { cycles: 3, cpuCost: 0, numTargets: 1 },
   'combine': { cycles: 10, cpuCost: 1, numTargets: 2 },
   'mov-cpu-5': { cycles: 5, cpuCost: 1, numTargets: 2 },
   'mov-cpu-1': { cycles: 5, cpuCost: 1, numTargets: 2 },
@@ -82,12 +82,12 @@ export function numTargetsOfExecutableName(name: ExecutableName): number {
 
 export function modificationOrder(): readonly ExecutableName[] {
   // the fact that typescript infers `_modificationOrder` here as
-  //    ("text-dialog" | ⋯)[]
+  //    ("text-edit" | ⋯)[]
   // seems to depend on `executables` being `as const`, but doesn't
   // require `_modificationOrder` to be `as const` to get an effective
   // static exhaustiveness check via _staticCheckCoverage below.
   const _modificationOrder = [
-    executables.textDialog,
+    executables.textEdit,
     executables.combine,
     executables.movCpu5,
     executables.movCpu1,
@@ -313,7 +313,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
   }
 
   switch (instr) {
-    case executables.textDialog: {
+    case executables.textEdit: {
       const tgtId = targetIds[0];
       const tgt = getItem(state.fs, tgtId);
       if (tgt.content.t != 'file') {
@@ -322,7 +322,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       const text = tgt.content.text;
       return [produce(state, s => {
         s.viewState = {
-          t: 'textDialogView',
+          t: 'textEditView',
           target: tgtId,
           state: { text, cursor: { x: 0, y: 0 } },
           back: state.viewState

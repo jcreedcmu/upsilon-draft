@@ -70,11 +70,11 @@ export type FsRenderable = {
   inventoryState: InventoryState,
 };
 
-export type TextDialogRenderable = { text: string, cursor: Point };
+export type TextEditRenderable = { text: string, cursor: Point };
 
 export type Renderable =
   | { t: 'fsView' } & FsRenderable
-  | { t: 'textDialogView' } & TextDialogRenderable;
+  | { t: 'textEditView' } & TextEditRenderable;
 
 function truncate(name: string, len: number) {
   if (name.length > len) {
@@ -133,8 +133,8 @@ function getRenderable(state: GameState): Renderable {
         inventoryState: state.inventoryState,
       };
     }
-    case 'textDialogView':
-      return { t: 'textDialogView', ...state.viewState.state };
+    case 'textEditView':
+      return { t: 'textEditView', ...state.viewState.state };
   }
 }
 
@@ -370,7 +370,7 @@ export function renderFsView(rend: FsRenderable): Screen {
   return screen;
 }
 
-export function renderTextDialogView(state: TextDialogRenderable): Screen {
+export function renderTextEditView(state: TextEditRenderable): Screen {
   const screen = new Screen();
   const yellowFg = { fg: ColorCode.yellow, bg: ColorCode.blue };
   const whiteFg = { fg: ColorCode.white, bg: ColorCode.blue };
@@ -388,7 +388,7 @@ export function finalRender(state: Renderable): Screen {
 
   switch (state.t) {
     case 'fsView': return renderFsView(state);
-    case 'textDialogView': return renderTextDialogView(state);
+    case 'textEditView': return renderTextEditView(state);
   }
 }
 

@@ -6,8 +6,8 @@ import { ErrorCode, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, TextDialogViewState } from './model';
-import { reduceTextDialogView } from './text-dialog';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, TextEditViewState } from './model';
+import { reduceTextEditView } from './text-edit';
 
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;
@@ -325,9 +325,9 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
   const vs = state.viewState;
   switch (vs.t) {
     case 'fsView': return reduceGameStateFs(state, action);
-    case 'textDialogView': {
-      const orig: TextDialogViewState = vs;
-      const result = reduceTextDialogView(vs.state, action);
+    case 'textEditView': {
+      const orig: TextEditViewState = vs;
+      const result = reduceTextEditView(vs.state, action);
       switch (result.t) {
         case 'normal': {
           const nvs = produce(orig, s => { s.state = result.state; });
@@ -344,7 +344,7 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
               s.viewState = vs.back;
               setTextꜝ(s.fs, vs.target, vs.state.text);
               // The following is a hack. Error-clearing clock-updates
-              // can get swallowed by text dialog reduce handler, so we
+              // can get swallowed by text edit reduce handler, so we
               // clear them manually.
               s.error = undefined;
             }),

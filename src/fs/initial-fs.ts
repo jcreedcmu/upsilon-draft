@@ -123,7 +123,7 @@ function errorDir(): ItemPlan {
 function binDirs(): ItemPlan[] {
   return [{
     t: 'dir', name: 'bin', contents: [
-      namedExec(executables.textDialog, { resources: { cpu: 4 } }),
+      namedExec(executables.textEdit, { resources: { cpu: 4 } }),
       namedExec(executables.movCpu5, { resources: { cpu: 5 } }),
       namedExec(executables.movCpu1, { resources: { cpu: 5 } }),
       namedExec(executables.combine),

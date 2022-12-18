@@ -7,35 +7,35 @@ export type TextWidgetState = {
   cursor: Point;
 };
 
-type TextDialogReduceResult =
+type TextEditReduceResult =
   | { t: 'normal', state: TextWidgetState, effects: Effect[] }
   | { t: 'quit', text: string }
   ;
 
-function quitResult(state: TextWidgetState): TextDialogReduceResult {
+function quitResult(state: TextWidgetState): TextEditReduceResult {
   return { t: 'quit', text: state.text };
 }
 
-function nopResult(state: TextWidgetState): TextDialogReduceResult {
+function nopResult(state: TextWidgetState): TextEditReduceResult {
   return { t: 'normal', state, effects: [] };
 }
 
-export function reduceTextDialogView(state: TextWidgetState, action: GameAction): TextDialogReduceResult {
+export function reduceTextEditView(state: TextWidgetState, action: GameAction): TextEditReduceResult {
   switch (action.t) {
-    case 'key': return reduceTextDialogViewKey(state, action.code);
+    case 'key': return reduceTextEditViewKey(state, action.code);
     default: return { t: 'normal', state, effects: [] };
   }
 }
 
-function reduceTextDialogViewKey(state: TextWidgetState, code: string): TextDialogReduceResult {
-  function cursorAdjust(amount: number): TextDialogReduceResult {
+function reduceTextEditViewKey(state: TextWidgetState, code: string): TextEditReduceResult {
+  function cursorAdjust(amount: number): TextEditReduceResult {
     return {
       t: 'normal', state: produce(state, s => {
         s.cursor.x = Math.max(0, Math.min(state.text.length, state.cursor.x + amount));
       }), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }]
     }
   }
-  function backspace(): TextDialogReduceResult {
+  function backspace(): TextEditReduceResult {
     const t = state.text;
     const cr = state.cursor.x;
     if (cr <= 0)
@@ -48,7 +48,7 @@ function reduceTextDialogViewKey(state: TextWidgetState, code: string): TextDial
       }), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }]
     }
   }
-  function insertCharacter(char: string): TextDialogReduceResult {
+  function insertCharacter(char: string): TextEditReduceResult {
     const t = state.text;
     const cr = state.cursor.x;
     const newText = t.substring(0, cr) + char + t.substring(cr);

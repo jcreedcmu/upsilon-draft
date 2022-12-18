@@ -8,7 +8,7 @@ import { produce } from '../util/produce';
 import { ClockState, mkClockState } from './clock';
 import { cancelRecurꜝ, ExecutableName } from './executables';
 import { FullLine, getLines } from './lines';
-import { TextWidgetState } from './text-dialog';
+import { TextWidgetState } from './text-edit';
 import { ErrorCode } from './errors';
 import { Hook, keybindingsOfFs, soundsOfFs, showOfFs, errorsOfFs } from './hooks';
 
@@ -136,8 +136,8 @@ export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
 export type Recurring = Record<Ident, { periodTicks: number }>;
 
-export type TextDialogViewState = {
-  t: 'textDialogView',
+export type TextEditViewState = {
+  t: 'textEditView',
   back: ViewState,
   target: Ident,
   state: TextWidgetState
@@ -147,7 +147,7 @@ export type TextDialogViewState = {
 // are triggered by "diagetic" controls.
 export type ViewState =
   | { t: 'fsView' }
-  | TextDialogViewState
+  | TextEditViewState
   ;
 
 export type InventoryState = {
