@@ -275,3 +275,16 @@ I find the code
 function f(n,r,t){var e=o(n);2===e?n.set(r,t):3===e?(n.delete(r),n.add(t)):n[r]=t}
 >>>
 so that function exists at the toplevel already. I'll just use ff, I guess.
+
+=== 2022.12.18 META: (:id 15060dca-deac-4ae6-acb0-9127b94d8794)
+
+Some thoughts on puzzles/secrets:
+
+I like the idea that there are resources or other structures hidden in
+items. One source of this can be things that appear to be plain files,
+but are actually openable, and can hide an arbitrary amount of
+interesting stuff within. Another source can be files that have
+resources on them, but which are not rendered in their current state.
+For example, I think labels look nice without resource rendering, so
+maybe you toggle label into a plain file and find that it has 50cpu or
+something.
