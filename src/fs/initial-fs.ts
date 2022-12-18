@@ -139,7 +139,7 @@ function binDirs(): ItemPlan[] {
       namedExec(executables.extractId, { resources: { cpu: 10 } }),
       namedExec(executables.magnet, { resources: { cpu: 10 } }),
       namedExec(executables.toggleCaps, { resources: { data: 1 } }),
-      namedExec(executables.prefix, { resources: { network: 1 } }),
+      namedExec(executables.makeLabel, { resources: { network: 1 } }),
       namedExec(executables.charge, { resources: { cpu: 4, network: 3 } }),
       namedExec(executables.treadmill, { resources: { cpu: 0, network: 0 } }),
       namedExec(executables.modify, { resources: { cpu: 5, network: 0 } }),

@@ -4,6 +4,7 @@ import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
 import { ErrorCode, ErrorCodeException, errorCodes, ErrorInfo } from "./errors";
+import { toggleLabel } from "./labels";
 import { canPickup } from "./lines";
 import { Acls, Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
 import { addFutureꜝ, processHooks, reduceGameStateFs, ReduceResult, ReduceResultErr, withError } from "./reduce";
@@ -36,7 +37,7 @@ export const executables = {
   toggleExec: 'toggle-exec',
   toggleUnlock: 'toggle-unlock',
   toggleCaps: 'toggle-caps',
-  prefix: 'prefix',
+  makeLabel: 'make-label',
   charge: 'charge',
   treadmill: 'treadmill',
   extractId: 'extract-id',
@@ -63,7 +64,7 @@ export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'toggle-exec': { cycles: 5, cpuCost: 1 },
   'toggle-unlock': { cycles: 5, cpuCost: 1 },
   'toggle-caps': { cycles: 5, cpuCost: 1 },
-  'prefix': { cycles: 5, cpuCost: 1 },
+  'make-label': { cycles: 5, cpuCost: 1 },
   'charge': { cycles: 5, cpuCost: 1 },
   'treadmill': { cycles: 50, cpuCost: 0 },
   'extract-id': { cycles: 5, cpuCost: 1, aclRequirements: ['read'] },
@@ -97,7 +98,7 @@ export function modificationOrder(): readonly ExecutableName[] {
     executables.toggleExec,
     executables.toggleUnlock,
     executables.toggleCaps,
-    executables.prefix,
+    executables.makeLabel,
     executables.charge,
     executables.treadmill,
     executables.extractId,
@@ -356,8 +357,8 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
 
     case executables.toggleOpen:
       return withModifiedTarget(tgt => { tgt.acls.open = !tgt.acls.open; });
-    case executables.prefix:
-      return withModifiedTarget(tgt => { tgt.name = "." + tgt.name; });
+    case executables.makeLabel:
+      return withModifiedTarget(tgt => { tgt.name = toggleLabel(tgt.name); });
 
     case executables.extractId: {
       // Takes one argument.

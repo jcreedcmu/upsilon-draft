@@ -6,6 +6,7 @@ import { ColorCode, COLS } from '../ui/ui-constants';
 import { invertAttr, repeat, unreachable } from '../util/util';
 import { nowTicks } from './clock';
 import { ErrorCode } from './errors';
+import { itemIsLabel } from './labels';
 import { GameState, Ident, Item, ItemContent } from './model';
 
 export type Action =
@@ -147,7 +148,15 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
   unreachable(content);
 }
 
-export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): ItemRenderableLine {
+export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): RenderableLine {
+  if (itemIsLabel(item)) {
+    return {
+      t: 'special',
+      attr: { fg: ColorCode.bblue, bg: ColorCode.blue },
+      str: ' ' + item.name,
+    }
+  }
+
   const str = prefixForItem(item) + item.name;
   const _attr = attrForItem(item);
   // XXX Maybe something other than invertAttr for flash? Not sure.
@@ -165,7 +174,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
   }
 }
 
-export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number): FullItemLine {
+export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number): FullLine {
   return {
     ...getRenderableLineOfItem(ident, item, ticks),
     actions: {
@@ -201,19 +210,22 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
     }
     else {
       const elapsed = nowTicks(state.clock) - item.progress.startTicks;
-      lines.push({
-        t: 'item',
-        str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
-        resources: line.resources,
-        size: 1,
-        inProgress: true,
-        attr: { bg: ColorCode.red, fg: ColorCode.yellow },
-        actions: {
-          exec: { t: 'error', code: 'alreadyExecuting' },
-          pickup: { t: 'error', code: 'cantPickUpLocked' },
-          drop: dropActionForItem(item, loc, lines.length),
-        }
-      });
+      if (line.t == 'item') {
+        // XXX Not showing resources in progress bar
+        lines.push({
+          t: 'item',
+          str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
+          resources: line.resources,
+          size: 1,
+          inProgress: true,
+          attr: { bg: ColorCode.red, fg: ColorCode.yellow },
+          actions: {
+            exec: { t: 'error', code: 'alreadyExecuting' },
+            pickup: { t: 'error', code: 'cantPickUpLocked' },
+            drop: dropActionForItem(item, loc, lines.length),
+          }
+        });
+      }
     }
   });
 
