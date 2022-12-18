@@ -1,5 +1,5 @@
 import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdForward, moveIdTo, moveIdToRelMark, reifyId, setMark, textContent } from "../fs/fs";
-import { SpecialId } from "../fs/initialFs";
+import { SpecialId } from "../fs/initial-fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";

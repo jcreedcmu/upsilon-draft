@@ -1,7 +1,7 @@
 import { Hook, Ident, Item, ItemContent, Location } from '../core/model';
 import { logger } from "../util/debug";
 import { produce } from "../util/produce";
-import { SpecialId } from "./initialFs";
+import { SpecialId } from "./initial-fs";
 import { Resources } from './resources';
 import { getVirtualItem, getVirtualItemLocation, VIRTUAL_ITEM_PATTERN, VIRTUAL_ITEM_PREFIX } from "./vfs";
 

@@ -1,5 +1,5 @@
 import { setMark, Fs, getContents, getFullContents, getItem, itemContents, getMark } from '../fs/fs';
-import { initialFs, SpecialId } from '../fs/initialFs';
+import { initialFs, SpecialId } from '../fs/initial-fs';
 import { Resources } from '../fs/resources';
 import { ImgData } from '../ui/image';
 import { AbstractSoundEffect, allSoundEffects, SoundEffect } from '../ui/sound';
@@ -9,6 +9,7 @@ import { Point } from '../util/types';
 import { ClockState, mkClockState } from './clock';
 import { cancelRecurꜝ, ExecutableName } from './executables';
 import { FullLine, getLines } from './lines';
+import { TextDialogViewState } from "./text-dialog";
 
 export type Acl =
   | 'open' // item can be opened
@@ -140,11 +141,6 @@ export type State = {
 export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
 export type Recurring = Record<Ident, { periodTicks: number }>;
-
-export type TextDialogViewState = {
-  text: string,
-  cursor: Point,
-};
 
 // This is for alternate modal states within the game interface, which
 // are triggered by "diagetic" controls.

@@ -1,5 +1,5 @@
 import { getItem, insertPlans, mkFs } from '../src/fs/fs';
-import { SpecialId } from '../src/fs/initialFs';
+import { SpecialId } from '../src/fs/initial-fs';
 import { produce } from '../src/util/produce';
 import { getResource, modifyResourceꜝ, Resources, resourcesPlus } from '../src/fs/resources';
 

@@ -1,12 +1,13 @@
 import { getInventoryItem, getItem, getLocation, getMark, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId, setMark } from '../fs/fs';
-import { SpecialId } from '../fs/initialFs';
+import { SpecialId } from '../fs/initial-fs';
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs, TextDialogViewState } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs } from './model';
+import { reduceTextDialogView } from './text-dialog';
 
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;
@@ -318,17 +319,6 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
       doAgain('...');
       return [state, [{ t: 'playSound', effect: 'high', loc: undefined }]];
     }
-  }
-}
-
-type TextDialogReduceResult =
-  | { t: 'normal', state: TextDialogViewState, effects: Effect[] }
-  | { t: 'quit', text: string };
-
-function reduceTextDialogView(state: TextDialogViewState, action: GameAction): TextDialogReduceResult {
-  switch (action.t) {
-    case 'key': return { t: 'quit', text: state.text };
-    default: return { t: 'normal', state, effects: [] };
   }
 }
 

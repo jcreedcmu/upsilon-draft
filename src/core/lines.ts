@@ -1,5 +1,5 @@
 import { getContents, getItem } from '../fs/fs';
-import { SpecialId } from '../fs/initialFs';
+import { SpecialId } from '../fs/initial-fs';
 import { InfoBox, ItemRenderableLine, RenderableLine } from '../ui/render';
 import { Attr, Chars } from '../ui/screen';
 import { ColorCode, COLS } from '../ui/ui-constants';

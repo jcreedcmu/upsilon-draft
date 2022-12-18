@@ -1,5 +1,5 @@
 import { getContents, getFullContents, getItem, insertPlans, mkFs } from '../src/fs/fs';
-import { SpecialId } from '../src/fs/initialFs';
+import { SpecialId } from '../src/fs/initial-fs';
 import { testFile } from "./testing-utils";
 
 const jestConsole = console;

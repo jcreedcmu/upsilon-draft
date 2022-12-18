@@ -1,5 +1,5 @@
 import { getContents, insertPlans, mkFs, insertId, removeId } from '../src/fs/fs';
-import { SpecialId } from '../src/fs/initialFs';
+import { SpecialId } from '../src/fs/initial-fs';
 import { testFile } from './testing-utils';
 
 const fs = (() => {

@@ -1,7 +1,7 @@
 import { gameStateOfFs } from '../src/core/model';
 import { reduceExecAction, reduceGameStateFs } from '../src/core/reduce';
 import { getFullContents, insertPlans, mkFs, moveId } from '../src/fs/fs';
-import { SpecialId } from '../src/fs/initialFs';
+import { SpecialId } from '../src/fs/initial-fs';
 import { getResource } from '../src/fs/resources';
 import { produce } from '../src/util/produce';
 import { testFile } from "./testing-utils";
