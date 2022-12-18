@@ -9,6 +9,7 @@ import { ClockState, mkClockState } from './clock';
 import { cancelRecurꜝ, ExecutableName } from './executables';
 import { FullLine, getLines } from './lines';
 import { TextWidgetState } from './text-dialog';
+import { ErrorCode } from './errors';
 
 export type Acl =
   | 'open' // item can be opened
@@ -21,7 +22,7 @@ export type Acl =
 export type Acls = { [P in Acl]?: boolean };
 
 export type UserError = {
-  code: number,
+  code: ErrorCode,
 };
 
 export type ExecProgress = {

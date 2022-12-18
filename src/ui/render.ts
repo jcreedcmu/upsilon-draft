@@ -1,4 +1,5 @@
 import { nowTicks } from '../core/clock';
+import { errorCodes, errorCodeText } from '../core/errors';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
 import { GameState, getCurId, getCurLine, InventoryState, SceneState, Show, UserError } from '../core/model';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
@@ -338,7 +339,7 @@ export function renderFsView(rend: FsRenderable): Screen {
 
   if (rend.error !== undefined) {
     screen.drawTagLine(screen.at(0, screen.rows - 1), screen.cols,
-      'E ' + rend.error.code,
+      'E ' + errorCodes[rend.error.code] + ' ' + errorCodeText(rend.error.code),
       ERROR_ATTR
     );
   }

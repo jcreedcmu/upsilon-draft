@@ -59,9 +59,7 @@ function advanceLine(state: GameState, amount: number): GameState {
 function makeErrorBanner(state: GameState, code: ErrorCode): GameState {
   const now = nowTicks(state.clock);
   return produce(state, s => {
-    s.error = {
-      code: errorCodes[code],
-    };
+    s.error = { code };
     // cancel any pending clearError futures
     s.futures = state.futures.filter(f => f.action.t != 'clearError');
 
