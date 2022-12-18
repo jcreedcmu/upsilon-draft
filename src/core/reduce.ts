@@ -1,11 +1,10 @@
-import { getInventoryItem, getItem, getLocation, getMark, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId, setMark } from '../fs/fs';
-import { SpecialId } from '../fs/initial-fs';
+import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId } from '../fs/fs';
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
-import { DropLineAction, ExecLineAction, getLines, PickupLineAction } from './lines';
+import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
 import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs } from './model';
 import { reduceTextDialogView } from './text-dialog';
 

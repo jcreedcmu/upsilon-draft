@@ -5,7 +5,7 @@ import { ImgData } from '../ui/image';
 import { arrowChars } from '../ui/screen';
 import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
 import { isDev } from '../util/debug';
-import { Fs, insertPlans, ItemPlan, mkFs, textContent, GeneralItemPlan } from './fs';
+import { Fs, GeneralItemPlan, insertPlans, ItemPlan, mkFs, textContent } from './fs';
 import { Resources } from './resources';
 
 export enum SpecialId {

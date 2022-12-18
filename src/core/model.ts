@@ -1,15 +1,14 @@
-import { setMark, Fs, getContents, getFullContents, getItem, itemContents, getMark } from '../fs/fs';
+import { Fs, getContents, getFullContents, getItem, getMark, itemContents, setMark } from '../fs/fs';
 import { initialFs, SpecialId } from '../fs/initial-fs';
 import { Resources } from '../fs/resources';
 import { ImgData } from '../ui/image';
-import { AbstractSoundEffect, allSoundEffects, SoundEffect } from '../ui/sound';
+import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
 import { DEBUG } from '../util/debug';
 import { produce } from '../util/produce';
-import { Point } from '../util/types';
 import { ClockState, mkClockState } from './clock';
 import { cancelRecurꜝ, ExecutableName } from './executables';
 import { FullLine, getLines } from './lines';
-import { TextDialogViewState } from "./text-dialog";
+import { TextDialogViewState } from './text-dialog';
 
 export type Acl =
   | 'open' // item can be opened
