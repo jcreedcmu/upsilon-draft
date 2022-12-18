@@ -59,12 +59,13 @@ type DirRenderable = {
   show: Show,
 }
 
+export type ErrorRenderable = { msg: string } | undefined;
 export type FsRenderable = {
   curLine: number,
   lines: RenderableLine[],
   show: Show,
   path: string[],
-  error: UserError | undefined,
+  error: ErrorRenderable,
   invLines: RenderableLine[],
   inventoryState: InventoryState,
 };
@@ -108,6 +109,15 @@ function getInventoryLines(state: GameState): RenderableLine[] {
   return rv;
 }
 
+function renderError(error: UserError | undefined, errorMsgs: Record<number, string>): ErrorRenderable {
+  if (error == undefined)
+    return undefined;
+  const codeNum = errorCodes[error.code];
+  const msg = errorMsgs[codeNum];
+  const text = msg == undefined ? '' : ` ${msg}`;
+  return { msg: `E${codeNum}${text}` };
+}
+
 function getRenderable(state: GameState): Renderable {
   switch (state.viewState.t) {
     case 'fsView': {
@@ -115,7 +125,7 @@ function getRenderable(state: GameState): Renderable {
       return {
         t: 'fsView',
         curLine: getCurLine(state),
-        error: state.error,
+        error: renderError(state.error, state._cached_errors),
         lines,
         path: state.path,
         show: state._cached_show,
@@ -339,7 +349,7 @@ export function renderFsView(rend: FsRenderable): Screen {
 
   if (rend.error !== undefined) {
     screen.drawTagLine(screen.at(0, screen.rows - 1), screen.cols,
-      'E ' + errorCodes[rend.error.code] + ' ' + errorCodeText(rend.error.code),
+      rend.error.msg,
       ERROR_ATTR
     );
   }

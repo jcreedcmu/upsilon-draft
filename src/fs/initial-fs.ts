@@ -1,4 +1,4 @@
-import { errorCodes, errorCodeText } from '../core/errors';
+import { ErrorCode, errorCodes, errorCodeText, errorFileName } from '../core/errors';
 import { ExecutableName, executables } from '../core/executables';
 import { Ident, KeyAction } from '../core/model';
 import { ImgData } from '../ui/image';
@@ -12,6 +12,7 @@ export enum SpecialId {
   keys = '_keys',
   sounds = '_sounds',
   lens = '_lens',
+  errors = '_errors',
   root = '_root',
   cursorMark = '_cursorMark', // XXX not really an ident in the same sense?
   tmpMark = '_tmpMark', // XXX this is like a caller-save register
@@ -109,12 +110,14 @@ function errorDir(): ItemPlan {
   const errorFiles: ItemPlan[] = Object.entries(errorCodes).map(([str, code]) => {
     return {
       t: 'file',
-      name: 'E' + code,
-      content: textContent(errorCodeText(str as keyof (typeof errorCodes)))
+      name: errorFileName(str as ErrorCode),
+      content: textContent(errorCodeText(str as keyof (typeof errorCodes))),
     };
   });
 
-  return { t: 'dir', name: 'error', contents: errorFiles };
+  return {
+    t: 'dir', name: 'error', contents: errorFiles, forceId: SpecialId.errors, hooks: ['ERROR'],
+  };
 }
 
 function binDirs(): ItemPlan[] {

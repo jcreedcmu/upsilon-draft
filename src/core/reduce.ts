@@ -5,7 +5,7 @@ import { nowTicks } from './clock';
 import { ErrorCode, errorCodes, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs, TextDialogViewState } from './model';
+import { Action, cancelRecur, Effect, errorsOfFs, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Hook, Ident, isNearbyGame, KeyAction, keybindingsOfFs, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, showOfFs, soundsOfFs, TextDialogViewState } from './model';
 import { reduceTextDialogView } from './text-dialog';
 
 export const EXEC_TICKS = 6;
@@ -166,6 +166,7 @@ function processHook(state: GameState, hook: Hook): GameState {
     case 'LENS': return produce(state, s => { s._cached_show = showOfFs(state.fs); });
     case 'KEY': return produce(state, s => { s._cached_keybindings = keybindingsOfFs(state.fs); });
     case 'SOUND': return produce(state, s => { s._cached_sounds = soundsOfFs(state.fs); });
+    case 'ERROR': return produce(state, s => { s._cached_errors = errorsOfFs(state.fs); });
   }
 }
 

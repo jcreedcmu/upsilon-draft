@@ -58,3 +58,7 @@ export function errorCodeText(k: ErrorCode): string {
 export class ErrorCodeException extends Error {
   constructor(public code: ErrorCode) { super(); }
 }
+
+export function errorFileName(code: ErrorCode) {
+  return 'E' + errorCodes[code];
+}

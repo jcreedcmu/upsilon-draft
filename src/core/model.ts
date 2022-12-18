@@ -45,6 +45,7 @@ export type Hook =
   | 'LENS'
   | 'KEY'
   | 'SOUND'
+  | 'ERROR'
   ;
 
 export type Value = number | string;
@@ -206,6 +207,7 @@ export type GameState = {
   _cached_keybindings: Record<string, KeyAction>,
   _cached_sounds: Record<string, SoundEffect>,
   _cached_show: Show,
+  _cached_errors: Record<number, string>,
 };
 
 export function mkState(): State {
@@ -256,6 +258,27 @@ export function showOfFs(fs: Fs): Show {
   }
 }
 
+export function errorsOfFs(fs: Fs): Record<number, string> {
+  let cont;
+  try {
+    cont = getFullContents(fs, SpecialId.errors);
+  }
+  catch (e) {
+    { };
+  }
+  const rv: Record<number, string> = {};
+  cont?.forEach(item => {
+    let m;
+    if (item.content.t == 'file' && (m = item.name.match(/^E(\d+)$/))) {
+      const n = parseInt(m[1]);
+      if (!isNaN(n)) {
+        rv[n] = item.content.text;
+      }
+    }
+  });
+  return rv;
+
+}
 
 export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
   let cont;
@@ -318,6 +341,7 @@ export function gameStateOfFs(fs: Fs): GameState {
     _cached_keybindings: keybindingsOfFs(fs),
     _cached_sounds: soundsOfFs(fs),
     _cached_show: showOfFs(fs),
+    _cached_errors: errorsOfFs(fs),
   };
 }
 
