@@ -1,5 +1,7 @@
-import { getContents, insertPlans, mkFs, insertId, removeId } from '../src/fs/fs';
-import { SpecialId } from '../src/fs/initial-fs';
+import { executables } from '../src/core/executables';
+import { GameAction } from '../src/core/model';
+import { getContents, getLocation, insertId, insertPlans, mkFs, moveIdForward, removeId } from '../src/fs/fs';
+import { namedExec, SpecialId } from '../src/fs/initial-fs';
 import { testFile } from './testing-utils';
 
 const fs = (() => {
@@ -56,6 +58,35 @@ describe('filesystem', () => {
       foo_a: { t: 'at', id: 'dir', pos: 1, },
       foo_c: { t: 'at', id: 'dir', pos: 2, },
       foo_d: { t: 'at', id: 'dir', pos: 3, },
+    });
+  });
+});
+
+describe('moveIdForward', () => {
+
+  const fs = (() => {
+    let fs = mkFs();
+    [fs,] = insertPlans(fs, SpecialId.root, [
+      {
+        t: 'dir', name: 'dir', forceId: '_debugDir', contents: [
+          namedExec(executables.automate, { forceId: '_automate', resources: { cpu: 5, network: 0 } }),
+          namedExec(executables.robot, { forceId: '_robot', resources: { cpu: 5, network: 0 } }),
+        ]
+      }
+    ]);
+    return fs;
+  })();
+
+  it('should work correctly', () => {
+
+    const action: GameAction = { "t": "finishExecution", "actorId": "_robot", "instr": "robot" };
+
+    const [newFs, hooks] = moveIdForward(fs, '_robot', 1);
+
+    expect(getLocation(newFs, '_robot')).toEqual({
+      t: "at",
+      id: "_debugDir",
+      pos: 1,
     });
   });
 });
