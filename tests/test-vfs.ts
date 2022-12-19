@@ -55,13 +55,8 @@ describe('virtual filesystem', () => {
       return fs;
     })();
 
-    // XXX This is wrong and I'm simply enshrining the wrong behavior
-    // in a test to remind me when I feel like fixing it.
-    // What's going wrong is that I'm equivocating between setting up
-    // the contents of a directory right away, and after its initial insertion.
     expect(getFullContents(fs, 'dir').map(x => x.name))
       .toEqual([
-        'virtual',
         'virtual',
         'foo_a',
       ]);
