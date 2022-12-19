@@ -128,7 +128,7 @@ describe('reduceGameState', () => {
     expect(getLocation(state2.fs, '_robot')).toEqual({
       t: "at",
       id: "_debugDir",
-      pos: 1,
+      pos: 0,
     });
     // Generally, nobody should be at position 2
     const locs = ['_automate', '_robot']

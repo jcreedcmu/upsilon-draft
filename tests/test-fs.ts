@@ -86,7 +86,7 @@ describe('moveIdForward', () => {
     expect(getLocation(newFs, '_robot')).toEqual({
       t: "at",
       id: "_debugDir",
-      pos: 1,
+      pos: 0,
     });
   });
 });

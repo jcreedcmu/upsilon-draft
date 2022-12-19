@@ -394,9 +394,11 @@ export function getNumLines(fs: Fs, loc: Ident): number {
   return contentsLength;
 }
 
+// Want to be careful *not* to call getNumLines here since items
+// can't exchange places with ..
 export function forwardLocation(fs: Fs, loc: Location, spaces: number): Location {
   if (loc.t != 'at') { throw new Error(`forwardLocation only supports 'at' right now`); }
-  const len = getNumLines(fs, loc.id);
+  const len = getContents(fs, loc.id).length;
   return { t: 'at', id: loc.id, pos: (loc.pos + spaces + len) % len };
 }
 
