@@ -124,6 +124,13 @@ describe('reduceGameState', () => {
 
     const [state2, effect] = reduceGameState(beforeState, action);
 
+    // Specifically, robot should be at position 1 after this
+    expect(getLocation(state2.fs, '_robot')).toEqual({
+      t: "at",
+      id: "_debugDir",
+      pos: 1,
+    });
+    // Generally, nobody should be at position 2
     const locs = ['_automate', '_robot']
       .map(it => {
         const loc = getLocation(state2.fs, it);
