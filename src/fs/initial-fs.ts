@@ -207,6 +207,12 @@ function initialPlans(): GeneralItemPlan[] {
       ]
     },
     {
+      t: 'dir', forceId: '_debugDir', name: 'debug', contents: [
+        namedExec(executables.automate, { forceId: '_automate', resources: { cpu: 5, network: 0 } }),
+        namedExec(executables.robot, { forceId: '_robot', resources: { cpu: 5, network: 0 } }),
+      ]
+    },
+    {
       t: 'dir', name: 'home', contents: [
         { t: 'file', name: 'foo', resources: { cpu: 5 } },
         {
