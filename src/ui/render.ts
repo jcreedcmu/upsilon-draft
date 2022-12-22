@@ -7,10 +7,10 @@ import { getInventoryItem, getItem } from '../fs/fs';
 import { Resources } from '../fs/resources';
 import { doOnce, logger, logOnce } from '../util/debug';
 import { Point } from '../util/types';
-import { int, invertAttr, mapval, repeat, zeropad } from '../util/util';
+import { int, invertAttr, mapval, maybeInvertAttr, repeat, zeropad } from '../util/util';
 import { ImgData, tagStrOfImg } from './image';
 import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
-import { ColorCode, COLS, ROWS } from './ui-constants';
+import { ColorCode as cc, COLS, ROWS } from './ui-constants';
 
 const FS_LEN = int(COLS / 2) - 1; // number of columns one row can take up in fsview
 const FS_ROWS = ROWS - 1;
@@ -37,6 +37,7 @@ export type ItemRenderableLine = {
   infobox?: InfoBox,
   resources: Resources,
   size: number,
+  sizeStr?: string, // replacement for size
   checked?: boolean | undefined,
   chargeNeeded?: number,
   attr: Attr,
@@ -90,7 +91,7 @@ function emptyRenderableLine(): RenderableLine {
   return {
     t: 'special',
     str: repeat(boxw, FS_LEN),
-    attr: { fg: ColorCode.yellow, bg: ColorCode.blue },
+    attr: { fg: cc.yellow, bg: cc.blue },
   };
 }
 
@@ -138,14 +139,14 @@ function getRenderable(state: GameState): Renderable {
   }
 }
 
-const CHARGE_ATTR = { fg: ColorCode.bblue, bg: ColorCode.blue };
-const NETWORK_ATTR = { fg: ColorCode.byellow, bg: ColorCode.blue };
-const DATA_ATTR = { fg: ColorCode.bgreen, bg: ColorCode.blue };
+const CHARGE_ATTR = { fg: cc.bblue, bg: cc.blue };
+const NETWORK_ATTR = { fg: cc.byellow, bg: cc.blue };
+const DATA_ATTR = { fg: cc.bgreen, bg: cc.blue };
 
-const MODELINE_ATTR = { fg: ColorCode.yellow, bg: ColorCode.black };
-const ERROR_ATTR = { fg: ColorCode.yellow, bg: ColorCode.red };
-const INV_ATTR = { fg: ColorCode.yellow, bg: ColorCode.blue }; // "inventory attr"? but it's more broadly used than that
-const GRAY_ATTR = { fg: ColorCode.bblack, bg: ColorCode.blue };
+const MODELINE_ATTR = { fg: cc.yellow, bg: cc.black };
+const ERROR_ATTR = { fg: cc.yellow, bg: cc.red };
+const INV_ATTR = { fg: cc.yellow, bg: cc.blue }; // "inventory attr"? but it's more broadly used than that
+const GRAY_ATTR = { fg: cc.bblack, bg: cc.blue };
 
 function invertAttrText(x: AttrString): AttrString {
   return { ...x, attr: invertAttr(x.attr) };
@@ -187,17 +188,24 @@ function renderItemLine(screen: Screen, p: Point, len: number, line: ItemRendera
   }
 
   if (show.size) {
-    const sizeStr = line.size ? zeropad(line.size + '', SIZE_COL_SIZE) : '';
-    const sizeAttr = (line.size < 2 && !invert) ? { fg: ColorCode.bblack, bg: ColorCode.blue } : attrs.base;
-    screen.drawTagStr(screen.at(sizeCol, y), sizeStr, sizeAttr);
+    if (line.sizeStr) {
+      const sizeStr = line.sizeStr;
+      const sizeAttr: Attr = { fg: cc.bblack, bg: cc.white };
+      screen.drawTagStr(screen.at(sizeCol, y), sizeStr, sizeAttr);
+    }
+    else {
+      const sizeStr = line.size ? zeropad(line.size + '', SIZE_COL_SIZE) : '';
+      const sizeAttr = (line.size < 2 && !invert) ? { fg: cc.bblack, bg: cc.blue } : attrs.base;
+      screen.drawTagStr(screen.at(sizeCol, y), sizeStr, sizeAttr);
+    }
   }
 
   if (line.checked !== undefined) {
     const inner = line.checked ? Chars.CHECKMARK : ' ';
     const checkedStr = `[${inner}]`;
     const attr = line.checked
-      ? { fg: ColorCode.bgreen, bg: ColorCode.green }
-      : { fg: ColorCode.bred, bg: ColorCode.red };
+      ? { fg: cc.bgreen, bg: cc.green }
+      : { fg: cc.bred, bg: cc.red };
     screen.drawTagStr(screen.at(sizeCol, y), checkedStr, attr);
   }
 }
@@ -267,10 +275,10 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number, sz: Point
   const ioffset = offset + (shouldInsertPrevGuard ? 1 : 0);
   const itemLines: RenderableLine[] = lines.slice(ioffset, ioffset + numLinesToShow);
   if (shouldInsertPrevGuard) {
-    itemLines.unshift({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_UP, numCols) });
+    itemLines.unshift({ t: 'special', attr: { fg: cc.white, bg: cc.bblack }, str: repeat(Chars.ARROW_UP, numCols) });
   }
   if (shouldInsertNextGuard) {
-    itemLines.push({ t: 'special', attr: { fg: ColorCode.white, bg: ColorCode.bblack }, str: repeat(Chars.ARROW_DOWN, numCols) });
+    itemLines.push({ t: 'special', attr: { fg: cc.white, bg: cc.bblack }, str: repeat(Chars.ARROW_DOWN, numCols) });
   }
   return [itemLines, offset];
 }
@@ -321,7 +329,7 @@ function renderDir(screen: Screen, p: Point, sz: Point, rend: DirRenderable): vo
 }
 
 export function renderFsView(rend: FsRenderable): Screen {
-  const screen = new Screen({ fg: ColorCode.blue, bg: ColorCode.blue });
+  const screen = new Screen({ fg: cc.blue, bg: cc.blue });
   logger('renderFsView', rend);
 
   renderDir(screen, { x: 0, y: 0 }, { x: FS_LEN, y: FS_ROWS }, rend);
@@ -372,8 +380,8 @@ export function renderFsView(rend: FsRenderable): Screen {
 
 export function renderTextEditView(state: TextEditRenderable): Screen {
   const screen = new Screen();
-  const yellowFg = { fg: ColorCode.yellow, bg: ColorCode.blue };
-  const whiteFg = { fg: ColorCode.white, bg: ColorCode.blue };
+  const yellowFg = { fg: cc.yellow, bg: cc.blue };
+  const whiteFg = { fg: cc.white, bg: cc.blue };
   const offset: Point = { x: 1, y: 1 };
   screen.fillRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, whiteFg, 32);
   screen.drawRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, whiteFg);

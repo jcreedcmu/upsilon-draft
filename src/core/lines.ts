@@ -1,7 +1,7 @@
 import { getContents, getItem } from '../fs/fs';
 import { SpecialId } from '../fs/initial-fs';
 import { InfoBox, ItemRenderableLine, RenderableLine } from '../ui/render';
-import { Attr, Chars } from '../ui/screen';
+import { Attr, Chars, progressChars } from '../ui/screen';
 import { ColorCode, COLS } from '../ui/ui-constants';
 import { invertAttr, repeat, unreachable } from '../util/util';
 import { nowTicks } from './clock';
@@ -211,14 +211,25 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
     else {
       const elapsed = nowTicks(state.clock) - item.progress.startTicks;
       if (line.t == 'item') {
+        const progress = elapsed / (item.progress.totalTicks - 1);
+        function progressChar(fraction: number): string {
+          const len = progressChars.length;
+          const ix = Math.floor(fraction * (len - 1));
+          return progressChars[Math.min(len - 1, Math.max(0, ix))];
+        }
+
+        const sizeStr = progressChar(progress * 3) +
+          progressChar(progress * 3 - 1) +
+          progressChar(progress * 3 - 2);
         // XXX Not showing resources in progress bar
         lines.push({
           t: 'item',
-          str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
+          //          str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
+          str: line.str,
           resources: line.resources,
           size: 1,
-          inProgress: true,
-          attr: { bg: ColorCode.red, fg: ColorCode.yellow },
+          sizeStr,
+          attr: { bg: ColorCode.blue, fg: ColorCode.yellow },
           actions: {
             exec: { t: 'error', code: 'alreadyExecuting' },
             pickup: { t: 'error', code: 'cantPickUpLocked' },

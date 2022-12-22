@@ -4,6 +4,10 @@ export function invertAttr(attr: Attr): Attr {
   return { bg: attr.fg, fg: attr.bg };
 }
 
+export function maybeInvertAttr(attr: Attr, doInvert: boolean): Attr {
+  return doInvert ? { bg: attr.fg, fg: attr.bg } : attr;
+}
+
 export function mapval<T, U>(m: { [k: string]: T }, f: (x: T) => U): { [k: string]: U } {
   return Object.fromEntries(Object.entries(m).map(([k, v]) => [k, f(v)]));
 }

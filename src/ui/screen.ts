@@ -45,6 +45,16 @@ export const Chars = {
   LTRI_RIGHT: '\xc7',
 }
 
+export const progressChars = [
+  ' ',
+  '\xa9',
+  '\xaa',
+  '\xab',
+  '\xac',
+  '\xad',
+  '\x00',
+];
+
 export const arrowChars = '\xa0\xa1\xa2\xa3';
 
 type StrState = {
