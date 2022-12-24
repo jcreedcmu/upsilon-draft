@@ -19,17 +19,19 @@ global_settings {
   }
 }
 default {finish {ambient 0}}
+#declare intensity = 10;
+
 #declare bigRad = 1;
 #declare smallRad = 0.8;
 #declare medRad = 0.83;
 
 #declare bigRad2 = 0.3;
-#declare smallRad2 = smallRad * bigRad2 / bigRad;
+#declare smallRad2 = 0.8 * smallRad * bigRad2 / bigRad;
 #declare coneDepth = 1;
 #declare sphereFlatten = 0.3;
 #declare sphereFlatten2 = 0.6;
 
-#declare xoff = -1.5;
+#declare xoff = -1.1;
 
 #ifdef (PUSH)
 #declare pushed = true;
@@ -50,7 +52,7 @@ default {finish {ambient 0}}
 
 #declare myCone2 = cone {
   <0,0.01,0>, bigRad2
-  <0,-bigRad2,0>, 0
+  <0,-bigRad2*coneDepth,0>, 0
   translate <xoff, 0, 0>
 };
 
@@ -69,13 +71,13 @@ default {finish {ambient 0}}
 
 background { colour srgbt <0.0, 0.0, 0.0, 1.0> }
 
-#declare pillHeight = 0.3;
+#declare pillHeight = 0.25;
 #declare pillRad = 0.06;
 #declare pill = union {
   sphere {<0,0,pillHeight>, pillRad}
   sphere {<0,0,-pillHeight>, pillRad}
   cylinder {<0,0,pillHeight>, <0,0,-pillHeight>, pillRad}
-  translate <0, 0.85 * sphereFlatten, 0>
+  translate <0, 0.8 * sphereFlatten, 0>
 };
 #declare formm = union {
   difference {
@@ -88,7 +90,7 @@ background { colour srgbt <0.0, 0.0, 0.0, 1.0> }
   union {
   difference {
     sphere {  <0, 0, 0>, smallRad scale <1, sphereFlatten, 1>}
-    torus { bigRad * 0.55, bigRad * 0.09 translate <0, sphereFlatten * 0.80, 0>}
+    torus { bigRad * 0.55, bigRad * 0.09 translate <0, sphereFlatten * 0.75, 0>}
     pill
   }
     cylinder { <0,0,0>, <0,-2,0>, smallRad }
@@ -96,7 +98,7 @@ background { colour srgbt <0.0, 0.0, 0.0, 1.0> }
   }
   sphere {  <xoff, 0, 0>, smallRad2 scale <1, sphereFlatten2, 1>
     #if (pushed)
-  texture {finish {emission rgb<0,1,1>} pigment {color White}}
+  texture {finish {emission rgb intensity * <0,1,0>} pigment {color White}}
     #else
         texture {pigment {color rgb<0.2,0.15,0.1>} }
     #end
