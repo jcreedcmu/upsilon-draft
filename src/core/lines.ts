@@ -154,6 +154,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
       t: 'special',
       attr: { fg: ColorCode.bblue, bg: ColorCode.blue },
       str: ' ' + item.name,
+      resources: item.resources,
     }
   }
 
@@ -221,10 +222,8 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
         const sizeStr = progressChar(progress * 3) +
           progressChar(progress * 3 - 1) +
           progressChar(progress * 3 - 2);
-        // XXX Not showing resources in progress bar
         lines.push({
           t: 'item',
-          //          str: repeat(Chars.SHADE2, Math.floor((COLS / 2 - 1) * elapsed / (item.progress.totalTicks - 1))),
           str: line.str,
           resources: line.resources,
           size: 1,

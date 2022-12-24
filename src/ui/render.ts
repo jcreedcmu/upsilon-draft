@@ -48,6 +48,7 @@ export type SpecialRenderableLine = {
   t: 'special',
   str: string,
   attr: Attr,
+  resources: Resources,
 };
 
 export type RenderableLine =
@@ -92,6 +93,7 @@ function emptyRenderableLine(): RenderableLine {
     t: 'special',
     str: repeat(boxw, FS_LEN),
     attr: { fg: cc.yellow, bg: cc.blue },
+    resources: {},
   };
 }
 
@@ -231,8 +233,6 @@ function renderLine(screen: Screen, p: Point, len: number, line: RenderableLine,
 type RenderableResources = { name: string, count: number, attr: Attr, symbol: string };
 
 export function getRenderableResources(line: RenderableLine): RenderableResources[] {
-  if (line.t != 'item')
-    return [];
   const rv: RenderableResources[] = [];
   if (line.resources.cpu) {
     rv.push({ name: 'CPU', count: line.resources.cpu, attr: CHARGE_ATTR, symbol: Chars.DIA });
@@ -275,16 +275,25 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number, sz: Point
   const ioffset = offset + (shouldInsertPrevGuard ? 1 : 0);
   const itemLines: RenderableLine[] = lines.slice(ioffset, ioffset + numLinesToShow);
   if (shouldInsertPrevGuard) {
-    itemLines.unshift({ t: 'special', attr: { fg: cc.white, bg: cc.bblack }, str: repeat(Chars.ARROW_UP, numCols) });
+    itemLines.unshift({
+      t: 'special',
+      attr: { fg: cc.white, bg: cc.bblack },
+      str: repeat(Chars.ARROW_UP, numCols),
+      resources: {},
+    });
   }
   if (shouldInsertNextGuard) {
-    itemLines.push({ t: 'special', attr: { fg: cc.white, bg: cc.bblack }, str: repeat(Chars.ARROW_DOWN, numCols) });
+    itemLines.push({
+      t: 'special',
+      attr: { fg: cc.white, bg: cc.bblack },
+      str: repeat(Chars.ARROW_DOWN, numCols),
+      resources: {},
+    });
   }
   return [itemLines, offset];
 }
 
-function renderLineInfo(rend: FsRenderable, screen: Screen, line: RenderableLine) {
-  // draw the info the line content wants us to
+function renderLineInfoContent(rend: FsRenderable, screen: Screen, line: RenderableLine) {
   if (line.t == 'special')
     return;
   if (line.infobox == undefined)
@@ -300,6 +309,11 @@ function renderLineInfo(rend: FsRenderable, screen: Screen, line: RenderableLine
       break;
     }
   }
+}
+
+function renderLineInfo(rend: FsRenderable, screen: Screen, line: RenderableLine) {
+  // draw the info the line content wants us to
+  renderLineInfoContent(rend, screen, line);
 
   // draw resources info
   const rrs = getRenderableResources(line);
