@@ -22,3 +22,6 @@ test:
 
 deploy:
 	git push origin "main:deploy"
+
+count:
+	ag -g 'ts$$|frag$$|vert$$' --ignore='source/test/*.ts' | xargs wc -l
