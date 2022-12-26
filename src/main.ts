@@ -11,30 +11,7 @@ import { initSound, playSound } from './ui/sound';
 import { lerp } from "./util/util";
 import { Screen } from "./ui/screen";
 
-// Do a little startup-time preprocessing on the font image so I can
-// edit it more conveniently.
-function bufferFromImage(image: HTMLImageElement): Buffer {
-  const buf = buffer({ x: image.width, y: image.height });
-  buf.d.drawImage(image, 0, 0);
-  const imdata = buf.d.getImageData(0, 0, image.width, image.height);
-  const data = imdata.data;
-
-  // assume all pixels are fully opaque black or white; convert any
-  // white pixels to transparent.
-  for (let i = 0; i < image.width; i++) {
-    for (let j = 0; j < image.height; j++) {
-      const off = 4 * (i + j * image.width);
-      if (data[off] == 255)
-        data[off + 3] = 0;
-    }
-  }
-
-  buf.d.putImageData(imdata, 0, 0);
-  return buf;
-}
-
 type CanvasBundle = { c: HTMLCanvasElement, d: CanvasRenderingContext2D };
-
 
 function nextWake(state: GameState): WakeTime {
   // XXX we could check times and be more optimal here
