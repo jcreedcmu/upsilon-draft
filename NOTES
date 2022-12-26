@@ -288,3 +288,12 @@ resources on them, but which are not rendered in their current state.
 For example, I think labels look nice without resource rendering, so
 maybe you toggle label into a plain file and find that it has 50cpu or
 something.
+
+=== 2022.12.26 META: (:id 595a0700-3d0c-44eb-bd7f-4902af138f4d)
+
+Q: How'd I get a list of common surnames?
+A:
+https://forebears.io/earth/surnames
+cat /tmp/surnames.html \
+ | perl -pe 's/<a/\n<a/g' \
+ | perl -lne 'm,<a href=".*">(\w*)</a></td>, and print $1' > surnames.txt
