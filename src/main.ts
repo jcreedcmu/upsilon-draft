@@ -10,6 +10,7 @@ import { render } from "./ui/render";
 import { initSound, playSound } from './ui/sound';
 import { lerp } from "./util/util";
 import { Screen } from "./ui/screen";
+import { initAssets } from "./core/assets";
 
 type CanvasBundle = { c: HTMLCanvasElement, d: CanvasRenderingContext2D };
 
@@ -84,6 +85,7 @@ function powerButtonImageOfState(state: SceneState): string {
 async function go() {
 
   const sound = initSound();
+  await initAssets();
 
   let prevSceneState: SceneState | null = null; // think about optimizing rendering
 

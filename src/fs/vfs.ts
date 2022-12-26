@@ -4,6 +4,7 @@ import { Rand } from '../util/util';
 import { Fs, itemOfPlan, ItemPlan, virtualId } from "./fs";
 import { Resources } from './resources';
 import { GeneralItemPlan as GeneralItemPlan } from './fs';
+import { getAssets } from '../core/assets';
 /// Constants
 
 // The idea is that every virtual item doesn't have a normal abstract
@@ -69,13 +70,37 @@ export function getVirtualItem(ident: Ident): Item {
   }
 }
 
+function randomLetter(rand: Rand): string {
+  return String.fromCharCode(97 + rand.i(26));
+}
+
+function maybeRandomLetter(rand: Rand): string {
+  return rand.i(4) == 0 ? randomLetter(rand) : '';
+}
+
+function randomName(rand: Rand): string {
+  const surnames = getAssets().surnames;
+  return randomLetter(rand) + maybeRandomLetter(rand) + surnames[rand.i(surnames.length)];
+}
+
+function nameOfIdent(ident: Ident): string {
+  let m;
+  if (m = ident.match(/^dir-(\d+)$/)) {
+    const seed = parseInt(m[1]);
+    return randomName(new Rand(seed));
+  }
+  else {
+    return ident;
+  }
+}
+
 function virtualPlanOfIdent(ident: Ident): VirtualItemPlan {
   let seed = undefined;
   let m;
   if (ident == 'vroot') {
     seed = 0;
   }
-  if (m = ident.match(/dir-(\d+)/)) {
+  if (m = ident.match(/^dir-(\d+)$/)) {
     seed = parseInt(m[1]);
   }
   if (seed != undefined) {
@@ -83,22 +108,22 @@ function virtualPlanOfIdent(ident: Ident): VirtualItemPlan {
     const rand = new Rand(seed);
     const contents: Ident[] = [];
     for (let i = 0; i < 5; i++) {
-      const genid = rand.i(25);
+      const genid = rand.i(1000);
       contents.push(`dir-${genid}`);
     }
-    if (seed == 0) {
+    if (seed < 100) {
       contents.push(translit('tapra'));
     }
-    if (seed == 1) {
+    else if (seed < 200) {
       contents.push(translit('gar'));
     }
-    if (seed == 2) {
+    else if (seed < 300) {
       contents.push(translit('wojma'));
     }
-    return { t: 'dir', name: ident, contents };
+    return { t: 'dir', name: nameOfIdent(ident), contents };
   }
   else {
-    return { t: 'file', name: ident };
+    return { t: 'file', name: nameOfIdent(ident) };
   }
 }
 
