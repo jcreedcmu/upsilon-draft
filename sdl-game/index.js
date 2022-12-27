@@ -2,6 +2,20 @@ const NativeLayer = require('native-layer').NativeLayer;
 
 const nativeLayer = new NativeLayer();
 
+const vertexShader = `
+#version 130
+in vec2 i_position;
+in vec4 i_color;
+out vec4 v_color;
+uniform mat4 u_projection_matrix;
+void main() {
+    v_color = i_color;
+    gl_Position = u_projection_matrix * vec4( i_position, 0.0, 1.0 );
+};
+`
+
+nativeLayer.compileShaders(vertexShader, 'frag', 'wat');
+
 setTimeout(() => {
   nativeLayer.finish();
 }, 1000);

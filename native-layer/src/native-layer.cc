@@ -5,6 +5,8 @@
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_opengl_glext.h>
 
+#include "gl-utils.hh"
+
 class NativeLayer : public Napi::ObjectWrap<NativeLayer> {
 public:
   NativeLayer(const Napi::CallbackInfo &);
@@ -48,8 +50,51 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 
 Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
-  this->_vs = glCreateShader(GL_VERTEX_SHADER);
-  this->_fs = glCreateShader(GL_FRAGMENT_SHADER);
+  GLuint vs, fs;
+
+  this->_vs = vs = glCreateShader(GL_VERTEX_SHADER);
+  this->_fs = fs = glCreateShader(GL_FRAGMENT_SHADER);
+
+  if (info.Length() < 2) {
+    Napi::TypeError::New(
+        env,
+        "usage: compileShaders(vertexShader: string, fragmentShader: string)")
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  if (!info[0].IsString()) {
+    Napi::TypeError::New(env, "argument 0 should be a string")
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  if (!info[1].IsString()) {
+    Napi::TypeError::New(env, "argument 1 should be a string")
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  std::string vertexShader = info[0].As<Napi::String>().Utf8Value();
+  std::string fragmentShader = info[1].As<Napi::String>().Utf8Value();
+
+  int length = vertexShader.size();
+
+  const char *vs_cstr = vertexShader.c_str();
+  glShaderSource(vs, 1, &vs_cstr, &length);
+  glCompileShader(vs);
+
+  GLint status;
+  glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
+  if (status == GL_FALSE) {
+    printShaderLog(vs);
+    Napi::TypeError::New(env, "vertex compilation failed")
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
+
+  printf("shaders [%s]\n", fragmentShader.c_str());
+
   return env.Null();
 }
 
@@ -68,7 +113,8 @@ Napi::Function NativeLayer::GetClass(Napi::Env env) {
       env, "NativeLayer",
       {
           NativeLayer::InstanceMethod("finish", &NativeLayer::finish),
-          NativeLayer::InstanceMethod("compileShaders", &NativeLayer::compileShaders),
+          NativeLayer::InstanceMethod("compileShaders",
+                                      &NativeLayer::compileShaders),
       });
 }
 
