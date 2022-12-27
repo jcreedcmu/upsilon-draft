@@ -1,10 +1,7 @@
-const nativeLayer = require('native-layer');
-const ObjectWrapDemo = nativeLayer.ObjectWrapDemo;
+const NativeLayer = require('native-layer').NativeLayer;
 
-nativeLayer.init();
-console.log(nativeLayer.hello());
+const nativeLayer = new NativeLayer();
 
-const owd = new ObjectWrapDemo('alice');
-owd.greet('bob');
-
-setTimeout(() => nativeLayer.finish(), 1000);
+setTimeout(() => {
+  nativeLayer.finish();
+}, 1000);
