@@ -9,7 +9,9 @@
     'include_dirs': [
       "<!@(node -p \"require('node-addon-api').include\")"
     ],
-    'libraries': [],
+    'libraries': [
+      '-lSDL2'
+    ],
     'dependencies': [
       "<!(node -p \"require('node-addon-api').gyp\")"
     ],
