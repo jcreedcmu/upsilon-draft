@@ -36,3 +36,14 @@ make serve
 to start a local server on port 8000.
 
 Browse to http://localhost:8000 to play the game.
+
+Directory Structure
+-------------------
+
+| [native-layer](native-layer) | A nodejs module providing access to native ui through sdl/opengl     |
+| [povray](povray) | POV-Ray files used to generate graphics assets |
+| [public](public) | Static assets for browser version |
+| [sdl-game](sdl-game) | Entry point for native version |
+| [sdl-opengl-sandbox](sdl-opengl-sandbox) | WIP experiments with SDL/OpenGL bindings |
+| [src](src) | Typescript code of the main body of the game |
+| [tests](tests) | Unit tests |
