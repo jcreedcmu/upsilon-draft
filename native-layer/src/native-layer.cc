@@ -7,6 +7,11 @@
 
 #include "gl-utils.hh"
 
+typedef enum t_attrib_id { attrib_position, attrib_color } t_attrib_id;
+
+static const int width = 800;
+static const int height = 600;
+
 class NativeLayer : public Napi::ObjectWrap<NativeLayer> {
 public:
   NativeLayer(const Napi::CallbackInfo &);
@@ -34,9 +39,6 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-  static const int width = 800;
-  static const int height = 600;
-
   SDL_Window *window =
       SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                        width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
@@ -50,8 +52,7 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 
 Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
-  GLuint vs, fs;
-
+  GLuint vs, fs, program;
 
   if (info.Length() < 2) {
     Napi::TypeError::New(
@@ -113,6 +114,20 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   }
 
   printf("Successfully compiled shaders\n");
+
+  this->_program =  program = glCreateProgram();
+  glAttachShader(program, vs);
+  glAttachShader(program, fs);
+
+  glBindAttribLocation(program, attrib_position, "i_position");
+  glBindAttribLocation(program, attrib_color, "i_color");
+  glLinkProgram(program);
+
+  glUseProgram(program);
+
+  glDisable(GL_DEPTH_TEST);
+  glClearColor(0.5, 0.0, 0.0, 0.0);
+  glViewport(0, 0, width, height);
 
   return env.Null();
 }
