@@ -22,7 +22,8 @@ void printShaderLog(GLuint shader) {
 
     // Deallocate string
     delete[] infoLog;
-  } else {
+  }
+  else {
     printf("Name %d is not a shader\n", shader);
   }
 }
