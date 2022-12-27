@@ -71,6 +71,7 @@ export type ExecLineAction =
   | { t: 'exec', ident: Ident }
   | { t: 'back' }
   | { t: 'toggle', ident: Ident }
+  | { t: 'increment', ident: Ident }
   | { t: 'play', ident: Ident } // as in: play audio
   ;
 
@@ -106,6 +107,9 @@ function execActionForItem(ident: Ident, item: Item): ExecLineAction {
   }
   else if (item.content.t == 'checkbox') {
     return { t: 'toggle', ident };
+  }
+  else if (item.content.t == 'numeric') {
+    return { t: 'increment', ident };
   }
   if (canExec(item))
     return { t: 'exec', ident };
@@ -143,6 +147,7 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
     case 'sound': return undefined;
     case 'inventorySlot': return undefined;
     case 'compressed': return undefined;
+    case 'numeric': return undefined;
   }
   // wouldn't get nonexhaustivity check otherwise because fallthrough would return undefined
   unreachable(content);
@@ -172,6 +177,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
     chargeNeeded: item.acls.exec ? 1 : 0,
     attr,
     checked: item.content.t == 'checkbox' ? item.content.checked : undefined,
+    value: item.content.t == 'numeric' ? item.content.value : undefined,
   }
 }
 

@@ -47,6 +47,7 @@ export type ItemContent =
   // 'file' is inclusive of plain files and directories
   | { t: 'file', text: string, contents: Ident[] }
   | { t: 'checkbox', checked: boolean }
+  | { t: 'numeric', value: number }
   | { t: 'sound', effect: SoundEffect }
   | { t: 'image', data: ImgData }
   | { t: 'inventorySlot' }

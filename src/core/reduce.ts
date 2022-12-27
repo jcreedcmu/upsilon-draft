@@ -107,6 +107,21 @@ export function toggleItem(state: GameState, ident: Ident): ReduceResult {
     [{ t: 'playAbstractSound', effect: 'toggle', loc: loc }]];
 }
 
+export function incrementItem(state: GameState, ident: Ident): ReduceResult {
+  const loc = getLocation(state.fs, ident);
+  state = produce(state, s => {
+    modifyItemꜝ(s.fs, ident, item => {
+      const content = item.content;
+      if (content.t != 'numeric')
+        throw new Error(`invariant violation, tried to increment a non-numeric`);
+      content.value = (content.value + 1) % 10;
+    });
+  });
+  state = processHooks(state, hooksOfLocation(state.fs, loc));
+  return [state,
+    [{ t: 'playAbstractSound', effect: 'toggle', loc: loc }]];
+}
+
 export function playAudioItem(state: GameState, ident: Ident): ReduceResult {
   const item = getItem(state.fs, ident);
   const loc = getLocation(state.fs, ident);
@@ -157,6 +172,7 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): Redu
     }
     case 'back': return reduceKeyAction(state, KeyAction.back);
     case 'toggle': return toggleItem(state, action.ident);
+    case 'increment': return incrementItem(state, action.ident);
     case 'play': return playAudioItem(state, action.ident);
   }
 

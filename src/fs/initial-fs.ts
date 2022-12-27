@@ -224,6 +224,7 @@ function initialPlans(): GeneralItemPlan[] {
         { t: 'file', name: 'mumble', size: 23 },
         { t: 'checkbox', name: 'toggle1', checked: true },
         { t: 'checkbox', name: 'toggle2', checked: false },
+        { t: 'numeric', name: 'numeric', value: 3 },
         { t: 'file', name: 'portrait.bmp', content: { t: 'image', data: initialImage }, resources: { data: 3, cpu: 2 } },
         { t: 'file', name: 'inventory.spc', content: { t: 'inventorySlot' } },
         { t: 'file', name: 'inventory.spc', content: { t: 'inventorySlot' } },
