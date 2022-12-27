@@ -1,1 +1,1 @@
-module.exports = require('./build/Release/testaddon.node');
+module.exports = require('bindings')('native-layer');
