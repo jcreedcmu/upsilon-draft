@@ -40,6 +40,8 @@ Browse to http://localhost:8000 to play the game.
 Directory Structure
 -------------------
 
+| Directory | Description |
+| --- | --- |
 | [native-layer](native-layer) | A nodejs module providing access to native ui through sdl/opengl     |
 | [povray](povray) | POV-Ray files used to generate graphics assets |
 | [public](public) | Static assets for browser version |
