@@ -52,8 +52,6 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   GLuint vs, fs;
 
-  this->_vs = vs = glCreateShader(GL_VERTEX_SHADER);
-  this->_fs = fs = glCreateShader(GL_FRAGMENT_SHADER);
 
   if (info.Length() < 2) {
     Napi::TypeError::New(
@@ -75,25 +73,46 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
     return env.Null();
   }
 
-  std::string vertexShader = info[0].As<Napi::String>().Utf8Value();
-  std::string fragmentShader = info[1].As<Napi::String>().Utf8Value();
 
-  int length = vertexShader.size();
+  // Set up vertex shader
+  {
+    this->_vs = vs = glCreateShader(GL_VERTEX_SHADER);
+    std::string shader = info[0].As<Napi::String>().Utf8Value();
+    int length = shader.size();
+    const char *cstr = shader.c_str();
+    glShaderSource(vs, 1, &cstr, &length);
+    glCompileShader(vs);
 
-  const char *vs_cstr = vertexShader.c_str();
-  glShaderSource(vs, 1, &vs_cstr, &length);
-  glCompileShader(vs);
-
-  GLint status;
-  glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
-  if (status == GL_FALSE) {
-    printShaderLog(vs);
-    Napi::TypeError::New(env, "vertex compilation failed")
+    GLint status;
+    glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
+    if (status == GL_FALSE) {
+      printShaderLog(vs);
+      Napi::TypeError::New(env, "vertex compilation failed")
         .ThrowAsJavaScriptException();
-    return env.Null();
+      return env.Null();
+    }
   }
 
-  printf("shaders [%s]\n", fragmentShader.c_str());
+  // Set up fragment shader
+  {
+    this->_fs = fs = glCreateShader(GL_FRAGMENT_SHADER);
+    std::string shader = info[1].As<Napi::String>().Utf8Value();
+    int length = shader.size();
+    const char *cstr = shader.c_str();
+    glShaderSource(fs, 1, &cstr, &length);
+    glCompileShader(fs);
+
+    GLint status;
+    glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
+    if (status == GL_FALSE) {
+      printShaderLog(fs);
+      Napi::TypeError::New(env, "fragment compilation failed")
+        .ThrowAsJavaScriptException();
+      return env.Null();
+    }
+  }
+
+  printf("Successfully compiled shaders\n");
 
   return env.Null();
 }

@@ -61,7 +61,7 @@ static const char *fragment_shader = "#version 130\n"
                                      "    o_color = v_color;\n"
                                      "}\n";
 
-typedef enum t_attrib_id { attrib_position, attrib_color } t_attrib_id;
+typedum t_attriattrib_color } t_attrib_id;
 
 void printProgramLog(GLuint program) {
   if (glIsProgram(program)) {
