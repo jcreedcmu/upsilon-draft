@@ -46,6 +46,5 @@ Directory Structure
 | [povray](povray) | POV-Ray files used to generate graphics assets |
 | [public](public) | Static assets for browser version |
 | [sdl-game](sdl-game) | Entry point for native version |
-| [sdl-opengl-sandbox](sdl-opengl-sandbox) | WIP experiments with SDL/OpenGL bindings |
 | [src](src) | Typescript code of the main body of the game |
 | [tests](tests) | Unit tests |
