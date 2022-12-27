@@ -25,3 +25,7 @@ deploy:
 
 count:
 	ag -g 'ts$$|frag$$|vert$$' --ignore='source/test/*.ts' | xargs wc -l
+
+native:
+	cd native-layer && npm run build
+	node sdl-game/index.js

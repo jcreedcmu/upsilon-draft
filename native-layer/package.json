@@ -5,7 +5,7 @@
   "main": "index.js",
   "gypfile": true,
   "scripts": {
-    "build": "node-gyp rebuild",
+    "build": "node-gyp build",
     "clean": "node-gyp clean"
   },
   "author": "Jason Reed <jcreed@gmail.com>",
