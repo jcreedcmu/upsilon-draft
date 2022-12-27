@@ -1,5 +1,5 @@
 {
-  "name": "test-addon",
+  "name": "native-layer",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "build": "node-gyp rebuild",
     "clean": "node-gyp clean"
   },
-  "author": "",
+  "author": "Jason Reed <jcreed@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "node-gyp": "^3.7.0"
