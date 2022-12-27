@@ -1,3 +1,4 @@
+#include <iostream>
 #include <napi.h>
 
 #include <SDL2/SDL.h>
@@ -38,6 +39,8 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
       SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                        width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
   SDL_GLContext context = SDL_GL_CreateContext(window);
+
+  printf("GL VERSION [%s]\n", glGetString(GL_VERSION));
 
   this->_context = context;
   this->_window = window;

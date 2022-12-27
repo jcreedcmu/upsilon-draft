@@ -10,7 +10,9 @@
       "<!@(node -p \"require('node-addon-api').include\")"
     ],
     'libraries': [
-      '-lSDL2'
+      '-lSDL2',
+      '-lGL',
+      '-lGLU'
     ],
     'dependencies': [
       "<!(node -p \"require('node-addon-api').gyp\")"
