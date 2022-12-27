@@ -17,6 +17,7 @@ public:
   NativeLayer(const Napi::CallbackInfo &);
   Napi::Value finish(const Napi::CallbackInfo &);
   Napi::Value compileShaders(const Napi::CallbackInfo &);
+  Napi::Value renderFrame(const Napi::CallbackInfo &);
 
   static Napi::Function GetClass(Napi::Env);
 
@@ -24,6 +25,7 @@ private:
   SDL_Window *_window;
   SDL_GLContext _context;
   GLuint _vs, _fs, _program;
+  GLuint _vao, _vbo;
 };
 
 NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
@@ -128,12 +130,10 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glClearColor(0.5, 0.0, 0.0, 0.0);
   glViewport(0, 0, width, height);
 
-  GLuint vao, vbo;
-
-  glGenVertexArrays(1, &vao);
-  glGenBuffers(1, &vbo);
-  glBindVertexArray(vao);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glGenVertexArrays(1, &this->_vao);
+  glGenBuffers(1, &this->_vbo);
+  glBindVertexArray(this->_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
 
   glEnableVertexAttribArray(attrib_position);
   glEnableVertexAttribArray(attrib_color);
@@ -161,6 +161,29 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   return env.Null();
 }
 
+Napi::Value NativeLayer::renderFrame(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  SDL_Event event;
+  while (SDL_PollEvent(&event)) {
+    switch (event.type) {
+    case SDL_KEYUP:
+      if (event.key.keysym.sym == SDLK_ESCAPE)
+        return Napi::Boolean::New(env, false);
+      break;
+    }
+  }
+
+  glBindVertexArray(this->_vao);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+
+  SDL_GL_SwapWindow(this->_window);
+  SDL_Delay(1);
+  return Napi::Boolean::New(env, true);
+}
+
 Napi::Value NativeLayer::finish(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
@@ -178,6 +201,7 @@ Napi::Function NativeLayer::GetClass(Napi::Env env) {
           NativeLayer::InstanceMethod("finish", &NativeLayer::finish),
           NativeLayer::InstanceMethod("compileShaders",
                                       &NativeLayer::compileShaders),
+          NativeLayer::InstanceMethod("renderFrame", &NativeLayer::renderFrame),
       });
 }
 

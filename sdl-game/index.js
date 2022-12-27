@@ -25,6 +25,7 @@ void main() {
 
 nativeLayer.compileShaders(vertexShader, fragmentShader);
 
-setTimeout(() => {
-  nativeLayer.finish();
-}, 1000);
+while (nativeLayer.renderFrame()) {
+}
+
+nativeLayer.finish();
