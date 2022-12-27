@@ -9,6 +9,7 @@ This is a prototype of a game idea drawing some inspiration from
  - [Quadrilateral Cowboy](https://en.wikipedia.org/wiki/Quadrilateral_Cowboy)
  - [smalltalk](https://en.wikipedia.org/wiki/Smalltalk)-style reflection
  - [uxn](https://100r.co/site/uxn.html)
+ - [Baba is You](https://hempuli.com/baba/)
 
 Thanks to @dwrensha and @tom7 for ideas.
 
