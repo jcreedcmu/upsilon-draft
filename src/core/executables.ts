@@ -48,6 +48,7 @@ export const executables = {
   robot: 'robot',
   compress: 'compress',
   uncompress: 'uncompress',
+  configure: 'configure',
 } as const;
 
 export type ExecutablesType = typeof executables;
@@ -75,6 +76,7 @@ export const executableProperties: Record<ExecutableName, ExecutableSpec> = {
   'robot': { cycles: 5, cpuCost: 1, numTargets: -1 },
   'compress': { cycles: 15, cpuCost: 1 },
   'uncompress': { cycles: 15, cpuCost: 1 },
+  'configure': { cycles: 0, cpuCost: 0 },
 }
 
 export function numTargetsOfExecutableName(name: ExecutableName): number {
@@ -109,6 +111,7 @@ export function modificationOrder(): readonly ExecutableName[] {
     executables.robot,
     executables.compress,
     executables.uncompress,
+    executables.configure,
   ];
 
   // We don't ever expect to call this function, but it will only typecheck if
@@ -482,5 +485,23 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       });
     }
 
+    case executables.configure: {
+
+      const tgtId = targetIds[0];
+      const tgt = getItem(state.fs, tgtId);
+      if (tgt.content.t != 'file') {
+        return withErrorExec(state, { code: 'badInputs', loc, blame: actorId });
+      }
+      const text = tgt.content.text;
+      return [produce(state, s => {
+        s.viewState = {
+          t: 'configureView',
+          target: tgtId,
+          state: { item: tgt },
+          back: state.viewState
+        };
+      }), [], undefined];
+
+    }
   }
 }

@@ -267,7 +267,7 @@ export function insertItem(fs: Fs, loc: Ident, item: Item, forceId?: Ident): [Fs
 // produce) and returns an fs with item `ident` so modified.
 // Crucially, if ident is a virtual id, we still do the right thing,
 // that is, we reify the virtual item in the course of modifying it.
-function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
+export function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
   fs = reifyId(fs, ident);
   const newItem = f(getItem(fs, ident));
   return produce(fs, fsd => {
@@ -280,6 +280,11 @@ function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
 export function modifyItemꜝ(fs: Fs, ident: Ident, f: (x: Item) => void): void {
   const item = getItem(fs, ident);
   f(item);
+  fs.idToItem[ident] = item;
+}
+
+// Imperatively replaces item with ident `ident` with item `item`.
+export function setItemꜝ(fs: Fs, ident: Ident, item: Item): void {
   fs.idToItem[ident] = item;
 }
 

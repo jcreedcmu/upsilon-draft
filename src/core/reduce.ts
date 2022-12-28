@@ -1,4 +1,4 @@
-import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId, setTextꜝ } from '../fs/fs';
+import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId, setItemꜝ, setTextꜝ } from '../fs/fs';
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
@@ -7,6 +7,7 @@ import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, schedul
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
 import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, TextEditViewState } from './model';
+import { ConfigureViewState, reduceConfigureView } from './configure';
 import { reduceTextEditView } from './text-edit';
 
 export const EXEC_TICKS = 6;
@@ -341,6 +342,32 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
   const vs = state.viewState;
   switch (vs.t) {
     case 'fsView': return reduceGameStateFs(state, action);
+    case 'configureView': {
+      const orig: ConfigureViewState = vs;
+      const result = reduceConfigureView(vs.state, action);
+      switch (result.t) {
+        case 'normal': {
+          const nvs = produce(orig, s => { s.state = result.state; });
+          return [
+            produce(state, s => {
+              s.viewState = nvs;
+            }),
+            result.effects
+          ]
+        }
+        case 'quit': {
+          return [
+            produce(state, s => {
+              s.viewState = vs.back;
+              setItemꜝ(s.fs, vs.target, vs.state.item);
+              s.error = undefined;
+            }),
+            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+          ];
+        }
+      }
+    }
+
     case 'textEditView': {
       const orig: TextEditViewState = vs;
       const result = reduceTextEditView(vs.state, action);

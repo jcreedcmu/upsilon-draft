@@ -1,7 +1,7 @@
 import { nowTicks } from '../core/clock';
 import { errorCodes, errorCodeText } from '../core/errors';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
-import { GameState, getCurId, getCurLine, InventoryState, SceneState, Show, UserError } from '../core/model';
+import { GameState, getCurId, getCurLine, InventoryState, Item, SceneState, Show, UserError } from '../core/model';
 import { INVENTORY_MAX_ITEMS } from '../core/reduce';
 import { getInventoryItem, getItem } from '../fs/fs';
 import { Resources } from '../fs/resources';
@@ -75,9 +75,12 @@ export type FsRenderable = {
 
 export type TextEditRenderable = { text: string, cursor: Point };
 
+export type ConfigureRenderable = { item: Item };
+
 export type Renderable =
   | { t: 'fsView' } & FsRenderable
-  | { t: 'textEditView' } & TextEditRenderable;
+  | { t: 'textEditView' } & TextEditRenderable
+  | { t: 'configureView' } & ConfigureRenderable;
 
 function truncate(name: string, len: number) {
   if (name.length > len) {
@@ -139,6 +142,8 @@ function getRenderable(state: GameState): Renderable {
     }
     case 'textEditView':
       return { t: 'textEditView', ...state.viewState.state };
+    case 'configureView':
+      return { t: 'configureView', ...state.viewState.state };
   }
 }
 
@@ -412,12 +417,30 @@ export function renderTextEditView(state: TextEditRenderable): Screen {
   return screen;
 }
 
+export function renderConfigureView(state: ConfigureRenderable): Screen {
+  const screen = new Screen();
+  const yellowFg = { fg: cc.yellow, bg: cc.blue };
+  const whiteFg = { fg: cc.white, bg: cc.blue };
+  const offset: Point = { x: 1, y: 1 };
+  screen.fillRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, whiteFg, 32);
+  screen.drawRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, whiteFg);
+  screen.drawRect({ h: 2, w: screen.cols - 1, x: 0, y: 0 }, yellowFg);
+
+  screen.drawStr(screen.at(1, 1, screen.cols - 2), state.item.name, whiteFg);
+
+
+  screen.drawStr(screen.at(3, screen.rows - 1, screen.cols - 2), "<esc> to quit", yellowFg);
+
+  return screen;
+}
+
 export function finalRender(state: Renderable): Screen {
   logger('rendering', 'rendering');
 
   switch (state.t) {
     case 'fsView': return renderFsView(state);
     case 'textEditView': return renderTextEditView(state);
+    case 'configureView': return renderConfigureView(state);
   }
 }
 

@@ -11,6 +11,7 @@ import { FullLine, getLines } from './lines';
 import { TextWidgetState } from './text-edit';
 import { ErrorCode } from './errors';
 import { Hook, keybindingsOfFs, soundsOfFs, showOfFs, errorsOfFs } from './hooks';
+import { ConfigureViewState } from './configure';
 
 export type Acl =
   | 'open' // item can be opened
@@ -149,6 +150,7 @@ export type TextEditViewState = {
 export type ViewState =
   | { t: 'fsView' }
   | TextEditViewState
+  | ConfigureViewState
   ;
 
 export type InventoryState = {
