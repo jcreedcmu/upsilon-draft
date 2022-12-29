@@ -1,3 +1,4 @@
+import { produce } from '../util/produce';
 import { Action } from './lines';
 import { Effect, GameAction, Ident, Item, ViewState } from './model';
 
@@ -35,12 +36,20 @@ export function reduceConfigureView(state: ConfigureWidgetState, action: GameAct
   }
 }
 
-function reduceConfigureViewKey(state: ConfigureWidgetState, code: string): ConfigureReduceResult {
-  if (code == '<esc>')
-    return cancelResult(state);
-  if (code == '<left>')
-    return cancelResult(state);
+function moveCursor(state: ConfigureWidgetState, amount: number): ConfigureWidgetState {
+  const numLines = getItemConfigLines(state.config).length;
+  return produce(state, s => {
+    s.cursor = (s.cursor + numLines + amount) % numLines;
+  })
+}
 
+function reduceConfigureViewKey(state: ConfigureWidgetState, code: string): ConfigureReduceResult {
+  switch (code) {
+    case '<esc>': return cancelResult(state);
+    case '<left>': return cancelResult(state);
+    case '<up>': return { t: 'normal', state: moveCursor(state, -1), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }] };
+    case '<down>': return { t: 'normal', state: moveCursor(state, 1), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }] };
+  }
   console.log(code);
   return nopResult(state);
 }
