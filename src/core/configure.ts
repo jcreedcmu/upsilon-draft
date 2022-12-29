@@ -43,12 +43,23 @@ function moveCursor(state: ConfigureWidgetState, amount: number): ConfigureWidge
   })
 }
 
+function reduceConfigAction(state: ConfigureWidgetState, action: ConfigAction): ConfigureReduceResult {
+  switch (action.t) {
+    case 'cancel': return { t: 'cancel' };
+    case 'save': return { t: 'save', item: state.item, config: state.config };
+  }
+}
+
 function reduceConfigureViewKey(state: ConfigureWidgetState, code: string): ConfigureReduceResult {
   switch (code) {
     case '<esc>': return cancelResult(state);
     case '<left>': return cancelResult(state);
     case '<up>': return { t: 'normal', state: moveCursor(state, -1), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }] };
     case '<down>': return { t: 'normal', state: moveCursor(state, 1), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }] };
+    case '<right>': {
+      const action = getItemConfigLines(state.config)[state.cursor].action;
+      return reduceConfigAction(state, action);
+    }
   }
   console.log(code);
   return nopResult(state);

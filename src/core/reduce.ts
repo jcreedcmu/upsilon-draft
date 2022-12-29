@@ -393,7 +393,7 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
               // This is the same error-clearing hack as with textedit below.
               s.error = undefined;
             }),
-            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+            [{ t: 'playAbstractSound', effect: 'success', loc: undefined }]
           ];
         }
       }
