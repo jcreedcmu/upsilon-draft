@@ -4,12 +4,10 @@ const nativeLayer = new NativeLayer();
 
 const vertexShader = `
 #version 130
-in vec2 i_position;
 in vec2 i_uv;
-
 out vec2 v_uv;
-uniform mat4 u_projection_matrix;
 void main() {
+  // negating y-coord means (0,0) at top left of screen
   gl_Position = vec4(2. * i_uv.x - 1., - (2. * i_uv.y - 1.), 0., 1.);
   v_uv = i_uv;
 };
@@ -18,11 +16,10 @@ void main() {
 const fragmentShader = `
 #version 130
 
-in vec4 v_color;
 in vec2 v_uv;
 out vec4 o_color;
 void main() {
-    o_color = vec4(1.0, v_uv.y, v_uv.x, 1.);
+    o_color = vec4(v_uv.y, (v_uv.x + v_uv.y) / 2., v_uv.x, 1.0);
 };
 `;
 
