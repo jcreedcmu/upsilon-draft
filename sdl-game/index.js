@@ -1,4 +1,5 @@
-const NativeLayer = require('native-layer').NativeLayer;
+const nat = require('native-layer');
+const NativeLayer = nat.NativeLayer;
 
 const nativeLayer = new NativeLayer();
 
@@ -32,3 +33,8 @@ while (nativeLayer.pollEvent()) {
 }
 
 nativeLayer.finish();
+
+const nonce = new nat.Nonce();
+
+console.log(nat.foo(nativeLayer));
+console.log(nat.foo(nonce));

@@ -7,6 +7,22 @@
 
 #include "gl-utils.hh"
 
+class Nonce : public Napi::ObjectWrap<Nonce> {
+public:
+  Nonce(const Napi::CallbackInfo &info): ObjectWrap(info) {
+
+  }
+  Napi::Value hello(Napi::Env env) {
+    return Napi::String::New(env, "Hello World from Nonce");
+  }
+
+  static Napi::Function GetClass(Napi::Env env) {
+    return DefineClass(env, "Nonce", {});
+  }
+
+private:
+};
+
 typedef enum t_attrib_id { attrib_uv } t_attrib_id;
 
 static const int width = 800;
@@ -19,6 +35,8 @@ public:
   Napi::Value compileShaders(const Napi::CallbackInfo &);
   Napi::Value pollEvent(const Napi::CallbackInfo &);
   Napi::Value renderFrame(const Napi::CallbackInfo &);
+
+  Napi::Value hello(Napi::Env);
 
   static Napi::Function GetClass(Napi::Env);
 
@@ -214,10 +232,26 @@ Napi::Function NativeLayer::GetClass(Napi::Env env) {
       });
 }
 
+Napi::Value NativeLayer::hello(Napi::Env env) {
+  return Napi::String::New(env, "Hello World");
+}
+
+Napi::Value foo(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+
+  Napi::Object nl = info[0].As<Napi::Object>();
+  NativeLayer *nat = Napi::ObjectWrap<NativeLayer>::Unwrap(nl);
+
+  return nat->hello(env);
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "NativeLayer"),
               NativeLayer::GetClass(env));
+  exports.Set(Napi::String::New(env, "Nonce"),
+              Nonce::GetClass(env));
 
+  exports.Set("foo", Napi::Function::New(env, foo));
   return exports;
 }
 
