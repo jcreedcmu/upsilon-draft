@@ -27,7 +27,8 @@ void main() {
 
 nativeLayer.compileShaders(vertexShader, fragmentShader);
 
-while (nativeLayer.renderFrame()) {
+while (nativeLayer.pollEvent()) {
+  nativeLayer.renderFrame();
 }
 
 nativeLayer.finish();

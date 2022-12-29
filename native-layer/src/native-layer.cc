@@ -17,6 +17,7 @@ public:
   NativeLayer(const Napi::CallbackInfo &);
   Napi::Value finish(const Napi::CallbackInfo &);
   Napi::Value compileShaders(const Napi::CallbackInfo &);
+  Napi::Value pollEvent(const Napi::CallbackInfo &);
   Napi::Value renderFrame(const Napi::CallbackInfo &);
 
   static Napi::Function GetClass(Napi::Env);
@@ -161,12 +162,12 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   return env.Null();
 }
 
-Napi::Value NativeLayer::renderFrame(const Napi::CallbackInfo &info) {
+// Returns true if we should keep going
+Napi::Value NativeLayer::pollEvent(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
-  glClear(GL_COLOR_BUFFER_BIT);
-
   SDL_Event event;
+
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
     case SDL_KEYUP:
@@ -175,6 +176,13 @@ Napi::Value NativeLayer::renderFrame(const Napi::CallbackInfo &info) {
       break;
     }
   }
+  return Napi::Boolean::New(env, true);
+}
+
+Napi::Value NativeLayer::renderFrame(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
+
+  glClear(GL_COLOR_BUFFER_BIT);
 
   glBindVertexArray(this->_vao);
   glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -201,6 +209,7 @@ Napi::Function NativeLayer::GetClass(Napi::Env env) {
           NativeLayer::InstanceMethod("finish", &NativeLayer::finish),
           NativeLayer::InstanceMethod("compileShaders",
                                       &NativeLayer::compileShaders),
+          NativeLayer::InstanceMethod("pollEvent", &NativeLayer::pollEvent),
           NativeLayer::InstanceMethod("renderFrame", &NativeLayer::renderFrame),
       });
 }
