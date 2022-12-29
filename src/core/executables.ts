@@ -403,15 +403,24 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
     }
 
     case executables.modify: {
-      let newName = getItem(state.fs, targetIds[0]).name;
-      const mo = modificationOrder();
-      const found = mo.findIndex(x => x == newName);
-      if (found != -1) {
-        newName = mo[(found + 1) % mo.length];
+      const actor = getItem(state.fs, actorId);
+      const config = getItemConfig(actor);
+      if (config.t !== 'modify') {
+        // XXX probably should handle this differently somehow
+        console.error('invariant violation: unexpected item config');
+        return withErrorExec(state, { code: 'badExecutable', blame: actorId, loc });
       }
-      return withModifiedTarget(tgt => {
-        tgt.name = newName;
-      });
+      else {
+        let newName = getItem(state.fs, targetIds[0]).name;
+        const mo = modificationOrder();
+        const found = mo.findIndex(x => x == newName);
+        if (found != -1) {
+          newName = mo[(found + mo.length + config.increment) % mo.length];
+        }
+        return withModifiedTarget(tgt => {
+          tgt.name = newName;
+        });
+      }
     }
 
     case executables.copy: {

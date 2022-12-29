@@ -1,3 +1,4 @@
+import { Chars } from '../ui/screen';
 import { produce } from '../util/produce';
 import { Action } from './lines';
 import { Effect, GameAction, Ident, Item, ViewState } from './model';
@@ -43,10 +44,26 @@ function moveCursor(state: ConfigureWidgetState, amount: number): ConfigureWidge
   })
 }
 
+function toggleConfig(state: ConfigureWidgetState): ConfigureWidgetState {
+  switch (state.config.t) {
+    case 'none': return state;
+    case 'modify': return produce(state, s => {
+      if (s.config.t == 'modify') { // XXX bummer that I have to do this for typing reasons
+        s.config.increment *= -1;
+      }
+    });
+  }
+}
+
 function reduceConfigAction(state: ConfigureWidgetState, action: ConfigAction): ConfigureReduceResult {
   switch (action.t) {
     case 'cancel': return { t: 'cancel' };
     case 'save': return { t: 'save', item: state.item, config: state.config };
+    case 'toggle': return {
+      t: 'normal',
+      state: toggleConfig(state),
+      effects: [{ t: 'playAbstractSound', effect: 'change-slot', loc: undefined }]
+    };
   }
 }
 
@@ -68,9 +85,13 @@ function reduceConfigureViewKey(state: ConfigureWidgetState, code: string): Conf
 // Some lens-like operations to get/put config for an item
 
 export type ItemConfig =
-  { t: 'none' };
+  | { t: 'none' }
+  | { t: 'modify', increment: number };
 
 function defaultItemConfig(name: string): ItemConfig {
+  if (name == 'modify') {
+    return { t: 'modify', increment: 1 };
+  }
   return { t: 'none' };
 }
 
@@ -92,9 +113,15 @@ export function putItemConfig(item: Item, config: ItemConfig): Item {
 export type ConfigAction =
   | { t: 'cancel' }
   | { t: 'save' }
+  | { t: 'toggle' }
   ;
 
 export type ItemConfigLine = { tagStr: string, action: ConfigAction };
+
+function modifyLines(state: { increment: number }): ItemConfigLine[] {
+  const char = state.increment > 0 ? Chars.ARROW_DOWN : Chars.ARROW_UP;
+  return [{ tagStr: `direction: ${char}`, action: { t: 'toggle' } }];
+}
 
 export function getItemConfigLines(config: ItemConfig): ItemConfigLine[] {
   const basicLines: ItemConfigLine[] = [
@@ -103,5 +130,6 @@ export function getItemConfigLines(config: ItemConfig): ItemConfigLine[] {
   ];
   switch (config.t) {
     case 'none': return basicLines;
+    case 'modify': return [...modifyLines(config), ...basicLines];
   }
 }
