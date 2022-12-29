@@ -7,6 +7,13 @@ export type TextWidgetState = {
   cursor: Point;
 };
 
+export type TextEditViewState = {
+  t: 'textEditView',
+  back: ViewState,
+  target: Ident,
+  state: TextWidgetState
+}
+
 type TextEditReduceResult =
   | { t: 'normal', state: TextWidgetState, effects: Effect[] }
   | { t: 'quit', text: string }

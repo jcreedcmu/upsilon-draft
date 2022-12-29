@@ -2,13 +2,13 @@ import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, i
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
+import { ConfigureViewState, reduceConfigureView } from './configure';
 import { ErrorCode, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ, TextEditViewState } from './model';
-import { ConfigureViewState, reduceConfigureView } from './configure';
-import { reduceTextEditView } from './text-edit';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
+import { reduceTextEditView, TextEditViewState } from './text-edit';
 
 export const EXEC_TICKS = 6;
 export const INVENTORY_MAX_ITEMS = 3;

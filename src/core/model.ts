@@ -6,12 +6,12 @@ import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
 import { DEBUG } from '../util/debug';
 import { produce } from '../util/produce';
 import { ClockState, mkClockState } from './clock';
-import { cancelRecurꜝ, ExecutableName } from './executables';
-import { FullLine, getLines } from './lines';
-import { TextWidgetState } from './text-edit';
-import { ErrorCode } from './errors';
-import { Hook, keybindingsOfFs, soundsOfFs, showOfFs, errorsOfFs } from './hooks';
 import { ConfigureViewState } from './configure';
+import { ErrorCode } from './errors';
+import { cancelRecurꜝ, ExecutableName } from './executables';
+import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
+import { FullLine, getLines } from './lines';
+import { TextEditViewState } from './text-edit';
 
 export type Acl =
   | 'open' // item can be opened
@@ -137,13 +137,6 @@ export type State = {
 export type Future = { whenTicks: number, action: GameAction, live?: boolean };
 
 export type Recurring = Record<Ident, { periodTicks: number }>;
-
-export type TextEditViewState = {
-  t: 'textEditView',
-  back: ViewState,
-  target: Ident,
-  state: TextWidgetState
-}
 
 // This is for alternate modal states within the game interface, which
 // are triggered by "diagetic" controls.
