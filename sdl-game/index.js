@@ -3,7 +3,7 @@ const NativeLayer = require('native-layer').NativeLayer;
 const nativeLayer = new NativeLayer();
 
 const vertexShader = `
-#version 130
+#version 300 es
 in vec2 i_uv;
 out vec2 v_uv;
 void main() {
@@ -14,7 +14,9 @@ void main() {
 `
 
 const fragmentShader = `
-#version 130
+#version 300 es
+
+precision mediump float;
 
 in vec2 v_uv;
 out vec4 o_color;
