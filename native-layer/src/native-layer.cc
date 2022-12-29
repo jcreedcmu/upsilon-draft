@@ -121,7 +121,6 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glAttachShader(program, fs);
 
   glBindAttribLocation(program, attrib_position, "i_position");
-  glBindAttribLocation(program, attrib_color, "i_color");
   glLinkProgram(program);
 
   glUseProgram(program);
@@ -136,18 +135,14 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
 
   glEnableVertexAttribArray(attrib_position);
-  glEnableVertexAttribArray(attrib_color);
-
-  glVertexAttribPointer(attrib_color, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 6,
-                        0);
   glVertexAttribPointer(attrib_position, 2, GL_FLOAT, GL_FALSE,
-                        sizeof(float) * 6, (void *)(4 * sizeof(float)));
+                        sizeof(float) * 2, (void *)(0 * sizeof(float)));
 
   const GLfloat g_vertex_buffer_data[] = {
       /*  R, G, B, A, X, Y  */
-      1, 0, 0, 1, 0, 0, 0, 1, 0, 1, width, 0,      0, 0, 1, 1, width, height,
+      0, 0, width, 0,       width, height,
 
-      1, 0, 0, 1, 0, 0, 0, 0, 1, 1, width, height, 1, 1, 1, 1, 0,     height};
+      0, 0, width, height,  0,     height};
 
   glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data),
                g_vertex_buffer_data, GL_STATIC_DRAW);
@@ -170,7 +165,7 @@ Napi::Value NativeLayer::renderFrame(const Napi::CallbackInfo &info) {
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
     case SDL_KEYUP:
-      if (event.key.keysym.sym == SDLK_ESCAPE)
+      if (event.key.keysym.sym == SDLK_ESCAPE || event.key.keysym.sym == SDLK_q)
         return Napi::Boolean::New(env, false);
       break;
     }
