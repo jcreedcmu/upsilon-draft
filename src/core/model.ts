@@ -6,7 +6,7 @@ import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
 import { DEBUG } from '../util/debug';
 import { produce } from '../util/produce';
 import { ClockState, mkClockState } from './clock';
-import { ConfigureViewState } from './configure';
+import { ConfigureViewState, ItemConfig } from './configure';
 import { ErrorCode } from './errors';
 import { cancelRecurꜝ, ExecutableName } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
@@ -59,6 +59,7 @@ export type Item = {
   name: string, // displayable name
 
   content: ItemContent,
+  config?: ItemConfig,
 
   // Other game-relevant attributes
   acls: Acls, // Permissions bits

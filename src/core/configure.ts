@@ -70,12 +70,21 @@ function reduceConfigureViewKey(state: ConfigureWidgetState, code: string): Conf
 export type ItemConfig =
   { t: 'none' };
 
-export function getItemConfig(item: Item): ItemConfig {
+function defaultItemConfig(name: string): ItemConfig {
   return { t: 'none' };
 }
 
+export function getItemConfig(item: Item): ItemConfig {
+  // XXX maybe do some more checking here
+  if (item.config != undefined)
+    return item.config;
+  else
+    return defaultItemConfig(item.name);
+}
+
 export function putItemConfig(item: Item, config: ItemConfig): Item {
-  return item;
+  // XXX maybe do some more checking here
+  return produce(item, it => { it.config = config; });
 }
 
 // for rendering
