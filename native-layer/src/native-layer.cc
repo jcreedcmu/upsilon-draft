@@ -7,7 +7,7 @@
 
 #include "gl-utils.hh"
 
-typedef enum t_attrib_id { attrib_position, attrib_color } t_attrib_id;
+typedef enum t_attrib_id { attrib_position, attrib_uv } t_attrib_id;
 
 static const int width = 800;
 static const int height = 600;
@@ -121,6 +121,7 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glAttachShader(program, fs);
 
   glBindAttribLocation(program, attrib_position, "i_position");
+  glBindAttribLocation(program, attrib_uv, "i_uv");
   glLinkProgram(program);
 
   glUseProgram(program);
@@ -135,14 +136,24 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
 
   glEnableVertexAttribArray(attrib_position);
+  glEnableVertexAttribArray(attrib_uv);
+
   glVertexAttribPointer(attrib_position, 2, GL_FLOAT, GL_FALSE,
-                        sizeof(float) * 2, (void *)(0 * sizeof(float)));
+                        sizeof(float) * 4, (void *)(0 * sizeof(float)));
 
+  glVertexAttribPointer(attrib_uv, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4,
+                        (void *)(2 * sizeof(float)));
+
+  // comments prevent clang-format from wrapping while preserving
+  // alignment
   const GLfloat g_vertex_buffer_data[] = {
-      /*  R, G, B, A, X, Y  */
-      0, 0, width, 0,       width, height,
-
-      0, 0, width, height,  0,     height};
+      0,     0,      0, 0, //
+      width, 0,      1, 0, //
+      width, height, 1, 1, //
+      0,     0,      0, 0, //
+      width, height, 1, 1, //
+      0,     height, 0, 1  //
+  };
 
   glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data),
                g_vertex_buffer_data, GL_STATIC_DRAW);
