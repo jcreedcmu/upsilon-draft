@@ -252,9 +252,12 @@ function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): R
   };
 
   if (cycles == 0) {
-    let effects;
-    [state, effects] = reduceGameStateFs(state, action);
-    return [state, [...effects, { t: 'playAbstractSound', effect: 'execute', loc }], undefined];
+    let effects: Effect[], error: ErrorInfo | undefined;
+    [state, effects, error] = reduceGameStateFs(state, action);
+    const sound: Effect[] = error == undefined
+      ? [{ t: 'playAbstractSound', effect: 'execute', loc }]
+      : [];
+    return [state, [...effects, ...sound], undefined];
   }
   else {
     // defer execution

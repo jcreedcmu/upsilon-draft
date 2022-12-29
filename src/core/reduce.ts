@@ -16,6 +16,16 @@ export const INVENTORY_MAX_ITEMS = 3;
 export type ReduceResult = [GameState, Effect[]];
 export type ReduceResultErr = [GameState, Effect[], ErrorInfo | undefined];
 
+function noError(rr: ReduceResult): ReduceResultErr {
+  const [state, effects] = rr;
+  return [state, effects, undefined];
+}
+
+function ignoreError(rr: ReduceResultErr): ReduceResult {
+  const [state, effects] = rr;
+  return [state, effects];
+}
+
 export function reduce(state: SceneState, action: Action): [SceneState, Effect[]] {
   switch (state.t) {
     case 'game':
@@ -341,7 +351,7 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
 export function reduceGameState(state: GameState, action: GameAction): ReduceResult {
   const vs = state.viewState;
   switch (vs.t) {
-    case 'fsView': return reduceGameStateFs(state, action);
+    case 'fsView': return ignoreError(reduceGameStateFs(state, action));
     case 'configureView': {
       const orig: ConfigureViewState = vs;
       const result = reduceConfigureView(vs.state, action);
@@ -399,15 +409,16 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
   }
 }
 
-export function reduceGameStateFs(state: GameState, action: GameAction): ReduceResult {
+export function reduceGameStateFs(state: GameState, action: GameAction): ReduceResultErr {
+  const noChange: ReduceResultErr = [state, [], undefined];
   switch (action.t) {
     case 'key': {
       logger('keys', action.code);
       const keyAction = actionOfKey(state, action.code);
       if (keyAction != undefined)
-        return reduceKeyAction(state, keyAction);
+        return noError(reduceKeyAction(state, keyAction));
       else
-        return [state, []];
+        return noChange;
     }
     case 'clockUpdate':
       logger('clockUpdate', `clockUpdate ${action.tick}`);
@@ -421,10 +432,10 @@ export function reduceGameStateFs(state: GameState, action: GameAction): ReduceR
         // have effects that are intended to be idempotent (even
         // though I don't think I do right now)
         const [s, a] = reduceActions(state, actions);
-        return [s, [...a]];
+        return noError([s, [...a]]);
       }
       else {
-        return [state, []];
+        return noChange;
       }
 
     case 'finishExecution': {
@@ -439,7 +450,7 @@ export function reduceGameStateFs(state: GameState, action: GameAction): ReduceR
       if (error != undefined) {
         // unsuccessful execution
         state = cancelRecur(state, action.actorId);
-        return [state, effects];
+        return [state, effects, error];
       }
       else {
         // successful execution
@@ -450,21 +461,20 @@ export function reduceGameStateFs(state: GameState, action: GameAction): ReduceR
             scheduleRecurꜝ(s, action.actorId);
           });
         }
-        return [state, effects];
+        return [state, effects, undefined];
       }
     }
 
     case 'clearError':
       return [produce(state, s => {
         s.error = undefined;
-      }), []];
+      }), [], undefined];
 
     case 'none':
-      return [state, []];
+      return noChange;
 
     case 'recur': {
-      const [st, effect, undefined] = tryStartExecutable(state, action.ident);
-      return [st, effect];
+      return tryStartExecutable(state, action.ident);
     }
   }
 }
