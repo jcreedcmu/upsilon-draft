@@ -3,6 +3,7 @@ import { SpecialId } from "../fs/initial-fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
+import { getItemConfig } from "./configure";
 import { ErrorCode, ErrorCodeException, errorCodes, ErrorInfo } from "./errors";
 import { toggleLabel } from "./labels";
 import { canPickup } from "./lines";
@@ -500,7 +501,7 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
         s.viewState = {
           t: 'configureView',
           target: tgtId,
-          state: { item: tgt },
+          state: { item: tgt, cursor: 0, config: getItemConfig(tgt) },
           back: state.viewState
         };
       }), [], undefined];

@@ -2,7 +2,7 @@ import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, i
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
-import { ConfigureViewState, reduceConfigureView } from './configure';
+import { ConfigureViewState, putItemConfig, reduceConfigureView } from './configure';
 import { ErrorCode, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
@@ -365,11 +365,32 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
             result.effects
           ]
         }
-        case 'quit': {
+        case 'cancel': {
           return [
             produce(state, s => {
               s.viewState = vs.back;
-              setItemꜝ(s.fs, vs.target, vs.state.item);
+              // This is the same error-clearing hack as with textedit below.
+              s.error = undefined;
+            }),
+            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+          ];
+        }
+        case 'save': {
+          return [
+            produce(state, s => {
+              s.viewState = vs.back;
+              // There's maybe something subtle going on here in that
+              // we're using result.item (which will be the state of
+              // the item at the time that the configure dialog was
+              // opened) as a basis for setting result.config on it,
+              // rather than looking up vs.target in the fs as it
+              // exists at the present moment. Something tells me this
+              // is the thing to do that is less likely to have weird
+              // invariant violations if the type of the config we're
+              // trying to set is no longer compatible with the item
+              // in its current state.
+              setItemꜝ(s.fs, vs.target, putItemConfig(result.item, result.config));
+              // This is the same error-clearing hack as with textedit below.
               s.error = undefined;
             }),
             [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]

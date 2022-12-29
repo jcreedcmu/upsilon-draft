@@ -1,4 +1,5 @@
 import { nowTicks } from '../core/clock';
+import { ConfigureWidgetState, getItemConfigLines } from '../core/configure';
 import { errorCodes, errorCodeText } from '../core/errors';
 import { getLines, getRenderableLineOfItem } from '../core/lines';
 import { GameState, getCurId, getCurLine, InventoryState, Item, SceneState, Show, UserError } from '../core/model';
@@ -75,7 +76,7 @@ export type FsRenderable = {
 
 export type TextEditRenderable = { text: string, cursor: Point };
 
-export type ConfigureRenderable = { item: Item };
+export type ConfigureRenderable = ConfigureWidgetState;
 
 export type Renderable =
   | { t: 'fsView' } & FsRenderable
@@ -419,6 +420,8 @@ export function renderTextEditView(state: TextEditRenderable): Screen {
 
 export function renderConfigureView(state: ConfigureRenderable): Screen {
   const screen = new Screen();
+
+  const width = screen.cols - 2;
   const yellowFg = { fg: cc.yellow, bg: cc.blue };
   const whiteFg = { fg: cc.white, bg: cc.blue };
   const offset: Point = { x: 1, y: 1 };
@@ -426,10 +429,14 @@ export function renderConfigureView(state: ConfigureRenderable): Screen {
   screen.drawRect({ h: screen.rows - 1, w: screen.cols - 1, x: 0, y: 0 }, whiteFg);
   screen.drawRect({ h: 2, w: screen.cols - 1, x: 0, y: 0 }, yellowFg);
 
-  screen.drawStr(screen.at(1, 1, screen.cols - 2), state.item.name, whiteFg);
+  screen.drawStr(screen.at(1, 1, width), state.item.name, whiteFg);
 
+  getItemConfigLines(state.config).forEach((line, ix) => {
+    screen.drawTagStr(screen.at(1, 3 + ix, width), line.tagStr, whiteFg);
+  });
 
-  screen.drawStr(screen.at(3, screen.rows - 1, screen.cols - 2), "<esc> to quit", yellowFg);
+  screen.drawStr(screen.at(0, 3 + state.cursor, width), Chars.ARROW_RIGHT, invertAttr(whiteFg));
+  screen.drawStr(screen.at(3, screen.rows - 1, width), "<esc>/<left> to cancel", yellowFg);
 
   return screen;
 }
