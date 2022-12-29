@@ -10,8 +10,7 @@ in vec2 i_uv;
 out vec2 v_uv;
 uniform mat4 u_projection_matrix;
 void main() {
-  gl_Position = u_projection_matrix * vec4( i_position, 0.0, 1.0 );
-
+  gl_Position = vec4(2. * i_uv.x - 1., - (2. * i_uv.y - 1.), 0., 1.);
   v_uv = i_uv;
 };
 `
