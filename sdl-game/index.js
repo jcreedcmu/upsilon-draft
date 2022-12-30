@@ -35,6 +35,8 @@ o_color = texture(u_sampler, v_uv) ;
 };
 `;
 
+const button = new nat.Texture('public/assets/button-up.png');
+
 nativeLayer.compileShaders(vertexShader, fragmentShader);
 
 while (nativeLayer.pollEvent()) {
