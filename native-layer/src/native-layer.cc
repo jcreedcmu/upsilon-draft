@@ -37,8 +37,7 @@ public:
   Napi::Value renderFrame(const Napi::CallbackInfo &);
 
   Napi::Value hello(Napi::Env);
-
-  static Napi::Function GetClass(Napi::Env);
+  static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
 private:
   SDL_Window *_window;
@@ -220,8 +219,8 @@ Napi::Value NativeLayer::finish(const Napi::CallbackInfo &info) {
   return env.Null();
 }
 
-Napi::Function NativeLayer::GetClass(Napi::Env env) {
-  return DefineClass(
+Napi::Object NativeLayer::Init(Napi::Env env, Napi::Object exports) {
+  Napi::Function func = DefineClass(
       env, "NativeLayer",
       {
           NativeLayer::InstanceMethod("finish", &NativeLayer::finish),
@@ -230,6 +229,13 @@ Napi::Function NativeLayer::GetClass(Napi::Env env) {
           NativeLayer::InstanceMethod("pollEvent", &NativeLayer::pollEvent),
           NativeLayer::InstanceMethod("renderFrame", &NativeLayer::renderFrame),
       });
+
+  // _constructor = Napi::Persistent(func);
+  // _constructor.SuppressDestruct();
+
+  exports.Set(Napi::String::New(env, "NativeLayer"), func);
+
+  return exports;
 }
 
 Napi::Value NativeLayer::hello(Napi::Env env) {
@@ -246,8 +252,7 @@ Napi::Value foo(const Napi::CallbackInfo &info) {
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
-  exports.Set(Napi::String::New(env, "NativeLayer"),
-              NativeLayer::GetClass(env));
+  NativeLayer::Init(env, exports);
   exports.Set(Napi::String::New(env, "Nonce"),
               Nonce::GetClass(env));
 
