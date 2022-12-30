@@ -151,7 +151,8 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glUseProgram(program);
 
   glDisable(GL_DEPTH_TEST);
-  glClearColor(0.5, 0.0, 0.0, 0.0);
+  // #877a6a
+  glClearColor(0x87 / 255., 0x7a / 255., 0x6a / 255., 1.);
   glViewport(0, 0, width, height);
 
   glGenVertexArrays(1, &this->_vao);
@@ -178,7 +179,10 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data),
                g_vertex_buffer_data, GL_STATIC_DRAW);
 
-
+  // Set some uniforms
+  glUniform2f(glGetUniformLocation(program, "u_offset"), width-100, height-75);
+  glUniform2f(glGetUniformLocation(program, "u_size"), 100, 75);
+  glUniform2f(glGetUniformLocation(program, "u_viewport_size"), width, height);
 
   // Setup textures
   unsigned int texture;
