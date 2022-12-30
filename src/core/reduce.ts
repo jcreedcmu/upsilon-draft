@@ -7,7 +7,7 @@ import { ErrorCode, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, NarrowGameAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
 import { reduceTextEditView, TextEditViewState } from './text-edit';
 
 export const EXEC_TICKS = 6;
@@ -269,6 +269,7 @@ function reduceDropAction(state: GameState, action: DropLineAction): ReduceResul
 }
 
 function reduceActions(state: GameState, actions: GameAction[]): ReduceResult {
+  console.log('reduceActions', actions.map(a => a.t));
   let effects: Effect[] = [];
   for (const action of actions) {
     let moreEffects;
@@ -349,6 +350,34 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
 }
 
 export function reduceGameState(state: GameState, action: GameAction): ReduceResult {
+  // First we deal with some actions that have a uniform consequence
+  // regardless of what mode we're in. These are the difference between
+  // GameAction and NarrowGameAction
+  switch (action.t) {
+    case 'clearError': {
+      return [produce(state, s => {
+        s.error = undefined;
+      }), []];
+    }
+    case 'clockUpdate': {
+      logger('clockUpdate', `clockUpdate ${action.tick}`);
+      if (state.futures.length + Object.keys(state.recurring).length > 0) {
+        const actions = state.futures.filter(f => f.whenTicks == action.tick).map(x => x.action);
+        state = produce(state, s => {
+          s.futures = state.futures.filter(f => f.whenTicks > action.tick);
+        });
+
+        // XXX Might want to think about doing something smarter if I
+        // have effects that are intended to be idempotent (even
+        // though I don't think I do right now)
+        const [s, a] = reduceActions(state, actions);
+        return [s, [...a]];
+      }
+      else {
+        return [state, []];
+      }
+    }
+  }
   const vs = state.viewState;
   switch (vs.t) {
     case 'fsView': return ignoreError(reduceGameStateFs(state, action));
@@ -430,7 +459,7 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
   }
 }
 
-export function reduceGameStateFs(state: GameState, action: GameAction): ReduceResultErr {
+export function reduceGameStateFs(state: GameState, action: NarrowGameAction): ReduceResultErr {
   const noChange: ReduceResultErr = [state, [], undefined];
   switch (action.t) {
     case 'key': {
@@ -441,24 +470,6 @@ export function reduceGameStateFs(state: GameState, action: GameAction): ReduceR
       else
         return noChange;
     }
-    case 'clockUpdate':
-      logger('clockUpdate', `clockUpdate ${action.tick}`);
-      if (state.futures.length + Object.keys(state.recurring).length > 0) {
-        const actions = state.futures.filter(f => f.whenTicks == action.tick).map(x => x.action);
-        state = produce(state, s => {
-          s.futures = state.futures.filter(f => f.whenTicks > action.tick);
-        });
-
-        // XXX Might want to think about doing something smarter if I
-        // have effects that are intended to be idempotent (even
-        // though I don't think I do right now)
-        const [s, a] = reduceActions(state, actions);
-        return noError([s, [...a]]);
-      }
-      else {
-        return noChange;
-      }
-
     case 'finishExecution': {
       let effects, error;
       [state, effects, error] = executeInstructions(state, action.instr, action.actorId);
@@ -485,11 +496,6 @@ export function reduceGameStateFs(state: GameState, action: GameAction): ReduceR
         return [state, effects, undefined];
       }
     }
-
-    case 'clearError':
-      return [produce(state, s => {
-        s.error = undefined;
-      }), [], undefined];
 
     case 'none':
       return noChange;

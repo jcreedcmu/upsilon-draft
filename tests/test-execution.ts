@@ -1,5 +1,5 @@
 import { gameStateOfFs } from '../src/core/model';
-import { reduceExecAction, reduceGameStateFs } from '../src/core/reduce';
+import { reduceExecAction, reduceGameState, reduceGameStateFs } from '../src/core/reduce';
 import { getFullContents, insertPlans, mkFs, moveId } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initial-fs';
 import { getResource } from '../src/fs/resources';
@@ -24,7 +24,6 @@ describe('mov-cpu-5', () => {
 
     let [fs_,] = moveId(fs, { t: 'at', id: '_gen_vroot', pos: 5 }, { t: 'at', id: '_root', pos: 2 }); // ignore hooks
 
-
     state = produce(state, s => { s.fs = fs_; });
 
     expect(getFullContents(state.fs, '_gen_vroot').map(x => x.name))
@@ -46,7 +45,7 @@ describe('mov-cpu-5', () => {
       actorId: "mov-cpu-5", instr: "mov-cpu-5", t: "finishExecution"
     });
 
-    [state, effects] = reduceGameStateFs(state, state.futures[0].action);
+    [state, effects] = reduceGameState(state, state.futures[0].action);
 
     expect(getResource(getFullContents(state.fs, '_root')[2], 'cpu')).toEqual(0);
 

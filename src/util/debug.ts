@@ -2,7 +2,7 @@ export const isDev = globalThis['location'] != undefined && !!globalThis['locati
 
 export const DEBUG = {
   glTiming: false,
-  clockUpdate: false,
+  clockUpdate: true,
   recurring: false,
   rendering: false,
   renderFsView: false,

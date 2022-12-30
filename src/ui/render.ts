@@ -69,7 +69,6 @@ export type FsRenderable = {
   lines: RenderableLine[],
   show: Show,
   path: string[],
-  error: ErrorRenderable,
   invLines: RenderableLine[],
   inventoryState: InventoryState,
 };
@@ -78,10 +77,12 @@ export type TextEditRenderable = { text: string, cursor: Point };
 
 export type ConfigureRenderable = ConfigureWidgetState;
 
-export type Renderable =
+export type NarrowRenderable =
   | { t: 'fsView' } & FsRenderable
   | { t: 'textEditView' } & TextEditRenderable
   | { t: 'configureView' } & ConfigureRenderable;
+
+export type Renderable = { error: ErrorRenderable } & NarrowRenderable;
 
 function truncate(name: string, len: number) {
   if (name.length > len) {
@@ -127,13 +128,14 @@ function renderError(error: UserError | undefined, errorMsgs: Record<number, str
 }
 
 function getRenderable(state: GameState): Renderable {
+  const error = renderError(state.error, state._cached_errors);
   switch (state.viewState.t) {
     case 'fsView': {
       const lines = getLines(state, getCurId(state));
       return {
         t: 'fsView',
         curLine: getCurLine(state),
-        error: renderError(state.error, state._cached_errors),
+        error,
         lines,
         path: state.path,
         show: state._cached_show,
@@ -142,9 +144,9 @@ function getRenderable(state: GameState): Renderable {
       };
     }
     case 'textEditView':
-      return { t: 'textEditView', ...state.viewState.state };
+      return { t: 'textEditView', error, ...state.viewState.state };
     case 'configureView':
-      return { t: 'configureView', ...state.viewState.state };
+      return { t: 'configureView', error, ...state.viewState.state };
   }
 }
 
@@ -382,13 +384,6 @@ export function renderFsView(rend: FsRenderable): Screen {
     );
   }
 
-  if (rend.error !== undefined) {
-    screen.drawTagLine(screen.at(0, screen.rows - 1), screen.cols,
-      rend.error.msg,
-      ERROR_ATTR
-    );
-  }
-
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   const boxe = String.fromCharCode(boxify(BOXE)(0));
   if (rend.show.inventory) {
@@ -454,7 +449,15 @@ export function finalRender(state: Renderable): Screen {
 export function render(state: SceneState): Screen {
   switch (state.t) {
     case 'game': {
-      return finalRender(getRenderable(state.gameState));
+      const rend = getRenderable(state.gameState);
+      const screen = finalRender(rend);
+      if (rend.error !== undefined) {
+        screen.drawTagLine(screen.at(0, screen.rows - 1), screen.cols,
+          rend.error.msg,
+          ERROR_ATTR
+        );
+      }
+      return screen;
     }
   }
 }

@@ -86,10 +86,15 @@ export type Item = {
 };
 
 export type GameAction =
-  | { t: 'key', code: string }
-  | { t: 'clockUpdate', tick: number }
-  | { t: 'finishExecution', actorId: Ident, instr: ExecutableName }
   | { t: 'clearError' }
+  | { t: 'clockUpdate', tick: number }
+  | NarrowGameAction
+  ;
+
+// I think I want to migrate some of these up to GameAction
+export type NarrowGameAction =
+  | { t: 'key', code: string }
+  | { t: 'finishExecution', actorId: Ident, instr: ExecutableName }
   | { t: 'none' }
   | { t: 'recur', ident: Ident }
   ;
