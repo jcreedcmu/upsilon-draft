@@ -267,26 +267,26 @@ Napi::Value NativeLayer::hello(Napi::Env env) {
   return Napi::String::New(env, "Hello World");
 }
 
-Napi::Value foo(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
+// Napi::Value getUniformLocation(const Napi::CallbackInfo &info) {
+//   Napi::Env env = info.Env();
 
-  Napi::Object nl = info[0].As<Napi::Object>();
+//   Napi::Object nl = info[0].As<Napi::Object>();
 
-  if (nl.InstanceOf(NativeLayer::constructor.Value())) {
-    NativeLayer *nat = Napi::ObjectWrap<NativeLayer>::Unwrap(nl);
-    return nat->hello(env);
-  }
-  else {
-    return throwJs(env, "Argument is not a NativeLayer");
-  }
-}
+//   if (nl.InstanceOf(NativeLayer::constructor.Value())) {
+//     NativeLayer *nat = Napi::ObjectWrap<NativeLayer>::Unwrap(nl);
+//     return nat->hello(env);
+//   }
+//   else {
+//     return throwJs(env, "Argument is not a NativeLayer");
+//   }
+// }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
   exports.Set(Napi::String::New(env, "Nonce"), Nonce::GetClass(env));
 
-  exports.Set("foo", Napi::Function::New(env, foo));
+  //  exports.Set("foo", Napi::Function::New(env, foo));
   return exports;
 }
 

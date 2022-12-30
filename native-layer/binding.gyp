@@ -7,6 +7,7 @@
       "src/native-layer.cc",
       "src/stb.cc",
       "src/gl-texture.cc",
+      "src/gl-program.cc",
     ],
     'include_dirs': [
       "<!@(node -p \"require('node-addon-api').include\")"
