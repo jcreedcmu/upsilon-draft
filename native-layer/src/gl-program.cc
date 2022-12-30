@@ -12,6 +12,7 @@ Napi::Object GlProgram::Init(Napi::Env env, Napi::Object exports) {
       env, "Program",
       {
           GlProgram::InstanceMethod("programId", &GlProgram::programId),
+          GlProgram::InstanceMethod("getUniformLocation", &GlProgram::getUniformLocation),
       });
 
   GlProgram::constructor = Napi::Persistent(func);
@@ -87,4 +88,23 @@ GlProgram::GlProgram(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 NFUNC(GlProgram::programId) {
   NBOILER();
   return Napi::Number::New(env, this->_program);
+}
+
+
+NFUNC(GlProgram::getUniformLocation) {
+  NBOILER();
+
+  if (info.Length() < 1) {
+    throwJs(env,
+            "usage: getUniformLocation(name: string)");
+  }
+
+  if (!info[0].IsString()) {
+    return throwJs(env, "argument 0 should be a string");
+  }
+
+  std::string name = info[0].As<Napi::String>().Utf8Value();
+  unsigned int loc = glGetUniformLocation(this->_program, name.c_str());
+
+  return Napi::Number::New(env, loc);
 }

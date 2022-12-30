@@ -120,7 +120,7 @@ Napi::Value NativeLayer::configShaders(const Napi::CallbackInfo &info) {
   glGenTextures(1, &texture);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture);
-  glUniform1i(glGetUniformLocation(program, "u_sampler"), 0);
+  //  glUniform1i(glGetUniformLocation(program, "u_sampler"), 0);
 
   int width, height, nrChannels;
   unsigned char *data = stbi_load("public/assets/button-down.png", &width,
@@ -205,10 +205,35 @@ Napi::Value NativeLayer::hello(Napi::Env env) {
   return Napi::String::New(env, "Hello World");
 }
 
+NFUNC(wrap_glUniform1i) {
+  NBOILER();
+
+  if (info.Length() < 2) {
+    throwJs(env,
+            "usage: glUniform1i(location: number, value: number)");
+  }
+
+  if (!info[0].IsNumber()) {
+    return throwJs(env, "argument 0 should be a number");
+  }
+
+  if (!info[1].IsNumber()) {
+    return throwJs(env, "argument 1 should be a number");
+  }
+
+  glUniform1i(
+              info[0].As<Napi::Number>().Uint32Value(),
+              info[1].As<Napi::Number>().Uint32Value()
+              );
+  return env.Null();
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
   GlProgram::Init(env, exports);
+
+  exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));
   return exports;
 }
 
