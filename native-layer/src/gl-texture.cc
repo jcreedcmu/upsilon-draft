@@ -12,6 +12,7 @@ Napi::Object GlTexture::Init(Napi::Env env, Napi::Object exports) {
       env, "Texture",
       {
           GlTexture::InstanceMethod("textureId", &GlTexture::textureId),
+          GlTexture::InstanceMethod("bind", &GlTexture::bind),
       });
 
   GlTexture::constructor = Napi::Persistent(func);
@@ -59,4 +60,22 @@ GlTexture::GlTexture(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 NFUNC(GlTexture::textureId) {
   NBOILER();
   return Napi::Number::New(env, this->_texture);
+}
+
+NFUNC(GlTexture::bind) {
+  NBOILER();
+
+  if (info.Length() < 1) {
+    throwJs(env,
+            "usage: getUniformLocation(texture unit: number)");
+  }
+
+  if (!info[0].IsNumber()) {
+    return throwJs(env, "argument 0 should be a number");
+  }
+
+  glActiveTexture(GL_TEXTURE0 + info[0].As<Napi::Number>().Uint32Value());
+  glBindTexture(GL_TEXTURE_2D, this->_texture);
+
+  return env.Null();
 }
