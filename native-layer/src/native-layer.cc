@@ -5,6 +5,7 @@
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_opengl_glext.h>
 
+#include "gl-texture.hh"
 #include "gl-utils.hh"
 #include "stb_image.h"
 
@@ -180,7 +181,8 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
                g_vertex_buffer_data, GL_STATIC_DRAW);
 
   // Set some uniforms
-  glUniform2f(glGetUniformLocation(program, "u_offset"), width-100, height-75);
+  glUniform2f(glGetUniformLocation(program, "u_offset"), width - 100,
+              height - 75);
   glUniform2f(glGetUniformLocation(program, "u_size"), 100, 75);
   glUniform2f(glGetUniformLocation(program, "u_viewport_size"), width, height);
 
@@ -192,9 +194,11 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glUniform1i(glGetUniformLocation(program, "u_sampler"), 0);
 
   int width, height, nrChannels;
-  unsigned char *data = stbi_load("public/assets/button-down.png", &width, &height, &nrChannels, 0);
+  unsigned char *data = stbi_load("public/assets/button-down.png", &width,
+                                  &height, &nrChannels, 0);
   if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -205,7 +209,7 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   stbi_image_free(data);
 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable( GL_BLEND );
+  glEnable(GL_BLEND);
 
   return env.Null();
 }
@@ -291,11 +295,11 @@ Napi::Value foo(const Napi::CallbackInfo &info) {
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
+  GlTexture::Init(env, exports);
   exports.Set(Napi::String::New(env, "Nonce"), Nonce::GetClass(env));
 
   exports.Set("foo", Napi::Function::New(env, foo));
   return exports;
 }
-
 
 NODE_API_MODULE(native_layer, Init)

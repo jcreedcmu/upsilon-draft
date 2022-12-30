@@ -5,7 +5,8 @@
     "cflags_cc!": [ "-fno-exceptions" ],
     "sources": [
       "src/native-layer.cc",
-      "src/stb.cc"
+      "src/stb.cc",
+      "src/gl-texture.cc",
     ],
     'include_dirs': [
       "<!@(node -p \"require('node-addon-api').include\")"
