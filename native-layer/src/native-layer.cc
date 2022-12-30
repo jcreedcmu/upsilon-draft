@@ -6,7 +6,7 @@
 #include <SDL2/SDL_opengl_glext.h>
 
 #include "gl-texture.hh"
-#include "gl-utils.hh"
+#include "gl-program.hh"
 #include "napi-helpers.hh"
 #include "stb_image.h"
 
@@ -50,7 +50,6 @@ public:
 private:
   SDL_Window *_window;
   SDL_GLContext _context;
-  GLuint _vs, _fs, _program;
   GLuint _vao, _vbo;
 };
 
@@ -82,65 +81,19 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 
 Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
-  GLuint vs, fs, program;
 
-  if (info.Length() < 2) {
-    return throwJs(
-        env,
-        "usage: compileShaders(vertexShader: string, fragmentShader: string)");
+  if (info.Length() < 1) {
+    throwJs(env,
+            "usage: compileShaders(program: number)");
   }
 
-  if (!info[0].IsString()) {
-    return throwJs(env, "argument 0 should be a string");
+  if (!info[0].IsNumber()) {
+    throwJs(env, "argument 0 should be a number");
   }
 
-  if (!info[1].IsString()) {
-    return throwJs(env, "argument 1 should be a string");
-  }
-
-  // Set up vertex shader
-  {
-    this->_vs = vs = glCreateShader(GL_VERTEX_SHADER);
-    std::string shader = info[0].As<Napi::String>().Utf8Value();
-    int length = shader.size();
-    const char *cstr = shader.c_str();
-    glShaderSource(vs, 1, &cstr, &length);
-    glCompileShader(vs);
-
-    GLint status;
-    glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
-    if (status == GL_FALSE) {
-      printShaderLog(vs);
-      return throwJs(env, "vertex compilation failed");
-    }
-  }
-
-  // Set up fragment shader
-  {
-    this->_fs = fs = glCreateShader(GL_FRAGMENT_SHADER);
-    std::string shader = info[1].As<Napi::String>().Utf8Value();
-    int length = shader.size();
-    const char *cstr = shader.c_str();
-    glShaderSource(fs, 1, &cstr, &length);
-    glCompileShader(fs);
-
-    GLint status;
-    glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
-    if (status == GL_FALSE) {
-      printShaderLog(fs);
-      return throwJs(env, "fragment compilation failed");
-    }
-  }
-
-  printf("Successfully compiled shaders\n");
-
-  this->_program = program = glCreateProgram();
-  glAttachShader(program, vs);
-  glAttachShader(program, fs);
+  unsigned int program = info[0].As<Napi::Number>().Uint32Value();
 
   glBindAttribLocation(program, attrib_uv, "i_uv");
-  glLinkProgram(program);
-  glUseProgram(program);
 
   glDisable(GL_DEPTH_TEST);
   // #877a6a
@@ -284,6 +237,7 @@ Napi::Value NativeLayer::hello(Napi::Env env) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
+  GlProgram::Init(env, exports);
   exports.Set(Napi::String::New(env, "Nonce"), Nonce::GetClass(env));
 
   //  exports.Set("foo", Napi::Function::New(env, foo));

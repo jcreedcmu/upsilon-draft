@@ -13,5 +13,5 @@ public:
   static Napi::FunctionReference constructor;
 
 private:
-  unsigned int _program;
+  unsigned int _program, _vs, _fs;
 };

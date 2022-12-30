@@ -37,7 +37,9 @@ o_color = texture(u_sampler, v_uv) ;
 
 const button = new nat.Texture('public/assets/button-up.png');
 
-nativeLayer.compileShaders(vertexShader, fragmentShader);
+const program = new nat.Program(vertexShader, fragmentShader);
+
+nativeLayer.compileShaders(program.programId());
 
 while (nativeLayer.pollEvent()) {
   nativeLayer.renderFrame();

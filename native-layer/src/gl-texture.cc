@@ -8,11 +8,11 @@
 Napi::FunctionReference GlTexture::constructor;
 
 Napi::Object GlTexture::Init(Napi::Env env, Napi::Object exports) {
-  Napi::Function func =
-      DefineClass(env, "Texture",
-                  {
-                      GlTexture::InstanceMethod("textureId", &GlTexture::textureId),
-                  });
+  Napi::Function func = DefineClass(
+      env, "Texture",
+      {
+          GlTexture::InstanceMethod("textureId", &GlTexture::textureId),
+      });
 
   GlTexture::constructor = Napi::Persistent(func);
   constructor.SuppressDestruct();
@@ -29,11 +29,11 @@ GlTexture::GlTexture(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 
   // XXX Maybe I should move argument checking into a js wrapper?
   if (info.Length() < 1) {
-     throwJs(env, "expected 1 argument");
+    throwJs(env, "expected 1 argument");
   }
 
   if (!info[0].IsString()) {
-     throwJs(env, "argument 0 should be a string");
+    throwJs(env, "argument 0 should be a string");
   }
 
   std::string filename = info[0].As<Napi::String>().Utf8Value();
