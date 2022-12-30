@@ -7,6 +7,7 @@
 
 #include "gl-texture.hh"
 #include "gl-utils.hh"
+#include "napi-helpers.hh"
 #include "stb_image.h"
 
 class Nonce : public Napi::ObjectWrap<Nonce> {
@@ -84,23 +85,17 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   GLuint vs, fs, program;
 
   if (info.Length() < 2) {
-    Napi::TypeError::New(
+    return throwJs(
         env,
-        "usage: compileShaders(vertexShader: string, fragmentShader: string)")
-        .ThrowAsJavaScriptException();
-    return env.Null();
+        "usage: compileShaders(vertexShader: string, fragmentShader: string)");
   }
 
   if (!info[0].IsString()) {
-    Napi::TypeError::New(env, "argument 0 should be a string")
-        .ThrowAsJavaScriptException();
-    return env.Null();
+    return throwJs(env, "argument 0 should be a string");
   }
 
   if (!info[1].IsString()) {
-    Napi::TypeError::New(env, "argument 1 should be a string")
-        .ThrowAsJavaScriptException();
-    return env.Null();
+    return throwJs(env, "argument 1 should be a string");
   }
 
   // Set up vertex shader
@@ -116,9 +111,7 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
     glGetShaderiv(vs, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
       printShaderLog(vs);
-      Napi::TypeError::New(env, "vertex compilation failed")
-          .ThrowAsJavaScriptException();
-      return env.Null();
+      return throwJs(env, "vertex compilation failed");
     }
   }
 
@@ -135,9 +128,7 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
     glGetShaderiv(fs, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE) {
       printShaderLog(fs);
-      Napi::TypeError::New(env, "fragment compilation failed")
-          .ThrowAsJavaScriptException();
-      return env.Null();
+      return throwJs(env, "fragment compilation failed");
     }
   }
 
@@ -287,9 +278,7 @@ Napi::Value foo(const Napi::CallbackInfo &info) {
     return nat->hello(env);
   }
   else {
-    Napi::TypeError::New(env, "Argument is not a NativeLayer")
-        .ThrowAsJavaScriptException();
-    return env.Null();
+    return throwJs(env, "Argument is not a NativeLayer");
   }
 }
 
