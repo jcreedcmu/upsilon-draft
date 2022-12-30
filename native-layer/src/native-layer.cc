@@ -115,27 +115,6 @@ Napi::Value NativeLayer::configShaders(const Napi::CallbackInfo &info) {
   glUniform2f(glGetUniformLocation(program, "u_size"), 100, 75);
   glUniform2f(glGetUniformLocation(program, "u_viewport_size"), width, height);
 
-  // Setup textures
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  //  glUniform1i(glGetUniformLocation(program, "u_sampler"), 0);
-
-  int width, height, nrChannels;
-  unsigned char *data = stbi_load("public/assets/button-down.png", &width,
-                                  &height, &nrChannels, 0);
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  }
-  else {
-    std::cout << "Failed to load texture" << std::endl;
-  }
-  stbi_image_free(data);
-
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
 

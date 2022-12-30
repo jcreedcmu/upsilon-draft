@@ -40,9 +40,8 @@ const button = new nat.Texture('public/assets/button-up.png');
 const program = new nat.Program(vertexShader, fragmentShader);
 const u_sampler = program.getUniformLocation('u_sampler');
 
-
 nativeLayer.configShaders(program.programId());
-nat.glUniform1i(u_sampler, button.textureId());
+nat.glUniform1i(u_sampler, 0); // texture UNIT not button.textureId()
 
 while (nativeLayer.pollEvent()) {
   nativeLayer.renderFrame();

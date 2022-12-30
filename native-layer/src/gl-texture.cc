@@ -38,6 +38,7 @@ GlTexture::GlTexture(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 
   std::string filename = info[0].As<Napi::String>().Utf8Value();
 
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, this->_texture);
 
   int width, height, nrChannels;
