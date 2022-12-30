@@ -19,10 +19,13 @@ const fragmentShader = `
 
 precision mediump float;
 
+uniform sampler2D u_sampler;
+
 in vec2 v_uv;
 out vec4 o_color;
 void main() {
-    o_color = vec4(v_uv.y, (v_uv.x + v_uv.y) / 2., v_uv.x, 1.0);
+//    o_color = vec4(v_uv.y, (v_uv.x + v_uv.y) / 2., v_uv.x, 1.0);
+o_color = texture(u_sampler, v_uv) ;
 };
 `;
 
