@@ -37,4 +37,10 @@ nativeLayer.finish();
 const nonce = new nat.Nonce();
 
 console.log(nat.foo(nativeLayer));
-console.log(nat.foo(nonce));
+
+try {
+  console.log(nat.foo(nonce));
+}
+catch (e) {
+  console.log(`[${e}]`);
+}

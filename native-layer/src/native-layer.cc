@@ -9,9 +9,7 @@
 
 class Nonce : public Napi::ObjectWrap<Nonce> {
 public:
-  Nonce(const Napi::CallbackInfo &info): ObjectWrap(info) {
-
-  }
+  Nonce(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
   Napi::Value hello(Napi::Env env) {
     return Napi::String::New(env, "Hello World from Nonce");
   }
@@ -39,21 +37,21 @@ public:
   Napi::Value hello(Napi::Env);
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
-private:
-  SDL_Window *_window;
-  SDL_GLContext _context;
-  GLuint _vs, _fs, _program;
-  GLuint _vao, _vbo;
-
   // This pattern of statically storing a funcRef to the constructor
   // in the class is cargo-culted from
   // https://github.com/nodejs/node-addon-examples/blob/main/inherits_from_event_emitter/node-addon-api/src/native-emitter.h
   // My goal is to be able to call InstanceOf to check whether I'm
   // being passed the right type of wrapped Napi::Object.
-  static Napi::FunctionReference _constructor;
+  static Napi::FunctionReference constructor;
+
+private:
+  SDL_Window *_window;
+  SDL_GLContext _context;
+  GLuint _vs, _fs, _program;
+  GLuint _vao, _vbo;
 };
 
-Napi::FunctionReference NativeLayer::_constructor;
+Napi::FunctionReference NativeLayer::constructor;
 
 NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   SDL_Init(SDL_INIT_VIDEO);
@@ -239,8 +237,8 @@ Napi::Object NativeLayer::Init(Napi::Env env, Napi::Object exports) {
           NativeLayer::InstanceMethod("renderFrame", &NativeLayer::renderFrame),
       });
 
-  NativeLayer::_constructor = Napi::Persistent(func);
-  _constructor.SuppressDestruct();
+  NativeLayer::constructor = Napi::Persistent(func);
+  constructor.SuppressDestruct();
 
   exports.Set(Napi::String::New(env, "NativeLayer"), func);
 
@@ -255,15 +253,21 @@ Napi::Value foo(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
   Napi::Object nl = info[0].As<Napi::Object>();
-  NativeLayer *nat = Napi::ObjectWrap<NativeLayer>::Unwrap(nl);
 
-  return nat->hello(env);
+  if (nl.InstanceOf(NativeLayer::constructor.Value())) {
+    NativeLayer *nat = Napi::ObjectWrap<NativeLayer>::Unwrap(nl);
+    return nat->hello(env);
+  }
+  else {
+    Napi::TypeError::New(env, "Argument is not a NativeLayer")
+        .ThrowAsJavaScriptException();
+    return env.Null();
+  }
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
-  exports.Set(Napi::String::New(env, "Nonce"),
-              Nonce::GetClass(env));
+  exports.Set(Napi::String::New(env, "Nonce"), Nonce::GetClass(env));
 
   exports.Set("foo", Napi::Function::New(env, foo));
   return exports;
