@@ -5,24 +5,10 @@
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_opengl_glext.h>
 
-#include "gl-texture.hh"
 #include "gl-program.hh"
+#include "gl-texture.hh"
 #include "napi-helpers.hh"
 #include "stb_image.h"
-
-class Nonce : public Napi::ObjectWrap<Nonce> {
-public:
-  Nonce(const Napi::CallbackInfo &info) : ObjectWrap(info) {}
-  Napi::Value hello(Napi::Env env) {
-    return Napi::String::New(env, "Hello World from Nonce");
-  }
-
-  static Napi::Function GetClass(Napi::Env env) {
-    return DefineClass(env, "Nonce", {});
-  }
-
-private:
-};
 
 typedef enum t_attrib_id { attrib_uv } t_attrib_id;
 
@@ -33,7 +19,7 @@ class NativeLayer : public Napi::ObjectWrap<NativeLayer> {
 public:
   NativeLayer(const Napi::CallbackInfo &);
   Napi::Value finish(const Napi::CallbackInfo &);
-  Napi::Value compileShaders(const Napi::CallbackInfo &);
+  Napi::Value configShaders(const Napi::CallbackInfo &);
   Napi::Value pollEvent(const Napi::CallbackInfo &);
   Napi::Value renderFrame(const Napi::CallbackInfo &);
 
@@ -79,12 +65,11 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   this->_window = window;
 }
 
-Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
+Napi::Value NativeLayer::configShaders(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
   if (info.Length() < 1) {
-    throwJs(env,
-            "usage: compileShaders(program: number)");
+    throwJs(env, "usage: configShaders(program: number)");
   }
 
   if (!info[0].IsNumber()) {
@@ -202,8 +187,8 @@ Napi::Object NativeLayer::Init(Napi::Env env, Napi::Object exports) {
       env, "NativeLayer",
       {
           NativeLayer::InstanceMethod("finish", &NativeLayer::finish),
-          NativeLayer::InstanceMethod("compileShaders",
-                                      &NativeLayer::compileShaders),
+          NativeLayer::InstanceMethod("configShaders",
+                                      &NativeLayer::configShaders),
           NativeLayer::InstanceMethod("pollEvent", &NativeLayer::pollEvent),
           NativeLayer::InstanceMethod("renderFrame", &NativeLayer::renderFrame),
       });
@@ -220,27 +205,10 @@ Napi::Value NativeLayer::hello(Napi::Env env) {
   return Napi::String::New(env, "Hello World");
 }
 
-// Napi::Value getUniformLocation(const Napi::CallbackInfo &info) {
-//   Napi::Env env = info.Env();
-
-//   Napi::Object nl = info[0].As<Napi::Object>();
-
-//   if (nl.InstanceOf(NativeLayer::constructor.Value())) {
-//     NativeLayer *nat = Napi::ObjectWrap<NativeLayer>::Unwrap(nl);
-//     return nat->hello(env);
-//   }
-//   else {
-//     return throwJs(env, "Argument is not a NativeLayer");
-//   }
-// }
-
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
   GlProgram::Init(env, exports);
-  exports.Set(Napi::String::New(env, "Nonce"), Nonce::GetClass(env));
-
-  //  exports.Set("foo", Napi::Function::New(env, foo));
   return exports;
 }
 

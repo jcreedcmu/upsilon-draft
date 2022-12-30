@@ -39,7 +39,7 @@ const button = new nat.Texture('public/assets/button-up.png');
 
 const program = new nat.Program(vertexShader, fragmentShader);
 
-nativeLayer.compileShaders(program.programId());
+nativeLayer.configShaders(program.programId());
 
 while (nativeLayer.pollEvent()) {
   nativeLayer.renderFrame();
@@ -48,12 +48,3 @@ while (nativeLayer.pollEvent()) {
 nativeLayer.finish();
 
 const nonce = new nat.Nonce();
-
-// console.log(nat.foo(nativeLayer));
-
-// try {
-//   console.log(nat.foo(nonce));
-// }
-// catch (e) {
-//   console.log(`[${e}]`);
-// }
