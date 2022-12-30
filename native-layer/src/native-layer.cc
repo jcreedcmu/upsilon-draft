@@ -6,6 +6,7 @@
 #include <SDL2/SDL_opengl_glext.h>
 
 #include "gl-utils.hh"
+#include "stb_image.h"
 
 class Nonce : public Napi::ObjectWrap<Nonce> {
 public:
@@ -183,6 +184,24 @@ Napi::Value NativeLayer::compileShaders(const Napi::CallbackInfo &info) {
   glUniformMatrix4fv(glGetUniformLocation(program, "u_projection_matrix"), 1,
                      GL_FALSE, projection_matrix);
 
+  // Setup textures
+
+  int width, height, nrChannels;
+  unsigned char *data = stbi_load("public/assets/button-down.png", &width, &height, &nrChannels, 0);
+  if (data) {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+  else {
+    std::cout << "Failed to load texture" << std::endl;
+  }
+  stbi_image_free(data);
+
+  unsigned int texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+
   return env.Null();
 }
 
@@ -272,5 +291,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set("foo", Napi::Function::New(env, foo));
   return exports;
 }
+
 
 NODE_API_MODULE(native_layer, Init)
