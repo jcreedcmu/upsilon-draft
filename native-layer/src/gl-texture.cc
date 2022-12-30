@@ -11,8 +11,7 @@ Napi::Object GlTexture::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func =
       DefineClass(env, "Texture",
                   {
-                      GlTexture::InstanceMethod("load", &GlTexture::load),
-                      GlTexture::InstanceMethod("bind", &GlTexture::bind),
+                      GlTexture::InstanceMethod("textureId", &GlTexture::textureId),
                   });
 
   GlTexture::constructor = Napi::Persistent(func);
@@ -24,19 +23,17 @@ Napi::Object GlTexture::Init(Napi::Env env, Napi::Object exports) {
 }
 
 GlTexture::GlTexture(const Napi::CallbackInfo &info) : ObjectWrap(info) {
-  glGenTextures(1, &this->_texture);
-}
-
-NFUNC(GlTexture::load) {
   NBOILER();
+
+  glGenTextures(1, &this->_texture);
 
   // XXX Maybe I should move argument checking into a js wrapper?
   if (info.Length() < 1) {
-    return throwJs(env, "expected 1 argument");
+     throwJs(env, "expected 1 argument");
   }
 
   if (!info[0].IsString()) {
-    return throwJs(env, "argument 0 should be a string");
+     throwJs(env, "argument 0 should be a string");
   }
 
   std::string filename = info[0].As<Napi::String>().Utf8Value();
@@ -53,13 +50,12 @@ NFUNC(GlTexture::load) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   }
   else {
-    return throwJs(env, "Failed to load texture");
+    throwJs(env, "Failed to load texture");
   }
-
-  return env.Null();
+  stbi_image_free(data);
 }
 
-NFUNC(GlTexture::bind) {
+NFUNC(GlTexture::textureId) {
   NBOILER();
-  return env.Null();
+  return Napi::Number::New(env, this->_texture);
 }

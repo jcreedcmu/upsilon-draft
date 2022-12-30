@@ -7,8 +7,7 @@
 class GlTexture : public Napi::ObjectWrap<GlTexture> {
 public:
   GlTexture(const Napi::CallbackInfo &info);
-  NFUNC(load);
-  NFUNC(bind);
+  NFUNC(textureId);
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
   static Napi::FunctionReference constructor;
