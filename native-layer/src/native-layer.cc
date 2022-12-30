@@ -44,7 +44,16 @@ private:
   SDL_GLContext _context;
   GLuint _vs, _fs, _program;
   GLuint _vao, _vbo;
+
+  // This pattern of statically storing a funcRef to the constructor
+  // in the class is cargo-culted from
+  // https://github.com/nodejs/node-addon-examples/blob/main/inherits_from_event_emitter/node-addon-api/src/native-emitter.h
+  // My goal is to be able to call InstanceOf to check whether I'm
+  // being passed the right type of wrapped Napi::Object.
+  static Napi::FunctionReference _constructor;
 };
+
+Napi::FunctionReference NativeLayer::_constructor;
 
 NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   SDL_Init(SDL_INIT_VIDEO);
@@ -230,8 +239,8 @@ Napi::Object NativeLayer::Init(Napi::Env env, Napi::Object exports) {
           NativeLayer::InstanceMethod("renderFrame", &NativeLayer::renderFrame),
       });
 
-  // _constructor = Napi::Persistent(func);
-  // _constructor.SuppressDestruct();
+  NativeLayer::_constructor = Napi::Persistent(func);
+  _constructor.SuppressDestruct();
 
   exports.Set(Napi::String::New(env, "NativeLayer"), func);
 
