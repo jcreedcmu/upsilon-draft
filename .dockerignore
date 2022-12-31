@@ -1,0 +1,7 @@
+.git
+**/node_modules
+out
+public/js/bundle.js
+public/js/bundle.js.map
+povray/button_down_hires.png
+povray/button_up_hires.png

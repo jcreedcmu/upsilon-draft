@@ -29,3 +29,9 @@ count:
 native:
 	cd native-layer && npm run build
 	node sdl-game/index.js
+
+docker-build: docker/Dockerfile
+	docker build . -t dev-env -f docker/Dockerfile
+
+docker-run:
+	docker run --rm -it --entrypoint bash  dev-env:latest
