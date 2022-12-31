@@ -86,6 +86,7 @@ export type DropLineAction =
 
 export type SignalAction =
   | { t: 'none' }
+  | { t: 'decrement', ident: Ident }
   ;
 
 export type LineActions = {
@@ -158,6 +159,11 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
   unreachable(content);
 }
 
+function valueAsStr(value: number): string {
+  const digit = '0123456789abcdef'[value];
+  return `[${digit}]`;
+}
+
 export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): RenderableLine {
   if (itemIsLabel(item)) {
     return {
@@ -182,12 +188,19 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
     chargeNeeded: item.acls.exec ? 1 : 0,
     attr,
     checked: item.content.t == 'checkbox' ? item.content.checked : undefined,
-    value: item.content.t == 'numeric' ? item.content.value : undefined,
+    valueStr: item.content.t == 'numeric' ? valueAsStr(item.content.value) : undefined,
   }
 }
 
+function signalActionsForItem(ident: Ident, item: Item): Record<string, SignalAction> | undefined {
+  if (item.content.t == 'numeric') {
+    return { q: { t: 'decrement', ident } };
+  }
+  return undefined;
+}
+
 export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number): FullLine {
-  return {
+  const line: FullLine = {
     ...getRenderableLineOfItem(ident, item, ticks),
     actions: {
       exec: execActionForItem(ident, item),
@@ -195,6 +208,10 @@ export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, 
       drop: dropActionForItem(item, loc, ix),
     },
   }
+  const signals = signalActionsForItem(ident, item);
+  if (signals !== undefined)
+    line.actions.signals = signals;
+  return line;
 }
 
 // If you change this, also change getNumLines in fs.ts so that the

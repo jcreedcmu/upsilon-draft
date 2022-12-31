@@ -40,7 +40,7 @@ export type ItemRenderableLine = {
   size: number,
   sizeStr?: string, // replacement for size
   checked?: boolean | undefined,
-  value?: number | undefined,
+  valueStr?: string | undefined,
   chargeNeeded?: number,
   attr: Attr,
   inProgress?: boolean,
@@ -220,10 +220,9 @@ function renderItemLine(screen: Screen, p: Point, len: number, line: ItemRendera
     screen.drawTagStr(screen.at(sizeCol, y), checkedStr, attr);
   }
 
-  if (line.value !== undefined) {
-    const valueStr = `[${line.value}]`;
+  if (line.valueStr !== undefined) {
     const attr = { fg: cc.bblue, bg: cc.blue };
-    screen.drawTagStr(screen.at(sizeCol, y), valueStr, attr);
+    screen.drawTagStr(screen.at(sizeCol, y), line.valueStr, attr);
   }
 }
 
