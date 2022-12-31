@@ -3,7 +3,7 @@
 #include <SDL2/SDL_opengl_glext.h>
 
 #include "gl-texture.hh"
-#include "stb_image.h"
+#include "vendor/stb_image.h"
 
 Napi::FunctionReference GlTexture::constructor;
 

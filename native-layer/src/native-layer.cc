@@ -8,7 +8,7 @@
 #include "gl-program.hh"
 #include "gl-texture.hh"
 #include "napi-helpers.hh"
-#include "stb_image.h"
+#include "vendor/stb_image.h"
 
 typedef enum t_attrib_id { attrib_uv } t_attrib_id;
 
