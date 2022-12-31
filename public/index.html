@@ -44,6 +44,11 @@
     <div class="container">
       <canvas id="c"></canvas>
       <div class="button-row"><img id="power-button" class="button hidden"></img></div>
+
+      <!-- Because this image was loaded dynamically by gl-pane.ts, it
+        didn't refresh even when I did a shift-ctrl-R "hard reload"...
+        but if it's included in the source page like so, it does. -->
+      <img style="display:none;" src="assets/vga.png">
     </div>
   </body>
 </html>
