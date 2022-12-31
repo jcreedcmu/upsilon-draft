@@ -2,7 +2,7 @@ import { ErrorCode, errorCodes, errorCodeText, errorFileName } from '../core/err
 import { ExecutableName, executables } from '../core/executables';
 import { Ident, KeyAction } from '../core/model';
 import { ImgData } from '../ui/image';
-import { arrowChars } from '../ui/screen';
+import { arrowChars, Chars } from '../ui/screen';
 import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
 import { isDev } from '../util/debug';
 import { Fs, GeneralItemPlan, insertPlans, ItemPlan, mkFs, textContent } from './fs';
@@ -208,9 +208,13 @@ function initialPlans(): GeneralItemPlan[] {
       ]
     },
     {
-      t: 'dir', forceId: '_debugDir', name: 'debug', contents: [
-        namedExec(executables.automate, { forceId: '_automate', resources: { cpu: 5, network: 0 } }),
-        namedExec(executables.robot, { forceId: '_robot', resources: { cpu: 5, network: 0 } }),
+      t: 'dir', name: 'linlog', contents: [
+        namedExec(executables.automate, { resources: { cpu: 5, network: 0 } }),
+        { t: 'file', name: `a${Chars.LOLLI}b` },
+        { t: 'file', name: `b${Chars.OTIMES}${Chars.BOT}` },
+        { t: 'file', name: `c${Chars.PAR}${Chars.TOP}` },
+        { t: 'file', name: `c${Chars.OPLUS}d` },
+        namedExec(executables.robot, { resources: { cpu: 5, network: 0 } }),
       ]
     },
     {

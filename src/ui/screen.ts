@@ -43,6 +43,12 @@ export const Chars = {
   LTRI_LEFT: '\xc5',
   LTRI_DOWN: '\xc6',
   LTRI_RIGHT: '\xc7',
+  LOLLI: '\xae',
+  OTIMES: '\xaf',
+  OPLUS: '\xb0',
+  PAR: '\xb1',
+  TOP: '\xb2',
+  BOT: '\xb3',
 }
 
 export const progressChars = [
