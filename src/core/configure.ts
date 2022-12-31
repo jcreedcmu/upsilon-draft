@@ -1,7 +1,6 @@
 import { Chars } from '../ui/screen';
 import { produce } from '../util/produce';
-import { Action } from './lines';
-import { Effect, GameAction, Ident, Item, ViewState } from './model';
+import { Effect, Ident, Item, UiAction, ViewState } from './model';
 
 export type ConfigureWidgetState = {
   item: Item,
@@ -30,10 +29,9 @@ function nopResult(state: ConfigureWidgetState): ConfigureReduceResult {
   return { t: 'normal', state, effects: [] };
 }
 
-export function reduceConfigureView(state: ConfigureWidgetState, action: GameAction): ConfigureReduceResult {
+export function reduceConfigureView(state: ConfigureWidgetState, action: UiAction): ConfigureReduceResult {
   switch (action.t) {
     case 'key': return reduceConfigureViewKey(state, action.code);
-    default: return { t: 'normal', state, effects: [] };
   }
 }
 

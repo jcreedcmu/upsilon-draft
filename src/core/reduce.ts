@@ -7,7 +7,7 @@ import { ErrorCode, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, NarrowGameAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
 import { reduceTextEditView, TextEditViewState } from './text-edit';
 
 export const EXEC_TICKS = 6;
@@ -349,7 +349,7 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
   }
 }
 
-export function reduceGameState(state: GameState, action: GameAction): ReduceResult {
+export function reduceGameState(state: GameState, action: GameAction): ReduceResultErr {
   // First we deal with some actions that have a uniform consequence
   // regardless of what mode we're in. These are the difference between
   // GameAction and NarrowGameAction
@@ -357,7 +357,7 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
     case 'clearError': {
       return [produce(state, s => {
         s.error = undefined;
-      }), []];
+      }), [], undefined];
     }
     case 'clockUpdate': {
       logger('clockUpdate', `clockUpdate ${action.tick}`);
@@ -370,105 +370,11 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
         // XXX Might want to think about doing something smarter if I
         // have effects that are intended to be idempotent (even
         // though I don't think I do right now)
-        const [s, a] = reduceActions(state, actions);
-        return [s, [...a]];
+        return noError(reduceActions(state, actions));
       }
       else {
-        return [state, []];
+        return [state, [], undefined];
       }
-    }
-  }
-  const vs = state.viewState;
-  switch (vs.t) {
-    case 'fsView': return ignoreError(reduceGameStateFs(state, action));
-    case 'configureView': {
-      const orig: ConfigureViewState = vs;
-      const result = reduceConfigureView(vs.state, action);
-      switch (result.t) {
-        case 'normal': {
-          const nvs = produce(orig, s => { s.state = result.state; });
-          return [
-            produce(state, s => {
-              s.viewState = nvs;
-            }),
-            result.effects
-          ]
-        }
-        case 'cancel': {
-          return [
-            produce(state, s => {
-              s.viewState = vs.back;
-              // This is the same error-clearing hack as with textedit below.
-              s.error = undefined;
-            }),
-            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
-          ];
-        }
-        case 'save': {
-          return [
-            produce(state, s => {
-              s.viewState = vs.back;
-              // There's maybe something subtle going on here in that
-              // we're using result.item (which will be the state of
-              // the item at the time that the configure dialog was
-              // opened) as a basis for setting result.config on it,
-              // rather than looking up vs.target in the fs as it
-              // exists at the present moment. Something tells me this
-              // is the thing to do that is less likely to have weird
-              // invariant violations if the type of the config we're
-              // trying to set is no longer compatible with the item
-              // in its current state.
-              setItemꜝ(s.fs, vs.target, putItemConfig(result.item, result.config));
-              // This is the same error-clearing hack as with textedit below.
-              s.error = undefined;
-            }),
-            [{ t: 'playAbstractSound', effect: 'success', loc: undefined }]
-          ];
-        }
-      }
-    }
-
-    case 'textEditView': {
-      const orig: TextEditViewState = vs;
-      const result = reduceTextEditView(vs.state, action);
-      switch (result.t) {
-        case 'normal': {
-          const nvs = produce(orig, s => { s.state = result.state; });
-          return [
-            produce(state, s => {
-              s.viewState = nvs;
-            }),
-            result.effects
-          ]
-        }
-        case 'quit': {
-          return [
-            produce(state, s => {
-              s.viewState = vs.back;
-              setTextꜝ(s.fs, vs.target, vs.state.text);
-              // The following is a hack. Error-clearing clock-updates
-              // can get swallowed by text edit reduce handler, so we
-              // clear them manually.
-              s.error = undefined;
-            }),
-            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
-          ];
-        }
-      }
-    }
-  }
-}
-
-export function reduceGameStateFs(state: GameState, action: NarrowGameAction): ReduceResultErr {
-  const noChange: ReduceResultErr = [state, [], undefined];
-  switch (action.t) {
-    case 'key': {
-      logger('keys', action.code);
-      const keyAction = actionOfKey(state, action.code);
-      if (keyAction != undefined)
-        return noError(reduceKeyAction(state, keyAction));
-      else
-        return noChange;
     }
     case 'finishExecution': {
       let effects, error;
@@ -498,10 +404,95 @@ export function reduceGameStateFs(state: GameState, action: NarrowGameAction): R
     }
 
     case 'none':
-      return noChange;
+      return [state, [], undefined];
 
     case 'recur': {
       return tryStartExecutable(state, action.ident);
+    }
+  }
+  const vs = state.viewState;
+  switch (vs.t) {
+    case 'fsView': return reduceFsView(state, action);
+    case 'configureView': {
+      const orig: ConfigureViewState = vs;
+      const result = reduceConfigureView(vs.state, action);
+      switch (result.t) {
+        case 'normal': {
+          const nvs = produce(orig, s => { s.state = result.state; });
+          return noError([
+            produce(state, s => {
+              s.viewState = nvs;
+            }),
+            result.effects
+          ]);
+        }
+        case 'cancel': {
+          return noError([
+            produce(state, s => {
+              s.viewState = vs.back;
+            }),
+            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+          ]);
+        }
+        case 'save': {
+          return noError([
+            produce(state, s => {
+              s.viewState = vs.back;
+              // There's maybe something subtle going on here in that
+              // we're using result.item (which will be the state of
+              // the item at the time that the configure dialog was
+              // opened) as a basis for setting result.config on it,
+              // rather than looking up vs.target in the fs as it
+              // exists at the present moment. Something tells me this
+              // is the thing to do that is less likely to have weird
+              // invariant violations if the type of the config we're
+              // trying to set is no longer compatible with the item
+              // in its current state.
+              setItemꜝ(s.fs, vs.target, putItemConfig(result.item, result.config));
+            }),
+            [{ t: 'playAbstractSound', effect: 'success', loc: undefined }]
+          ]);
+        }
+      }
+    }
+
+    case 'textEditView': {
+      const orig: TextEditViewState = vs;
+      const result = reduceTextEditView(vs.state, action);
+      switch (result.t) {
+        case 'normal': {
+          const nvs = produce(orig, s => { s.state = result.state; });
+          return noError([
+            produce(state, s => {
+              s.viewState = nvs;
+            }),
+            result.effects
+          ]);
+        }
+        case 'quit': {
+          return noError([
+            produce(state, s => {
+              s.viewState = vs.back;
+              setTextꜝ(s.fs, vs.target, vs.state.text);
+            }),
+            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+          ]);
+        }
+      }
+    }
+  }
+}
+
+function reduceFsView(state: GameState, action: UiAction): ReduceResultErr {
+  const noChange: ReduceResultErr = [state, [], undefined];
+  switch (action.t) {
+    case 'key': {
+      logger('keys', action.code);
+      const keyAction = actionOfKey(state, action.code);
+      if (keyAction != undefined)
+        return noError(reduceKeyAction(state, keyAction));
+      else
+        return noChange;
     }
   }
 }

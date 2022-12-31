@@ -1,6 +1,6 @@
 import { executables, executeInstructions } from '../src/core/executables';
-import { gameStateOfFs, getCurId, getSelectedId, KeyAction } from '../src/core/model';
-import { reduce, reduceExecAction, reduceGameState, reduceGameStateFs, reduceKeyAction } from '../src/core/reduce';
+import { gameStateOfFs, getSelectedId, KeyAction } from '../src/core/model';
+import { reduceExecAction, reduceKeyAction } from '../src/core/reduce';
 import { insertPlans, mkFs } from '../src/fs/fs';
 import { namedExec, SpecialId } from '../src/fs/initial-fs';
 import { testFile } from "./testing-utils";

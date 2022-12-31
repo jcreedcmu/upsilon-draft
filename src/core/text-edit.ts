@@ -1,6 +1,6 @@
 import { produce } from '../util/produce';
 import { Point } from '../util/types';
-import { Effect, GameAction, Ident, ViewState } from './model';
+import { Effect, Ident, UiAction, ViewState } from './model';
 
 export type TextWidgetState = {
   text: string;
@@ -27,10 +27,9 @@ function nopResult(state: TextWidgetState): TextEditReduceResult {
   return { t: 'normal', state, effects: [] };
 }
 
-export function reduceTextEditView(state: TextWidgetState, action: GameAction): TextEditReduceResult {
+export function reduceTextEditView(state: TextWidgetState, action: UiAction): TextEditReduceResult {
   switch (action.t) {
     case 'key': return reduceTextEditViewKey(state, action.code);
-    default: return { t: 'normal', state, effects: [] };
   }
 }
 

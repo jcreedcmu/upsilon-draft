@@ -1,14 +1,14 @@
-import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdForward, moveIdTo, moveIdToRelMark, reifyId, setMark, textContent } from "../fs/fs";
+import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdForward, moveIdToRelMark, reifyId, setMark, textContent } from "../fs/fs";
 import { SpecialId } from "../fs/initial-fs";
 import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
 import { getItemConfig } from "./configure";
-import { ErrorCode, ErrorCodeException, errorCodes, ErrorInfo } from "./errors";
+import { ErrorCodeException, ErrorInfo } from "./errors";
 import { toggleLabel } from "./labels";
 import { canPickup } from "./lines";
-import { Acls, Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
-import { addFutureꜝ, processHooks, reduceGameStateFs, ReduceResult, ReduceResultErr, withError } from "./reduce";
+import { Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
+import { addFutureꜝ, processHooks, reduceGameState, ReduceResult, ReduceResultErr, withError } from "./reduce";
 
 export const RECURRENCE_LENGTH = 10;
 
@@ -254,7 +254,7 @@ function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): R
 
   if (cycles == 0) {
     let effects: Effect[], error: ErrorInfo | undefined;
-    [state, effects, error] = reduceGameStateFs(state, action);
+    [state, effects, error] = reduceGameState(state, action);
     const sound: Effect[] = error == undefined
       ? [{ t: 'playAbstractSound', effect: 'execute', loc }]
       : [];

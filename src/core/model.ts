@@ -85,18 +85,21 @@ export type Item = {
   stickyCurrentPos?: number,
 };
 
+// There are UiActions, which might have different behavior depending
+// on view state, and other GameActions, which should be treated
+// uniformly.
 export type GameAction =
   | { t: 'clearError' }
   | { t: 'clockUpdate', tick: number }
-  | NarrowGameAction
-  ;
-
-// I think I want to migrate some of these up to GameAction
-export type NarrowGameAction =
-  | { t: 'key', code: string }
   | { t: 'finishExecution', actorId: Ident, instr: ExecutableName }
   | { t: 'none' }
   | { t: 'recur', ident: Ident }
+  | UiAction
+  ;
+
+// I think I want to migrate some of these up to GameAction
+export type UiAction =
+  | { t: 'key', code: string }
   ;
 
 export type Action =
