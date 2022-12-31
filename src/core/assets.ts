@@ -2,7 +2,12 @@ type Assets = {
   surnames: string[],
 };
 
-let assets: Assets | undefined = undefined;
+// Any data that goes here is effectively test data for consumption by
+// unit tests. initAssets, which will be called early in
+// initialization in actual execution, will overwrite it.
+let assets: Assets = {
+  surnames: ['foo', 'bar', 'baz'],
+}
 
 export async function initAssets() {
   assets = {

@@ -28,11 +28,11 @@ describe('mov-cpu-5', () => {
 
     expect(getFullContents(state.fs, '_gen_vroot').map(x => x.name))
       .toEqual([
-        'dir-20',
-        'dir-1',
-        'dir-18',
-        'dir-9',
-        'dir-3',
+        "gbar",
+        "zdbaz",
+        "sfoo",
+        "gbaz",
+        "jgbaz",
       ]);
 
     expect(getResource(getFullContents(state.fs, '_root')[2], 'cpu')).toEqual(3);

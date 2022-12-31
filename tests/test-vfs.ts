@@ -24,11 +24,11 @@ describe('virtual filesystem', () => {
     expect(getContents(fs, '_gen_vroot').length > 0).toBe(true);
     expect(getFullContents(fs, '_gen_vroot').map(x => x.name))
       .toEqual([
-        'dir-20',
-        'dir-1',
-        'dir-18',
-        'dir-9',
-        'dir-3',
+        "gbar",
+        "zdbaz",
+        "sfoo",
+        "gbaz",
+        "jgbaz",
         '\x81\x95\x83\x9D\x95'
       ]);
 
