@@ -38,6 +38,7 @@ function keysDir(): ItemPlan {
     { name: '<right>', keyAction: KeyAction.exec },
     { name: '<space>', keyAction: KeyAction.pickupDrop },
     { name: '<up>', keyAction: KeyAction.prevLine },
+    { name: 'q', keyAction: KeyAction.qsignal },
     { name: 'a', keyAction: KeyAction.back },
     { name: 'd', keyAction: KeyAction.exec },
     { name: 's', keyAction: KeyAction.nextLine },

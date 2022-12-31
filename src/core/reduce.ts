@@ -6,7 +6,7 @@ import { ConfigureViewState, putItemConfig, reduceConfigureView } from './config
 import { ErrorCode, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
-import { DropLineAction, ExecLineAction, PickupLineAction } from './lines';
+import { DropLineAction, ExecLineAction, PickupLineAction, SignalAction } from './lines';
 import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
 import { reduceTextEditView, TextEditViewState } from './text-edit';
 
@@ -292,6 +292,14 @@ function shouldDropVersusPickup(state: GameState): boolean {
   return getInventoryItem(state.fs, state.inventoryState.curSlot) != undefined;
 }
 
+function reduceSignalAction(state: GameState, action: SignalAction | undefined): ReduceResult {
+  if (action == undefined)
+    return withError(state, { code: 'unhandledSignal' }); // XXX loc, maybe?
+  switch (action.t) {
+    case 'none': return withError(state, { code: 'unhandledSignal' }); // XXX loc, maybe?
+  }
+}
+
 export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResult {
   switch (action) {
     case KeyAction.prevLine:
@@ -345,6 +353,9 @@ export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResu
       }
       doAgain('...');
       return [state, [{ t: 'playSound', effect: 'high', loc: undefined }]];
+    }
+    case KeyAction.qsignal: {
+      return reduceSignalAction(state, getSelectedLine(state).actions.signals?.q);
     }
   }
 }

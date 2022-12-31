@@ -16,6 +16,7 @@ export const errorCodes = {
   badExecutable: 112,
   badArchive: 113,
   permissionDenied: 114,
+  unhandledSignal: 115,
 };
 
 export type ErrorCode = keyof (typeof errorCodes);
@@ -52,6 +53,7 @@ export function errorCodeText(k: ErrorCode): string {
     case 'badExecutable': return `Bad executable`;
     case 'badArchive': return `Bad archive`;
     case 'permissionDenied': return `Permission denied`;
+    case 'unhandledSignal': return `Unhandled signal`;
   }
 }
 

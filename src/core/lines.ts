@@ -84,10 +84,15 @@ export type DropLineAction =
   | { t: 'drop', loc: Ident, ix: number }
   | { t: 'error', code: ErrorCode }
 
+export type SignalAction =
+  | { t: 'none' }
+  ;
+
 export type LineActions = {
   exec: ExecLineAction,
   pickup: PickupLineAction,
   drop: DropLineAction,
+  signals?: Record<string, SignalAction>,
 };
 
 export type FullLine = RenderableLine & {

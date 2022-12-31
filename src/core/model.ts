@@ -115,6 +115,7 @@ export enum KeyAction {
   back = 'back',
   exec = 'exec',
   pickupDrop = 'pickup-drop', // Maybe want separate pickup and drop actions?,
+  qsignal = 'qsignal',
   debug = 'debug',
 }
 
