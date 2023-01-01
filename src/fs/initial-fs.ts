@@ -211,11 +211,10 @@ function initialPlans(): GeneralItemPlan[] {
     },
     {
       t: 'dir', name: 'linlog', contents: [
-        namedExec(executables.automate, { resources: { cpu: 5, network: 0 } }),
-        { t: 'linlog', linlog: limp(limp('a', 'b'), 'c') },
+        { t: 'linlog', linlog: limp('a', limp(limp('a', 'b'), 'c')) },
         { t: 'linlog', linlog: limp('d', limp('a', 'b')) },
         { t: 'linlog', linlog: latom('d') },
-        namedExec(executables.robot, { resources: { cpu: 5, network: 0 } }),
+        { t: 'linlog', linlog: latom('a') },
       ]
     },
     {
