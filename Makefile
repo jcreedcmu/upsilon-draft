@@ -35,3 +35,6 @@ docker-build: docker/Dockerfile
 
 docker-run:
 	docker run --rm -it --entrypoint bash  dev-env:latest
+
+docker-x11:
+	docker run -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY="$$DISPLAY" -h "$$HOSTNAME" -v "$$HOME"/.Xauthority:/home/x11-user/.Xauthority  dev-env:latest
