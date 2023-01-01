@@ -13,27 +13,32 @@ export function parseTagstr(str: string, init: Attr): AttrString[] {
       rv.push({ str, attr });
       break;
     }
-    const bgMatch = str.match(/^([^{]*?){bg-([^}]*?)}/s);
-    if (bgMatch && ncolors.includes(bgMatch[2])) {
-      rv.push({ str: bgMatch[1], attr });
-      attr = { ...attr, bg: colorCodeOfName(bgMatch[2]) };
-      str = str.substr(bgMatch[0].length);
-      continue;
-    }
     const match = str.match(/^([^{]*?){([^}]*?)}/s);
-    if (match && ncolors.includes(match[2])) {
-      rv.push({ str: match[1], attr });
-      attr = { ...attr, fg: colorCodeOfName(match[2]) };
-      str = str.substr(match[0].length);
-      continue;
+    if (match) {
+      const whole = match[0];
+      const prefix = match[1];
+      const tag = match[2];
+      if (tag.startsWith('bg-') && ncolors.includes(tag.substring(3))) {
+        const color = tag.substring(3);
+        rv.push({ str: prefix, attr });
+        attr = { ...attr, bg: colorCodeOfName(color) };
+        str = str.substr(whole.length);
+        continue;
+      }
+      if (match && ncolors.includes(tag)) {
+        rv.push({ str: prefix, attr });
+        attr = { ...attr, fg: colorCodeOfName(tag) };
+        str = str.substr(whole.length);
+        continue;
+      }
+      if (match && tag == '/') {
+        rv.push({ str: prefix, attr });
+        attr = init;
+        str = str.substr(whole.length);
+        continue;
+      }
     }
-    if (match && match[2] == '/') {
-      rv.push({ str: match[1], attr });
-      attr = init;
-      str = str.substr(match[0].length);
-      continue;
-    }
-    throw new ParseError(`don't know how to parse '${JSON.stringify(str)}'`);
+    throw new ParseError(`don't know how to parse ${JSON.stringify(str)}`);
   }
   return rv.filter(x => x.str != '');
 }
