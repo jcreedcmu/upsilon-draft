@@ -1,8 +1,9 @@
-import { AttrString, parseStr, Screen } from '../src/ui/screen';
+import { AttrString, Screen } from '../src/ui/screen';
+import { parseTagstr } from "../src/ui/parse-tagstr";
 import { ColorCode } from '../src/ui/ui-constants';
 
 function parse(str: string): AttrString[] {
-  return parseStr(str, { fg: ColorCode.bwhite, bg: ColorCode.black });
+  return parseTagstr(str, { fg: ColorCode.bwhite, bg: ColorCode.black });
 }
 
 describe('screen utilities', () => {

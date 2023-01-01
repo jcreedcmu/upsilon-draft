@@ -1,6 +1,7 @@
-import { Char, COLS, ROWS, ColorCode, colorCodeOfName, ncolors, TEXT_PAGE_W, TEXT_PAGE_H } from './ui-constants';
+import { Char, COLS, ROWS, ColorCode, TEXT_PAGE_W, TEXT_PAGE_H } from './ui-constants';
 import { Point } from '../util/types';
 import { invertAttr, repeat } from '../util/util';
+import { parseTagstrSafe as parseTagstr } from './parse-tagstr';
 
 export type Attr = { fg: ColorCode, bg: ColorCode };
 export type Rect = { x: number, y: number, w: number, h: number };
@@ -88,39 +89,6 @@ function attrOfCode(code: number): Attr {
   return { fg: code & 15, bg: (code >> 4) & 15 };
 }
 
-export function parseStr(str: string, init: Attr): AttrString[] {
-  let attr = init;
-  const rv: AttrString[] = [];
-  while (str.length >= 0) {
-    if (!str.match(/{/)) {
-      rv.push({ str, attr });
-      break;
-    }
-    const bgMatch = str.match(/^([^{]*?){bg-([^}]*?)}/s);
-    if (bgMatch && ncolors.includes(bgMatch[2])) {
-      rv.push({ str: bgMatch[1], attr });
-      attr = { ...attr, bg: colorCodeOfName(bgMatch[2]) };
-      str = str.substr(bgMatch[0].length);
-      continue;
-    }
-    const match = str.match(/^([^{]*?){([^}]*?)}/s);
-    if (match && ncolors.includes(match[2])) {
-      rv.push({ str: match[1], attr });
-      attr = { ...attr, fg: colorCodeOfName(match[2]) };
-      str = str.substr(match[0].length);
-      continue;
-    }
-    if (match && match[2] == '/') {
-      rv.push({ str: match[1], attr });
-      attr = init;
-      str = str.substr(match[0].length);
-      continue;
-    }
-    throw `parse error: ${JSON.stringify(str)}`;
-  }
-  return rv.filter(x => x.str != '');
-}
-
 export class Screen {
 /* private */ imdat: ImageData;
 
@@ -187,7 +155,7 @@ export class Screen {
   }
 
   drawTagStr(state: StrState, str: string, attr: Attr) {
-    this.drawAttrStr(state, parseStr(str, attr));
+    this.drawAttrStr(state, parseTagstr(str, attr));
   }
 
   drawStr(state: StrState, str: string, attr: Attr): StrState {
@@ -221,7 +189,7 @@ export class Screen {
   }
 
   parseStrToLength(str: string, attr: Attr, len: number): AttrString[] {
-    const parsed = parseStr(str, attr);
+    const parsed = parseTagstr(str, attr);
     let total = 0;
     for (let i = 0; i < parsed.length; i++) {
       const nextTotal = total + parsed[i].str.length;
