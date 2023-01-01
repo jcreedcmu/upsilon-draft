@@ -11,6 +11,7 @@ import { ErrorCode } from './errors';
 import { cancelRecurꜝ, ExecutableName } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { FullLine, getLines } from './lines';
+import { Linlog, LinlogContent } from './linlog';
 import { TextEditViewState } from './text-edit';
 
 export type Acl =
@@ -53,6 +54,7 @@ export type ItemContent =
   | { t: 'image', data: ImgData }
   | { t: 'inventorySlot' }
   | { t: 'compressed', body: ItemContent, acls: Acls }
+  | { t: 'linlog' } & LinlogContent
   ;
 
 export type Item = {

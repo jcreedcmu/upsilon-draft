@@ -233,6 +233,7 @@ export function startExecutable(state: GameState, id: Ident, name: ExecutableNam
   return [st, effect];
 }
 
+// We = "With Error"
 function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): ReduceResultErr {
 
   const { cycles, cpuCost } = executableProperties[name];

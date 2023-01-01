@@ -1,4 +1,5 @@
 import { Hook } from '../core/hooks';
+import { Linlog, llitem, nameOfLinlog } from '../core/linlog';
 import { Ident, Item, ItemContent, Location } from '../core/model';
 import { logger } from '../util/debug';
 import { produce } from '../util/produce';
@@ -26,7 +27,9 @@ export type ItemPlan =
   | { t: 'file', name: string, content?: ItemContent, size?: number, resources?: Resources, forceId?: Ident }
   | { t: 'instr', name: string }
   | { t: 'checkbox', name: string, checked: boolean, forceId?: Ident }
-  | { t: 'numeric', name: string, value: number, forceId?: Ident };
+  | { t: 'numeric', name: string, value: number, forceId?: Ident }
+  | { t: 'linlog', linlog: Linlog, forceId?: Ident, resources?: Resources }
+  ;
 
 export type GeneralItemPlan = ItemPlan
   | { t: 'virtual', id: Ident };
@@ -199,8 +202,11 @@ export function itemOfPlan(plan: ItemPlan): Item {
       size: 1,
     };
 
+    case 'linlog': return llitem(plan.linlog, plan.resources);
   }
 }
+
+
 
 export function insertPlan(fs: Fs, loc: Ident, plan: GeneralItemPlan): [Fs, Ident] {
   let ident;

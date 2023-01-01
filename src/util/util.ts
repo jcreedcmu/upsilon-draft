@@ -53,8 +53,8 @@ export function mlerp(a: number, b: number, t: number) {
   return Math.exp(lerp(Math.log(a), Math.log(b), t));
 }
 
-export function unreachable(x: never): void {
-
+export function unreachable<T>(x: never): T {
+  throw new Error('unreachable');
 }
 
 export function filterKeys<T>(rec: Record<string, T>, pred: (x: string) => boolean): Record<string, T> {

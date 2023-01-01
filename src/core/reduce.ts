@@ -7,6 +7,7 @@ import { ErrorCode, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction, SignalAction } from './lines';
+import { isLinLog, startLinlog } from './linlog';
 import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
 import { reduceTextEditView, TextEditViewState } from './text-edit';
 
@@ -179,6 +180,9 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): Redu
 
       if (isExecutable(actor.name)) {
         return startExecutable(state, actorId, actor.name);
+      }
+      else if (isLinLog(actor.content)) {
+        return startLinlog(state, actorId, actor.content);
       }
 
       return withError(state, { code: 'badExecutable', blame: actorId, loc });

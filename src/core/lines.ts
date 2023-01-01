@@ -154,9 +154,10 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
     case 'inventorySlot': return undefined;
     case 'compressed': return undefined;
     case 'numeric': return undefined;
+    case 'linlog': return undefined;
   }
   // wouldn't get nonexhaustivity check otherwise because fallthrough would return undefined
-  unreachable(content);
+  return unreachable(content);
 }
 
 function valueAsStr(value: number): string {

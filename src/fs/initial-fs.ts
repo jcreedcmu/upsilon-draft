@@ -1,5 +1,6 @@
 import { ErrorCode, errorCodes, errorCodeText, errorFileName } from '../core/errors';
 import { ExecutableName, executables } from '../core/executables';
+import { latom, limp } from '../core/linlog';
 import { Ident, KeyAction } from '../core/model';
 import { ImgData } from '../ui/image';
 import { arrowChars, Chars } from '../ui/screen';
@@ -211,10 +212,9 @@ function initialPlans(): GeneralItemPlan[] {
     {
       t: 'dir', name: 'linlog', contents: [
         namedExec(executables.automate, { resources: { cpu: 5, network: 0 } }),
-        { t: 'file', name: `a${Chars.LOLLI}b` },
-        { t: 'file', name: `b${Chars.OTIMES}${Chars.BOT}` },
-        { t: 'file', name: `c${Chars.PAR}${Chars.TOP}` },
-        { t: 'file', name: `c${Chars.OPLUS}d` },
+        { t: 'linlog', linlog: limp(limp('a', 'b'), 'c') },
+        { t: 'linlog', linlog: limp('d', limp('a', 'b')) },
+        { t: 'linlog', linlog: latom('d') },
         namedExec(executables.robot, { resources: { cpu: 5, network: 0 } }),
       ]
     },
