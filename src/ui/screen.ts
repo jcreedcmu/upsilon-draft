@@ -52,6 +52,10 @@ export const Chars = {
   BOT: '\xb3',
 }
 
+export function isEntity(x: string): x is keyof (typeof Chars) {
+  return x in Chars;
+}
+
 export const progressChars = [
   ' ',
   '\xa9',

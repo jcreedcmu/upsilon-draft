@@ -1,5 +1,5 @@
 import { colorCodeOfName, ncolors } from './ui-constants';
-import { Attr, AttrString } from './screen';
+import { Attr, AttrString, Chars, isEntity } from './screen';
 
 class ParseError extends Error {
 
@@ -18,22 +18,31 @@ export function parseTagstr(str: string, init: Attr): AttrString[] {
       const whole = match[0];
       const prefix = match[1];
       const tag = match[2];
-      if (tag.startsWith('bg-') && ncolors.includes(tag.substring(3))) {
+      if (tag.startsWith('bg-')) {
         const color = tag.substring(3);
-        rv.push({ str: prefix, attr });
-        attr = { ...attr, bg: colorCodeOfName(color) };
-        str = str.substr(whole.length);
-        continue;
+        if (ncolors.includes(tag.substring(3))) {
+          rv.push({ str: prefix, attr });
+          attr = { ...attr, bg: colorCodeOfName(color) };
+          str = str.substr(whole.length);
+          continue;
+        }
       }
-      if (match && ncolors.includes(tag)) {
+      if (ncolors.includes(tag)) {
         rv.push({ str: prefix, attr });
         attr = { ...attr, fg: colorCodeOfName(tag) };
         str = str.substr(whole.length);
         continue;
       }
-      if (match && tag == '/') {
+      if (tag == '/') {
         rv.push({ str: prefix, attr });
         attr = init;
+        str = str.substr(whole.length);
+        continue;
+      }
+      const entity = tag.toUpperCase();
+      if (isEntity(entity)) {
+        // XXX Maybe coalesce onto existing string if any
+        rv.push({ str: Chars[entity], attr });
         str = str.substr(whole.length);
         continue;
       }

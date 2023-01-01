@@ -1,4 +1,4 @@
-import { AttrString, Screen } from '../src/ui/screen';
+import { AttrString, Chars, Screen } from '../src/ui/screen';
 import { parseTagstr } from "../src/ui/parse-tagstr";
 import { ColorCode } from '../src/ui/ui-constants';
 
@@ -23,5 +23,9 @@ describe('screen utilities', () => {
       { attr: { bg: 0, fg: 15 }, str: "!" }
     ]);
 
+    expect(parse('{lock}!')).toEqual([
+      { attr: { bg: 0, fg: 15 }, str: Chars.LOCK },
+      { attr: { bg: 0, fg: 15 }, str: "!" },
+    ]);
   });
 });
