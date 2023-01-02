@@ -445,30 +445,7 @@ function reduceKeyAction(state: GameState, code: string): ReduceResultErr {
   switch (vs.t) {
     case 'fsView': return reduceFsView(state, action);
     case 'configureView': return reduceConfigureView(state, vs, action);
-    case 'textEditView': {
-      const orig: TextEditViewState = vs;
-      const result = reduceTextEditView(vs.state, action);
-      switch (result.t) {
-        case 'normal': {
-          const nvs = produce(orig, s => { s.state = result.state; });
-          return noError([
-            produce(state, s => {
-              s.viewState = nvs;
-            }),
-            result.effects
-          ]);
-        }
-        case 'quit': {
-          return noError([
-            produce(state, s => {
-              s.viewState = vs.back;
-              setTextꜝ(s.fs, vs.target, vs.state.text);
-            }),
-            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
-          ]);
-        }
-      }
-    }
+    case 'textEditView': return reduceTextEditView(state, vs, action);
   }
 }
 

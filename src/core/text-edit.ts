@@ -1,6 +1,8 @@
+import { setTextꜝ } from '../fs/fs';
 import { produce } from '../util/produce';
 import { Point } from '../util/types';
-import { Effect, Ident, UiAction, ViewState } from './model';
+import { Effect, GameState, Ident, UiAction, ViewState } from './model';
+import { noError, ReduceResultErr } from './reduce';
 
 export type TextWidgetState = {
   text: string;
@@ -27,9 +29,30 @@ function nopResult(state: TextWidgetState): TextEditReduceResult {
   return { t: 'normal', state, effects: [] };
 }
 
-export function reduceTextEditView(state: TextWidgetState, action: UiAction): TextEditReduceResult {
-  switch (action.t) {
-    case 'key': return reduceTextEditViewKey(state, action.code);
+export function reduceTextEditView(state: GameState, vs: TextEditViewState, action: UiAction): ReduceResultErr {
+  {
+    const orig: TextEditViewState = vs;
+    const result = reduceTextEditViewKey(vs.state, action.code);
+    switch (result.t) {
+      case 'normal': {
+        const nvs = produce(orig, s => { s.state = result.state; });
+        return noError([
+          produce(state, s => {
+            s.viewState = nvs;
+          }),
+          result.effects
+        ]);
+      }
+      case 'quit': {
+        return noError([
+          produce(state, s => {
+            s.viewState = vs.back;
+            setTextꜝ(s.fs, vs.target, vs.state.text);
+          }),
+          [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+        ]);
+      }
+    }
   }
 }
 
