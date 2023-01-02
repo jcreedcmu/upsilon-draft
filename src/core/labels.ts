@@ -1,4 +1,4 @@
-import { Item, Ident, KeyAction } from '../core/model';
+import { Item, Ident } from '../core/model';
 
 export function toggleLabel(name: string): string {
   return nameIsLabel(name) ? name.replace(/:$/, '') : name + ':';

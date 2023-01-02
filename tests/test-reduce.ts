@@ -1,5 +1,6 @@
 import { executables, executeInstructions } from '../src/core/executables';
-import { gameStateOfFs, getSelectedId, KeyActionEnum } from '../src/core/model';
+import { gameStateOfFs, getSelectedId } from '../src/core/model';
+import { EnumKeyAction } from "../src/core/key-actions";
 import { reduceExecAction, reduceFsKeyAction } from '../src/core/reduce';
 import { insertPlans, mkFs } from '../src/fs/fs';
 import { namedExec, SpecialId } from '../src/fs/initial-fs';
@@ -37,16 +38,16 @@ describe('reduce', () => {
   test(`should descend into toggle-open'ed files correctly`, () => {
     let state = gameStateOfFs(fs2);
     let effects, error;
-    [state] = reduceFsKeyAction(state, KeyActionEnum.prevLine);
+    [state] = reduceFsKeyAction(state, 'prevLine');
     expect(getSelectedId(state)).toEqual('toggle-open');
     [state, effects, error] = executeInstructions(state, executables.toggleOpen, getSelectedId(state));
-    [state] = reduceFsKeyAction(state, KeyActionEnum.nextLine);
-    [state] = reduceFsKeyAction(state, KeyActionEnum.exec);
+    [state] = reduceFsKeyAction(state, 'nextLine');
+    [state] = reduceFsKeyAction(state, 'exec');
     expect(state.fs.marks).toEqual({ _cursorMark: { t: 'at', id: 'foo', pos: 0 } });
-    [state] = reduceFsKeyAction(state, KeyActionEnum.nextLine);
+    [state] = reduceFsKeyAction(state, 'nextLine');
     expect(state.fs.marks).toEqual({ _cursorMark: { t: 'at', id: 'foo', pos: 0 } });
     expect(state.path).toEqual(['foo']);
-    [state] = reduceFsKeyAction(state, KeyActionEnum.back);
+    [state] = reduceFsKeyAction(state, 'back');
     expect(state.fs.marks).toEqual({ _cursorMark: { t: 'at', id: '_root', pos: 1 } });
   });
 });

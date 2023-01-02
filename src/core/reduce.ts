@@ -8,7 +8,8 @@ import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, schedul
 import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction, SignalAction } from './lines';
 import { isLinLog, startLinlog } from './linlog';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, KeyAction, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
+import { KeyAction } from "./key-actions";
 import { reduceTextEditView, TextEditViewState } from './text-edit';
 
 export const EXEC_TICKS = 6;
@@ -308,6 +309,10 @@ function reduceSignalAction(state: GameState, action: SignalAction | undefined):
 }
 
 export function reduceFsKeyAction(state: GameState, action: KeyAction): ReduceResult {
+  if (typeof action != 'string') {
+    // don't do anything with other keys
+    return [state, []];
+  }
   switch (action) {
     case 'prevLine':
       return [advanceLine(state, -1),
