@@ -286,8 +286,8 @@ function reduceActions(state: GameState, actions: GameAction[]): ReduceResult {
   return [state, effects];
 }
 
-function actionOfKey(state: GameState, keyCode: string): KeyAction | undefined {
-  return state._cached_keybindings[keyCode];
+function actionOfKey(state: GameState, code: string): KeyAction {
+  return state._cached_keybindings[code] ?? { t: 'other', code };
 }
 
 function modifyInventorySlotꜝ(state: GameState, increment: number): void {
@@ -440,25 +440,16 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
 }
 
 function reduceKeyAction(state: GameState, code: string): ReduceResultErr {
+  const noChange: ReduceResultErr = [state, [], undefined];
   const vs = state.viewState;
   const action: GameAction = { t: 'key', code };
+
+  logger('keys', action.code);
+  const keyAction = actionOfKey(state, action.code);
+
   switch (vs.t) {
-    case 'fsView': return reduceFsView(state, action);
+    case 'fsView': return noError(reduceFsKeyAction(state, keyAction));
     case 'configureView': return reduceConfigureView(state, vs, action);
     case 'textEditView': return reduceTextEditView(state, vs, action);
-  }
-}
-
-function reduceFsView(state: GameState, action: UiAction): ReduceResultErr {
-  const noChange: ReduceResultErr = [state, [], undefined];
-  switch (action.t) {
-    case 'key': {
-      logger('keys', action.code);
-      const keyAction = actionOfKey(state, action.code);
-      if (keyAction != undefined)
-        return noError(reduceFsKeyAction(state, keyAction));
-      else
-        return noChange;
-    }
   }
 }
