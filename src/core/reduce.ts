@@ -449,7 +449,7 @@ function reduceKeyAction(state: GameState, code: string): ReduceResultErr {
 
   switch (vs.t) {
     case 'fsView': return noError(reduceFsKeyAction(state, keyAction));
-    case 'configureView': return reduceConfigureView(state, vs, action);
+    case 'configureView': return reduceConfigureView(state, vs, keyAction);
     case 'textEditView': return reduceTextEditView(state, vs, action);
   }
 }

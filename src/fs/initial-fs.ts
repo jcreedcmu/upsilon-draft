@@ -38,6 +38,7 @@ function keysDir(): ItemPlan {
     { name: ']', keyAction: 'nextInventorySlot' },
     { name: '<down>', keyAction: 'nextLine' },
     { name: '<left>', keyAction: 'back' },
+    { name: '<esc>', keyAction: 'back' },
     { name: '<return>', keyAction: 'exec' },
     { name: '<right>', keyAction: 'exec' },
     { name: '<space>', keyAction: 'pickupDrop' },

@@ -1,6 +1,7 @@
 import { setItemꜝ } from '../fs/fs';
 import { Chars } from '../ui/screen';
 import { produce } from '../util/produce';
+import { KeyAction } from './key-actions';
 import { Effect, GameAction, GameState, Ident, Item, UiAction, ViewState } from './model';
 import { noError, ReduceResultErr } from './reduce';
 
@@ -31,9 +32,9 @@ function nopResult(state: ConfigureWidgetState): ConfigureReduceResult {
   return { t: 'normal', state, effects: [] };
 }
 
-export function reduceConfigureView(state: GameState, vs: ConfigureViewState, action: UiAction): ReduceResultErr {
+export function reduceConfigureView(state: GameState, vs: ConfigureViewState, action: KeyAction): ReduceResultErr {
   const orig: ConfigureViewState = vs;
-  const result = reduceConfigureViewKey(vs.state, action.code);
+  const result = reduceConfigureViewKey(vs.state, action);
   switch (result.t) {
     case 'normal': {
       const nvs = produce(orig, s => { s.state = result.state; });
@@ -104,18 +105,17 @@ function reduceConfigAction(state: ConfigureWidgetState, action: ConfigAction): 
   }
 }
 
-function reduceConfigureViewKey(state: ConfigureWidgetState, code: string): ConfigureReduceResult {
-  switch (code) {
-    case '<esc>': return cancelResult(state);
-    case '<left>': return cancelResult(state);
-    case '<up>': return { t: 'normal', state: moveCursor(state, -1), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }] };
-    case '<down>': return { t: 'normal', state: moveCursor(state, 1), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }] };
-    case '<right>': {
+function reduceConfigureViewKey(state: ConfigureWidgetState, keyAction: KeyAction): ConfigureReduceResult {
+  switch (keyAction) {
+    case 'back': return cancelResult(state);
+    case 'prevLine': return { t: 'normal', state: moveCursor(state, -1), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }] };
+    case 'nextLine': return { t: 'normal', state: moveCursor(state, 1), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }] };
+    case 'exec': {
       const action = getItemConfigLines(state.config)[state.cursor].action;
       return reduceConfigAction(state, action);
     }
   }
-  console.log(code);
+  console.log(keyAction);
   return nopResult(state);
 }
 
