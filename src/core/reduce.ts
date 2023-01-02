@@ -440,16 +440,14 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
 }
 
 function reduceKeyAction(state: GameState, code: string): ReduceResultErr {
-  const noChange: ReduceResultErr = [state, [], undefined];
   const vs = state.viewState;
-  const action: GameAction = { t: 'key', code };
 
-  logger('keys', action.code);
-  const keyAction = actionOfKey(state, action.code);
+  const keyAction = actionOfKey(state, code);
+  logger('keys', code, keyAction);
 
   switch (vs.t) {
     case 'fsView': return noError(reduceFsKeyAction(state, keyAction));
     case 'configureView': return reduceConfigureView(state, vs, keyAction);
-    case 'textEditView': return reduceTextEditView(state, vs, action);
+    case 'textEditView': return reduceTextEditView(state, vs, keyAction);
   }
 }

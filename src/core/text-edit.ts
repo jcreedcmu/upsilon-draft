@@ -1,6 +1,7 @@
 import { setTextꜝ } from '../fs/fs';
 import { produce } from '../util/produce';
 import { Point } from '../util/types';
+import { KeyAction } from './key-actions';
 import { Effect, GameState, Ident, UiAction, ViewState } from './model';
 import { noError, ReduceResultErr } from './reduce';
 
@@ -29,10 +30,10 @@ function nopResult(state: TextWidgetState): TextEditReduceResult {
   return { t: 'normal', state, effects: [] };
 }
 
-export function reduceTextEditView(state: GameState, vs: TextEditViewState, action: UiAction): ReduceResultErr {
+export function reduceTextEditView(state: GameState, vs: TextEditViewState, action: KeyAction): ReduceResultErr {
   {
     const orig: TextEditViewState = vs;
-    const result = reduceTextEditViewKey(vs.state, action.code);
+    const result = reduceTextEditViewKey(vs.state, action);
     switch (result.t) {
       case 'normal': {
         const nvs = produce(orig, s => { s.state = result.state; });
@@ -56,7 +57,7 @@ export function reduceTextEditView(state: GameState, vs: TextEditViewState, acti
   }
 }
 
-function reduceTextEditViewKey(state: TextWidgetState, code: string): TextEditReduceResult {
+function reduceTextEditViewKey(state: TextWidgetState, action: KeyAction): TextEditReduceResult {
   function cursorAdjust(amount: number): TextEditReduceResult {
     return {
       t: 'normal', state: produce(state, s => {
@@ -88,27 +89,34 @@ function reduceTextEditViewKey(state: TextWidgetState, code: string): TextEditRe
       }), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }]
     }
   }
-  if (code.length == 1) {
-    return insertCharacter(code);
+  if (typeof action != 'string') {
+    const code = action.code;
+    if (code.length == 1) {
+      return insertCharacter(code);
+    }
+    let m;
+    if (m = code.match(/^S-([a-z])$/)) {
+      return insertCharacter(m[1].toUpperCase());
+    }
+    if (code == '<space>' || code == 'S-<space>') {
+      return insertCharacter(' ');
+    }
+    if (code == '<backspace>') {
+      return backspace();
+    }
+    if (code == '<right>') {
+      return cursorAdjust(1);
+    }
+    if (code == '<left>') {
+
+    }
+    if (code == '<esc>')
+      return quitResult(state);
+    console.log(code);
   }
-  let m;
-  if (m = code.match(/^S-([a-z])$/)) {
-    return insertCharacter(m[1].toUpperCase());
+  switch (action) {
+    case 'back': return cursorAdjust(-1);
+    case 'exec': return cursorAdjust(1);
   }
-  if (code == '<space>' || code == 'S-<space>') {
-    return insertCharacter(' ');
-  }
-  if (code == '<backspace>') {
-    return backspace();
-  }
-  if (code == '<right>') {
-    return cursorAdjust(1);
-  }
-  if (code == '<left>') {
-    return cursorAdjust(-1);
-  }
-  if (code == '<esc>')
-    return quitResult(state);
-  console.log(code);
   return nopResult(state);
 }
