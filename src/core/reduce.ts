@@ -187,7 +187,7 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): Redu
 
       return withError(state, { code: 'badExecutable', blame: actorId, loc });
     }
-    case 'back': return reduceKeyAction(state, KeyAction.back);
+    case 'back': return ignoreError(reduceKeyAction(state, KeyAction.back));
     case 'toggle': return toggleItem(state, action.ident);
     case 'increment': return incrementItem(state, action.ident, 1);
     case 'play': return playAudioItem(state, action.ident);
@@ -307,7 +307,7 @@ function reduceSignalAction(state: GameState, action: SignalAction | undefined):
   }
 }
 
-export function reduceKeyAction(state: GameState, action: KeyAction): ReduceResult {
+export function reduceFsKeyAction(state: GameState, action: KeyAction): ReduceResult {
   switch (action) {
     case KeyAction.prevLine:
       return [advanceLine(state, -1),
@@ -427,8 +427,16 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
     case 'recur': {
       return tryStartExecutable(state, action.ident);
     }
+
+    case 'key': {
+      return reduceKeyAction(state, action.code);
+    }
   }
+}
+
+function reduceKeyAction(state: GameState, code: string): ReduceResultErr {
   const vs = state.viewState;
+  const action: GameAction = { t: 'key', code };
   switch (vs.t) {
     case 'fsView': return reduceFsView(state, action);
     case 'configureView': {
@@ -508,7 +516,7 @@ function reduceFsView(state: GameState, action: UiAction): ReduceResultErr {
       logger('keys', action.code);
       const keyAction = actionOfKey(state, action.code);
       if (keyAction != undefined)
-        return noError(reduceKeyAction(state, keyAction));
+        return noError(reduceFsKeyAction(state, keyAction));
       else
         return noChange;
     }
