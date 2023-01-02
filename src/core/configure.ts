@@ -1,6 +1,8 @@
+import { setItemꜝ } from '../fs/fs';
 import { Chars } from '../ui/screen';
 import { produce } from '../util/produce';
-import { Effect, Ident, Item, UiAction, ViewState } from './model';
+import { Effect, GameAction, GameState, Ident, Item, UiAction, ViewState } from './model';
+import { noError, ReduceResultErr } from './reduce';
 
 export type ConfigureWidgetState = {
   item: Item,
@@ -29,9 +31,46 @@ function nopResult(state: ConfigureWidgetState): ConfigureReduceResult {
   return { t: 'normal', state, effects: [] };
 }
 
-export function reduceConfigureView(state: ConfigureWidgetState, action: UiAction): ConfigureReduceResult {
-  switch (action.t) {
-    case 'key': return reduceConfigureViewKey(state, action.code);
+export function reduceConfigureView(state: GameState, vs: ConfigureViewState, action: UiAction): ReduceResultErr {
+  const orig: ConfigureViewState = vs;
+  const result = reduceConfigureViewKey(vs.state, action.code);
+  switch (result.t) {
+    case 'normal': {
+      const nvs = produce(orig, s => { s.state = result.state; });
+      return noError([
+        produce(state, s => {
+          s.viewState = nvs;
+        }),
+        result.effects
+      ]);
+    }
+    case 'cancel': {
+      return noError([
+        produce(state, s => {
+          s.viewState = vs.back;
+        }),
+        [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
+      ]);
+    }
+    case 'save': {
+      return noError([
+        produce(state, s => {
+          s.viewState = vs.back;
+          // There's maybe something subtle going on here in that
+          // we're using result.item (which will be the state of
+          // the item at the time that the configure dialog was
+          // opened) as a basis for setting result.config on it,
+          // rather than looking up vs.target in the fs as it
+          // exists at the present moment. Something tells me this
+          // is the thing to do that is less likely to have weird
+          // invariant violations if the type of the config we're
+          // trying to set is no longer compatible with the item
+          // in its current state.
+          setItemꜝ(s.fs, vs.target, putItemConfig(result.item, result.config));
+        }),
+        [{ t: 'playAbstractSound', effect: 'success', loc: undefined }]
+      ]);
+    }
   }
 }
 

@@ -18,12 +18,12 @@ export const INVENTORY_MAX_ITEMS = 3;
 export type ReduceResult = [GameState, Effect[]];
 export type ReduceResultErr = [GameState, Effect[], ErrorInfo | undefined];
 
-function noError(rr: ReduceResult): ReduceResultErr {
+export function noError(rr: ReduceResult): ReduceResultErr {
   const [state, effects] = rr;
   return [state, effects, undefined];
 }
 
-function ignoreError(rr: ReduceResultErr): ReduceResult {
+export function ignoreError(rr: ReduceResultErr): ReduceResult {
   const [state, effects] = rr;
   return [state, effects];
 }
@@ -444,49 +444,7 @@ function reduceKeyAction(state: GameState, code: string): ReduceResultErr {
   const action: GameAction = { t: 'key', code };
   switch (vs.t) {
     case 'fsView': return reduceFsView(state, action);
-    case 'configureView': {
-      const orig: ConfigureViewState = vs;
-      const result = reduceConfigureView(vs.state, action);
-      switch (result.t) {
-        case 'normal': {
-          const nvs = produce(orig, s => { s.state = result.state; });
-          return noError([
-            produce(state, s => {
-              s.viewState = nvs;
-            }),
-            result.effects
-          ]);
-        }
-        case 'cancel': {
-          return noError([
-            produce(state, s => {
-              s.viewState = vs.back;
-            }),
-            [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
-          ]);
-        }
-        case 'save': {
-          return noError([
-            produce(state, s => {
-              s.viewState = vs.back;
-              // There's maybe something subtle going on here in that
-              // we're using result.item (which will be the state of
-              // the item at the time that the configure dialog was
-              // opened) as a basis for setting result.config on it,
-              // rather than looking up vs.target in the fs as it
-              // exists at the present moment. Something tells me this
-              // is the thing to do that is less likely to have weird
-              // invariant violations if the type of the config we're
-              // trying to set is no longer compatible with the item
-              // in its current state.
-              setItemꜝ(s.fs, vs.target, putItemConfig(result.item, result.config));
-            }),
-            [{ t: 'playAbstractSound', effect: 'success', loc: undefined }]
-          ]);
-        }
-      }
-    }
-
+    case 'configureView': return reduceConfigureView(state, vs, action);
     case 'textEditView': {
       const orig: TextEditViewState = vs;
       const result = reduceTextEditView(vs.state, action);
