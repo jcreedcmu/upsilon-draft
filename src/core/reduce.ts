@@ -448,6 +448,7 @@ function reduceKeyAction(state: GameState, code: string): ReduceResultErr {
   switch (vs.t) {
     case 'fsView': return noError(reduceFsKeyAction(state, keyAction));
     case 'configureView': return reduceConfigureView(state, vs, keyAction);
-    case 'textEditView': return reduceTextEditView(state, vs, keyAction);
+    // I guess disable all bindings for textEdit
+    case 'textEditView': return reduceTextEditView(state, vs, { t: 'other', code });
   }
 }

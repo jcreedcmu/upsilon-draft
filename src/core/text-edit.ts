@@ -89,7 +89,10 @@ function reduceTextEditViewKey(state: TextWidgetState, action: KeyAction): TextE
       }), effects: [{ t: 'playAbstractSound', effect: 'change-file', loc: undefined }]
     }
   }
-  if (typeof action != 'string') {
+  if (typeof action == 'string') {
+    return nopResult(state);
+  }
+  else {
     const code = action.code;
     if (code.length == 1) {
       return insertCharacter(code);
@@ -108,15 +111,11 @@ function reduceTextEditViewKey(state: TextWidgetState, action: KeyAction): TextE
       return cursorAdjust(1);
     }
     if (code == '<left>') {
-
+      return cursorAdjust(-1);
     }
     if (code == '<esc>')
       return quitResult(state);
     console.log(code);
+    return nopResult(state);
   }
-  switch (action) {
-    case 'back': return cursorAdjust(-1);
-    case 'exec': return cursorAdjust(1);
-  }
-  return nopResult(state);
 }
