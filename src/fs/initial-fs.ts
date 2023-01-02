@@ -1,7 +1,7 @@
 import { ErrorCode, errorCodes, errorCodeText, errorFileName } from '../core/errors';
 import { ExecutableName, executables } from '../core/executables';
 import { latom, limp } from '../core/linlog';
-import { Ident, KeyAction } from '../core/model';
+import { Ident, KeyActionEnum } from '../core/model';
 import { ImgData } from '../ui/image';
 import { arrowChars, Chars } from '../ui/screen';
 import { AbstractSoundEffect, SoundEffect } from '../ui/sound';
@@ -30,23 +30,23 @@ export function namedExec(name: ExecutableName, opts?: { resources?: Resources, 
 }
 
 function keysDir(): ItemPlan {
-  const keys: { name: string, keyAction: KeyAction }[] = [
-    { name: '[', keyAction: KeyAction.prevInventorySlot },
-    { name: ']', keyAction: KeyAction.nextInventorySlot },
-    { name: '<down>', keyAction: KeyAction.nextLine },
-    { name: '<left>', keyAction: KeyAction.back },
-    { name: '<return>', keyAction: KeyAction.exec },
-    { name: '<right>', keyAction: KeyAction.exec },
-    { name: '<space>', keyAction: KeyAction.pickupDrop },
-    { name: '<up>', keyAction: KeyAction.prevLine },
-    { name: 'q', keyAction: KeyAction.qsignal },
-    { name: 'a', keyAction: KeyAction.back },
-    { name: 'd', keyAction: KeyAction.exec },
-    { name: 's', keyAction: KeyAction.nextLine },
-    { name: 'w', keyAction: KeyAction.prevLine },
-    ...(isDev ? [{ name: 'z', keyAction: KeyAction.debug }] : []),
+  const keys: { name: string, keyAction: KeyActionEnum }[] = [
+    { name: '[', keyAction: KeyActionEnum.prevInventorySlot },
+    { name: ']', keyAction: KeyActionEnum.nextInventorySlot },
+    { name: '<down>', keyAction: KeyActionEnum.nextLine },
+    { name: '<left>', keyAction: KeyActionEnum.back },
+    { name: '<return>', keyAction: KeyActionEnum.exec },
+    { name: '<right>', keyAction: KeyActionEnum.exec },
+    { name: '<space>', keyAction: KeyActionEnum.pickupDrop },
+    { name: '<up>', keyAction: KeyActionEnum.prevLine },
+    { name: 'q', keyAction: KeyActionEnum.qsignal },
+    { name: 'a', keyAction: KeyActionEnum.back },
+    { name: 'd', keyAction: KeyActionEnum.exec },
+    { name: 's', keyAction: KeyActionEnum.nextLine },
+    { name: 'w', keyAction: KeyActionEnum.prevLine },
+    ...(isDev ? [{ name: 'z', keyAction: KeyActionEnum.debug }] : []),
   ];
-  function keyDir(key: { name: string, keyAction: KeyAction }): ItemPlan {
+  function keyDir(key: { name: string, keyAction: KeyActionEnum }): ItemPlan {
     const { name, keyAction } = key;
     return { t: 'dir', name, contents: [{ t: 'file', name: keyAction }], hooks: ['KEY'] }
   }

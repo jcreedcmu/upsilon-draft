@@ -109,17 +109,22 @@ export type Action =
   | { t: 'boot', onlyTurnOn?: boolean }
   ;
 
-export enum KeyAction {
-  prevInventorySlot = 'prev-inventory-slot',
-  nextInventorySlot = 'next-inventory-slot',
-  prevLine = 'prev-line',
-  nextLine = 'next-line',
-  back = 'back',
-  exec = 'exec',
-  pickupDrop = 'pickup-drop', // Maybe want separate pickup and drop actions?,
-  qsignal = 'qsignal',
-  debug = 'debug',
-}
+// The value in this object is the magic string that in-game entities
+// have to match to have their hook effect; the key is how we refer to
+// it in the implementation.
+export const keyActions = {
+  prevInventorySlot: 'prev-inventory-slot',
+  nextInventorySlot: 'next-inventory-slot',
+  prevLine: 'prev-line',
+  nextLine: 'next-line',
+  back: 'back',
+  exec: 'exec',
+  pickupDrop: 'pickup-drop', // Maybe want separate pickup and drop actions?,
+  qsignal: 'qsignal',
+  debug: 'debug',
+} as const;
+
+export type KeyAction = keyof (typeof keyActions);
 
 export type Effect =
   | { t: 'playSound', effect: SoundEffect, loc: Location | undefined }

@@ -1,7 +1,7 @@
 import { Fs, getFullContents, getItem, itemContents } from '../fs/fs';
 import { SpecialId } from '../fs/initial-fs';
 import { SoundEffect } from '../ui/sound';
-import { KeyAction, Show, showAll } from './model';
+import { KeyAction, keyActions, Show, showAll } from './model';
 
 // A hook is an extra piece of code that should be run any time a
 // directory has its contents changed.
@@ -25,7 +25,8 @@ export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
     const contents = itemContents(item);
     if (contents.length == 1) {
       const inner = getItem(fs, contents[0]);
-      if (Object.values(KeyAction).includes(inner.name as KeyAction)) {
+      const keyActionNames: string[] = Object.values(keyActions);
+      if (keyActionNames.includes(inner.name)) {
         rv[item.name] = inner.name as KeyAction;
       }
     }

@@ -187,7 +187,7 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): Redu
 
       return withError(state, { code: 'badExecutable', blame: actorId, loc });
     }
-    case 'back': return ignoreError(reduceKeyAction(state, KeyAction.back));
+    case 'back': return ignoreError(reduceKeyAction(state, 'back'));
     case 'toggle': return toggleItem(state, action.ident);
     case 'increment': return incrementItem(state, action.ident, 1);
     case 'play': return playAudioItem(state, action.ident);
@@ -309,25 +309,25 @@ function reduceSignalAction(state: GameState, action: SignalAction | undefined):
 
 export function reduceFsKeyAction(state: GameState, action: KeyAction): ReduceResult {
   switch (action) {
-    case KeyAction.prevLine:
+    case 'prevLine':
       return [advanceLine(state, -1),
       [
         { t: 'playAbstractSound', effect: 'change-file', loc: undefined },
       ]];
-    case KeyAction.nextLine:
+    case 'nextLine':
       return [advanceLine(state, 1),
       [
         { t: 'playAbstractSound', effect: 'change-file', loc: undefined },
       ]];
-    case KeyAction.exec: return reduceExecAction(state, getSelectedLine(state).actions.exec);
+    case 'exec': return reduceExecAction(state, getSelectedLine(state).actions.exec);
 
-    case KeyAction.pickupDrop:
+    case 'pickupDrop':
       if (shouldDropVersusPickup(state))
         return reduceDropAction(state, getSelectedLine(state).actions.drop);
       else
         return reducePickupAction(state, getSelectedLine(state).actions.pickup);
 
-    case KeyAction.back: {
+    case 'back': {
       const loc = getLocation(state.fs, getCurId(state));
       if (loc == undefined || loc.t == 'is_root' || loc.t == 'inventory') {
         return withError(state, { code: 'cantGoBack' });
@@ -345,13 +345,13 @@ export function reduceFsKeyAction(state: GameState, action: KeyAction): ReduceRe
         ]];
       }
     }
-    case KeyAction.prevInventorySlot:
+    case 'prevInventorySlot':
       return [produce(state, s => { modifyInventorySlotꜝ(s, -1) }),
       [{ t: 'playAbstractSound', effect: 'change-slot', loc: undefined }]];
-    case KeyAction.nextInventorySlot:
+    case 'nextInventorySlot':
       return [produce(state, s => { modifyInventorySlotꜝ(s, 1) }),
       [{ t: 'playAbstractSound', effect: 'change-slot', loc: undefined }]];
-    case KeyAction.debug: {
+    case 'debug': {
       if ((window as any).ff !== undefined) {
         ((window as any).ff)(state);
       }
@@ -361,7 +361,7 @@ export function reduceFsKeyAction(state: GameState, action: KeyAction): ReduceRe
       doAgain('...');
       return [state, [{ t: 'playSound', effect: 'high', loc: undefined }]];
     }
-    case KeyAction.qsignal: {
+    case 'qsignal': {
       return reduceSignalAction(state, getSelectedLine(state).actions.signals?.q);
     }
   }
