@@ -297,3 +297,12 @@ https://forebears.io/earth/surnames
 cat /tmp/surnames.html \
  | perl -pe 's/<a/\n<a/g' \
  | perl -lne 'm,<a href=".*">(\w*)</a></td>, and print $1' > surnames.txt
+
+=== 2023.01.03 META: (:id 3be55015-990d-4a5a-8736-c9bf4c3f2f2b)
+
+Q: Do I notice any tearing difference during animation if I call
+  SDL_GL_SetSwapInterval(...);
+with 0, 1, -1, per
+https://wiki.libsdl.org/SDL2/SDL_GL_SetSwapInterval
+?
+A: Not really.
