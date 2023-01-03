@@ -306,3 +306,53 @@ with 0, 1, -1, per
 https://wiki.libsdl.org/SDL2/SDL_GL_SetSwapInterval
 ?
 A: Not really.
+
+=== 2023.01.03 META: (:id 2acb7c94-a364-4fbe-b537-401e87ad264b)
+
+Q: What's the general narrative flow of the game?
+A: I think I'm going to try to first imagine a reasonable complete
+narrative that works without introducing the idea of networking, even
+though I think that would be separately fun.
+
+"Tutorial" phase
+
+- Show off unattainable secrets
+- Guide through basic mechanisms
+  + Navigating through directories
+  + Executing binaries
+  + Some comprehensible error messages
+- Culminate with getting access to some basic stuff
+
+"Manual" phase
+
+- Goal is to construct certain object which grants access to next phase.
+- Requires searching through some procgen filesystem for resources,
+  configuring some already-available tools to transform them, and
+  gaining access to another directory.
+
+"Semi-automation" phase
+
+- Goal is to construct certain object which would be somewhat tedious
+  to construct manually.
+
+- Requires transforming found objects in several phases, or
+  "disassembling" and "reassembling" them, at significant scale.
+
+- Could explore both of the following:
+  + automation that needs to be brought "to the site" where the resources are,
+    because the resources can't be moved.
+  + automation that --- for permissions reasons? --- requires transport of resources
+
+"Automation" phase
+
+- Goal is to construct a certain object which would be far too tedious to construct manually.
+
+- Similar to previous phase but with increased scale
+
+- I want more development in the complexity of the engineering in this
+  phase, but I'm not sure what that looks like yet.
+
+"Endgame" phase
+
+- Goal is to construct an object which grants root access to system.
+- Try to think of some story reason for needing this.
