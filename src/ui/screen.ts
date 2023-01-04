@@ -152,6 +152,12 @@ export class Screen {
     };
   }
 
+  atp(p: Point, wrapLen?: number): StrState {
+    return {
+      p: { x: p.x, y: p.y }, start: { x: p.x, y: p.y }, wrapLen
+    };
+  }
+
   drawAttrStr(state: StrState, sa: AttrString[]) {
     sa.forEach(({ str, attr }) => {
       state = this.drawStr(state, str, attr);

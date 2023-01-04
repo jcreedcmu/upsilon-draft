@@ -308,7 +308,7 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number, sz: Point
   return [itemLines, offset];
 }
 
-function renderLineInfoContent(rend: MainRenderable, screen: Screen, line: RenderableLine) {
+function renderLineInfoContent(p: Point, rend: MainRenderable, screen: Screen, line: RenderableLine) {
   if (line.t == 'special')
     return;
   if (line.infobox == undefined)
@@ -316,11 +316,11 @@ function renderLineInfoContent(rend: MainRenderable, screen: Screen, line: Rende
   switch (line.infobox.t) {
     case 'text': {
       const text = line.infobox.text;
-      screen.drawTagStr(screen.at(FS_LEN + 1, infoSectionStartRow(rend) + 1, FS_LEN), text, INV_ATTR);
+      screen.drawTagStr(screen.atp(vplus(p, { x: 0, y: infoSectionStartRow(rend) + 1 }), FS_LEN), text, INV_ATTR);
       break;
     }
     case 'image': {
-      screen.drawTagStr(screen.at(FS_LEN + 2, infoSectionStartRow(rend) + 1, FS_LEN), tagStrOfImg(line.infobox.data), INV_ATTR);
+      screen.drawTagStr(screen.atp(vplus(p, { x: 1, y: infoSectionStartRow(rend) + 1 }), FS_LEN), tagStrOfImg(line.infobox.data), INV_ATTR);
       break;
     }
   }
@@ -328,20 +328,20 @@ function renderLineInfoContent(rend: MainRenderable, screen: Screen, line: Rende
 
 function renderLineInfo(p: Point, rend: MainRenderable, screen: Screen, line: RenderableLine) {
   // draw the info the line content wants us to
-  renderLineInfoContent(rend, screen, line);
+  renderLineInfoContent(p, rend, screen, line);
 
   // draw resources info
   const rrs = getRenderableResources(line);
   rrs.forEach((rr, ix) => {
     const nameStr = `${rr.name}:`;
-    screen.drawTagStr(screen.at(FS_LEN + 1, screen.rows - 3 - ix), nameStr, INV_ATTR);
+    screen.drawTagStr(screen.atp(vplus(p, { x: 0, y: screen.rows - 3 - ix })), nameStr, INV_ATTR);
     if (rr.count >= 5)
       screen.drawAttrStr(
-        screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix),
+        screen.atp(vplus(p, { x: nameStr.length, y: screen.rows - 3 - ix })),
         [{ str: rr.count + '', attr: INV_ATTR }, { str: rr.symbol, attr: rr.attr }]
       );
     else
-      screen.drawTagStr(screen.at(FS_LEN + nameStr.length + 1, screen.rows - 3 - ix), repeat(rr.symbol, rr.count), rr.attr);
+      screen.drawTagStr(screen.atp(vplus(p, { x: nameStr.length, y: screen.rows - 3 - ix })), repeat(rr.symbol, rr.count), rr.attr);
   });
 }
 
