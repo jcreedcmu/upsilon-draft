@@ -8,7 +8,7 @@ import { getContents, getLocation } from '../src/fs/fs';
 const beforeState: GameState = {
   "power": true,
   "viewState": {
-    "t": "fsView"
+    "t": "mainView"
   },
   "clock": {
     "originEpochMs": 1671408655027,

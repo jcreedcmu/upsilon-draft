@@ -20,7 +20,7 @@ const SIZE_COL_SIZE = 3;
 const MARGIN = 1;
 const FILE_COL_SIZE = FS_LEN - CHARGE_COL_SIZE - SIZE_COL_SIZE - MARGIN;
 
-function infoSectionStartRow(rend: FsRenderable) {
+function infoSectionStartRow(rend: MainRenderable) {
   return rend.inventoryState.numSlots + 1;
 }
 
@@ -64,7 +64,7 @@ type DirRenderable = {
 }
 
 export type ErrorRenderable = { msg: string } | undefined;
-export type FsRenderable = {
+export type MainRenderable = {
   curLine: number,
   lines: RenderableLine[],
   show: Show,
@@ -78,7 +78,7 @@ export type TextEditRenderable = { text: string, cursor: Point };
 export type ConfigureRenderable = ConfigureWidgetState;
 
 export type NarrowRenderable =
-  | { t: 'fsView' } & FsRenderable
+  | { t: 'mainView' } & MainRenderable
   | { t: 'textEditView' } & TextEditRenderable
   | { t: 'configureView' } & ConfigureRenderable;
 
@@ -130,10 +130,10 @@ function renderError(error: UserError | undefined, errorMsgs: Record<number, str
 function getRenderable(state: GameState): Renderable {
   const error = renderError(state.error, state._cached_errors);
   switch (state.viewState.t) {
-    case 'fsView': {
+    case 'mainView': {
       const lines = getLines(state, getCurId(state));
       return {
-        t: 'fsView',
+        t: 'mainView',
         curLine: getCurLine(state),
         error,
         lines,
@@ -307,7 +307,7 @@ function getDisplayableLines(lines: RenderableLine[], curLine: number, sz: Point
   return [itemLines, offset];
 }
 
-function renderLineInfoContent(rend: FsRenderable, screen: Screen, line: RenderableLine) {
+function renderLineInfoContent(rend: MainRenderable, screen: Screen, line: RenderableLine) {
   if (line.t == 'special')
     return;
   if (line.infobox == undefined)
@@ -325,7 +325,7 @@ function renderLineInfoContent(rend: FsRenderable, screen: Screen, line: Rendera
   }
 }
 
-function renderLineInfo(rend: FsRenderable, screen: Screen, line: RenderableLine) {
+function renderLineInfo(rend: MainRenderable, screen: Screen, line: RenderableLine) {
   // draw the info the line content wants us to
   renderLineInfoContent(rend, screen, line);
 
@@ -356,9 +356,9 @@ function renderDir(screen: Screen, p: Point, sz: Point, rend: DirRenderable): vo
   });
 }
 
-export function renderFsView(rend: FsRenderable): Screen {
+export function renderMainView(rend: MainRenderable): Screen {
   const screen = new Screen({ fg: cc.blue, bg: cc.blue });
-  logger('renderFsView', rend);
+  logger('renderMainView', rend);
 
   renderDir(screen, { x: 0, y: 0 }, { x: FS_LEN, y: FS_ROWS }, rend);
 
@@ -439,7 +439,7 @@ export function finalRender(state: Renderable): Screen {
   logger('rendering', 'rendering');
 
   switch (state.t) {
-    case 'fsView': return renderFsView(state);
+    case 'mainView': return renderMainView(state);
     case 'textEditView': return renderTextEditView(state);
     case 'configureView': return renderConfigureView(state);
   }

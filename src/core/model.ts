@@ -142,7 +142,7 @@ export type Recurring = Record<Ident, { periodTicks: number }>;
 // This is for alternate modal states within the game interface, which
 // are triggered by "diagetic" controls.
 export type ViewState =
-  | { t: 'fsView' }
+  | { t: 'mainView' }
   | TextEditViewState
   | ConfigureViewState
   ;
@@ -221,7 +221,7 @@ export function gameStateOfFs(fs: Fs): GameState {
 
   return {
     power: false || DEBUG.quickStart,
-    viewState: { t: 'fsView' },
+    viewState: { t: 'mainView' },
     clock: mkClockState(),
     error: undefined,
     fs,

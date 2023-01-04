@@ -5,7 +5,7 @@ export const DEBUG = {
   clockUpdate: true,
   recurring: false,
   rendering: false,
-  renderFsView: false,
+  renderMainView: false,
   reschedule: false,
   produce: false,
   duplicates: true,
