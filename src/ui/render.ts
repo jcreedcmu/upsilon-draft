@@ -9,6 +9,7 @@ import { Resources } from '../fs/resources';
 import { doOnce, logger, logOnce } from '../util/debug';
 import { Point } from '../util/types';
 import { int, invertAttr, mapval, maybeInvertAttr, repeat, zeropad } from '../util/util';
+import { vplus } from '../util/vutil';
 import { ImgData, tagStrOfImg } from './image';
 import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
 import { ColorCode as cc, COLS, ROWS } from './ui-constants';
@@ -325,7 +326,7 @@ function renderLineInfoContent(rend: MainRenderable, screen: Screen, line: Rende
   }
 }
 
-function renderLineInfo(rend: MainRenderable, screen: Screen, line: RenderableLine) {
+function renderLineInfo(p: Point, rend: MainRenderable, screen: Screen, line: RenderableLine) {
   // draw the info the line content wants us to
   renderLineInfoContent(rend, screen, line);
 
@@ -359,18 +360,8 @@ function renderDir(screen: Screen, p: Point, sz: Point, rend: DirRenderable): vo
 export function renderMainView(rend: MainRenderable): Screen {
   const screen = new Screen({ fg: cc.blue, bg: cc.blue });
   logger('renderMainView', rend);
-
-  renderDir(screen, { x: 0, y: 0 }, { x: FS_LEN, y: FS_ROWS }, rend);
-
-  if (rend.show.info) {
-    renderLineInfo(rend, screen, rend.lines[rend.curLine]);
-  }
-
-  if (rend.show.inventory) {
-    rend.invLines.forEach((line, ix) => {
-      renderLine(screen, { x: FS_LEN + 1, y: ix + 1 }, FS_LEN, line, rend.show);
-    });
-  }
+  renderFsPanel(screen, { x: 0, y: 0 }, rend);
+  renderInfoPanel(screen, { x: FS_LEN + 1, y: 0 }, rend);
 
   if (rend.show.cwd) {
     let modestring = '/ ' + rend.path.join(' / ');
@@ -383,6 +374,23 @@ export function renderMainView(rend: MainRenderable): Screen {
     );
   }
 
+  return screen;
+}
+
+function renderFsPanel(screen: Screen, p: Point, rend: MainRenderable): void {
+  renderDir(screen, p, { x: FS_LEN, y: FS_ROWS }, rend);
+}
+
+function renderInfoPanel(screen: Screen, p: Point, rend: MainRenderable): void {
+  if (rend.show.info) {
+    renderLineInfo(p, rend, screen, rend.lines[rend.curLine]);
+  }
+
+  if (rend.show.inventory) {
+    rend.invLines.forEach((line, ix) => {
+      renderLine(screen, vplus(p, { x: 0, y: ix + 1 }), FS_LEN, line, rend.show);
+    });
+  }
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   const boxe = String.fromCharCode(boxify(BOXE)(0));
   if (rend.show.inventory) {
@@ -396,7 +404,7 @@ export function renderMainView(rend: MainRenderable): Screen {
     screen.drawRect({ x: FS_LEN, y: row, w: FS_LEN + 1, h: screen.rows - 2 - row }, INV_ATTR);
     screen.drawTagStr(screen.at(FS_LEN + 2, row), `${boxw}Info${boxe}`, INV_ATTR);
   }
-  return screen;
+
 }
 
 export function renderTextEditView(state: TextEditRenderable): Screen {
