@@ -29,15 +29,11 @@ export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
     const contents = itemContents(item);
     if (contents.length == 1) {
       const inner = getItem(fs, contents[0]);
-      console.log('inner.name', inner.name);
-
       if (keyActionNames.includes(inner.name)) {
-        console.log('yes', inner.name);
         rv[item.name] = keyActionReverse[inner.name];
       }
     }
   });
-  console.log(rv);
   return rv;
 }
 
