@@ -394,15 +394,21 @@ function renderInfoPanel(screen: Screen, p: Point, rend: MainRenderable): void {
   const boxw = String.fromCharCode(boxify(BOXW)(0));
   const boxe = String.fromCharCode(boxify(BOXE)(0));
   if (rend.show.inventory) {
-    screen.drawRect({ x: FS_LEN, y: 0, w: FS_LEN + 1, h: rend.inventoryState.numSlots + 1 }, INV_ATTR);
-    screen.drawTagStr(screen.at(FS_LEN + 2, 0), `${boxw}Holding${boxe}`, INV_ATTR);
+    screen.drawRectp(
+      { p: vplus(p, { x: -1, y: 0 }), sz: { x: FS_LEN + 1, y: rend.inventoryState.numSlots + 1 } },
+      INV_ATTR
+    );
+    screen.drawTagStr(screen.atp(vplus(p, { x: 1, y: 0 })), `${boxw}Holding${boxe}`, INV_ATTR);
     if (rend.inventoryState.numSlots > 1)
-      screen.drawTagStr(screen.at(FS_LEN, rend.inventoryState.curSlot + 1), Chars.LTRI_RIGHT, INV_ATTR);
+      screen.drawTagStr(screen.atp(vplus(p, { x: -1, y: rend.inventoryState.curSlot + 1 })), Chars.LTRI_RIGHT, INV_ATTR);
   }
   if (rend.show.info) {
     const row = infoSectionStartRow(rend);
-    screen.drawRect({ x: FS_LEN, y: row, w: FS_LEN + 1, h: screen.rows - 2 - row }, INV_ATTR);
-    screen.drawTagStr(screen.at(FS_LEN + 2, row), `${boxw}Info${boxe}`, INV_ATTR);
+    screen.drawRectp(
+      { p: vplus(p, { x: -1, y: row }), sz: { x: FS_LEN + 1, y: screen.rows - 2 - row } },
+      INV_ATTR
+    );
+    screen.drawTagStr(screen.atp(vplus(p, { x: 1, y: row })), `${boxw}Info${boxe}`, INV_ATTR);
   }
 
 }

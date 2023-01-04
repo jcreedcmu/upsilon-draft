@@ -5,6 +5,7 @@ import { parseTagstrSafe as parseTagstr } from './parse-tagstr';
 
 export type Attr = { fg: ColorCode, bg: ColorCode };
 export type Rect = { x: number, y: number, w: number, h: number };
+export type RectP = { p: Point, sz: Point };
 export type AttrString = { str: string, attr: Attr };
 
 export const BOXN = 1;
@@ -247,5 +248,9 @@ export class Screen {
       this.modChar(x, y + i + 1, vert, attr);
       this.modChar(x + w, y + i + 1, vert, attr);
     }
+  }
+
+  drawRectp(rect: RectP, attr: Attr) {
+    this.drawRect({ x: rect.p.x, y: rect.p.y, w: rect.sz.x, h: rect.sz.y }, attr);
   }
 }
