@@ -9,6 +9,7 @@ public:
   GlProgram(const Napi::CallbackInfo &info);
   NFUNC(programId);
   NFUNC(getUniformLocation);
+  NFUNC(use);
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
   static Napi::FunctionReference constructor;

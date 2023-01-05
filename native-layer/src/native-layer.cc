@@ -22,6 +22,7 @@ public:
   Napi::Value configShaders(const Napi::CallbackInfo &);
   Napi::Value pollEvent(const Napi::CallbackInfo &);
   Napi::Value renderFrame(const Napi::CallbackInfo &);
+  Napi::Value swapWindow(const Napi::CallbackInfo &);
 
   Napi::Value hello(Napi::Env);
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
@@ -145,6 +146,11 @@ Napi::Value NativeLayer::renderFrame(const Napi::CallbackInfo &info) {
 
   glBindVertexArray(this->_vao);
   glDrawArrays(GL_TRIANGLES, 0, 6);
+  return Napi::Boolean::New(env, true);
+}
+
+Napi::Value NativeLayer::swapWindow(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
 
   SDL_GL_SwapWindow(this->_window);
   SDL_Delay(1);
@@ -170,6 +176,7 @@ Napi::Object NativeLayer::Init(Napi::Env env, Napi::Object exports) {
                                       &NativeLayer::configShaders),
           NativeLayer::InstanceMethod("pollEvent", &NativeLayer::pollEvent),
           NativeLayer::InstanceMethod("renderFrame", &NativeLayer::renderFrame),
+          NativeLayer::InstanceMethod("swapWindow", &NativeLayer::swapWindow),
       });
 
   NativeLayer::constructor = Napi::Persistent(func);

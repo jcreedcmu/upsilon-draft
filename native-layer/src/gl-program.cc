@@ -13,6 +13,7 @@ Napi::Object GlProgram::Init(Napi::Env env, Napi::Object exports) {
       {
           GlProgram::InstanceMethod("programId", &GlProgram::programId),
           GlProgram::InstanceMethod("getUniformLocation", &GlProgram::getUniformLocation),
+          GlProgram::InstanceMethod("use", &GlProgram::use),
       });
 
   GlProgram::constructor = Napi::Persistent(func);
@@ -107,4 +108,12 @@ NFUNC(GlProgram::getUniformLocation) {
   unsigned int loc = glGetUniformLocation(this->_program, name.c_str());
 
   return Napi::Number::New(env, loc);
+}
+
+NFUNC(GlProgram::use) {
+  NBOILER();
+
+  glUseProgram(this->_program);
+
+  return env.Null();
 }
