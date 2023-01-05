@@ -53,8 +53,10 @@ o_color = vec4(v_uv.x, v_uv.y, 1., 1.);
 `;
 
 const BUTTON_TEXTURE_UNIT = 1;
-const button1 = new nat.Texture('public/assets/button-down.png');
-const button2 = new nat.Texture('public/assets/button-up.png');
+const button1 = new nat.Texture();
+button1.loadFile('public/assets/button-down.png');
+const button2 = new nat.Texture();
+button2.loadFile('public/assets/button-up.png');
 
 const programX = new nat.Program(vertexShader, fragmentShaderX);
 nativeLayer.configShaders(programX.programId());
@@ -74,8 +76,13 @@ nat.glUniform1i(u_sampler, BUTTON_TEXTURE_UNIT);
 
 while (nativeLayer.pollEvent()) {
   const buttonTexture = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
-  programX.use();
-  // buttonTexture.bind(BUTTON_TEXTURE_UNIT);
+  if (0) {
+    programX.use();
+  }
+  else {
+    program.use();
+    buttonTexture.bind(BUTTON_TEXTURE_UNIT);
+  }
   nativeLayer.renderFrame();
   nativeLayer.swapWindow();
 }
