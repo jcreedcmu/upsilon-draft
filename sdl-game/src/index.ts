@@ -30,12 +30,11 @@ uniform sampler2D u_sampler;
 in vec2 v_uv;
 out vec4 o_color;
 void main() {
-//    o_color = vec4(v_uv.y, (v_uv.x + v_uv.y) / 2., v_uv.x, 1.0);
-o_color = texture(u_sampler, v_uv) ;
+  o_color = texture(u_sampler, v_uv) ;
 };
 `;
 
-const fragmentShader2 = `
+const fragmentShaderX = `
 #version 300 es
 
 precision mediump float;
@@ -45,7 +44,8 @@ uniform sampler2D u_sampler;
 in vec2 v_uv;
 out vec4 o_color;
 void main() {
- o_color = (vec4(1., 0., 0., 1.) + texture(u_sampler, v_uv)) / 2. ;
+// o_color = (vec4(1., 0., 0., 1.) + texture(u_sampler, v_uv)) / 2. ;
+o_color = vec4(v_uv.x, v_uv.y, 1., 1.);
 };
 `;
 
@@ -53,8 +53,8 @@ const BUTTON_TEXTURE_UNIT = 1;
 const button1 = new nat.Texture('public/assets/button-down.png');
 const button2 = new nat.Texture('public/assets/button-up.png');
 
-const program2 = new nat.Program(vertexShader, fragmentShader2);
-
+const programX = new nat.Program(vertexShader, fragmentShaderX);
+nativeLayer.configShaders(programX.programId());
 
 const program = new nat.Program(vertexShader, fragmentShader);
 const u_sampler = program.getUniformLocation('u_sampler');
@@ -62,9 +62,9 @@ nativeLayer.configShaders(program.programId());
 nat.glUniform1i(u_sampler, BUTTON_TEXTURE_UNIT);
 
 while (nativeLayer.pollEvent()) {
-  const b = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
-  program.use();
-  b.bind(BUTTON_TEXTURE_UNIT);
+  const buttonTexture = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
+  programX.use();
+  //  buttonTexture.bind(BUTTON_TEXTURE_UNIT);
   nativeLayer.renderFrame();
   nativeLayer.swapWindow();
 }
