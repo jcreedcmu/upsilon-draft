@@ -9,6 +9,8 @@ public:
   GlFramebuffer(const Napi::CallbackInfo &info);
   NFUNC(framebufferId);
   NFUNC(bind);
+  NFUNC(unbind);
+  NFUNC(setOutputTexture);
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
   static Napi::FunctionReference constructor;

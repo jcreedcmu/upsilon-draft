@@ -3,6 +3,8 @@
 // named after the class.
 export class UniformLoc { private _UniformLoc(): void }
 export class ProgramId { private _ProgramId(): void }
+export class FramebufferId { private _FramebufferId(): void }
+export class TextureId { private _TextureId(): void }
 
 // Main classes
 
@@ -20,6 +22,7 @@ export function glUniform2f(uniform: UniformLoc, value: number, value2: number):
 export class Texture {
   constructor();
   loadFile(filename: string): void;
+  textureId(): TextureId;
   bind(textureUnit: number): void;
   makeBlank(width: number, height: number): void;
 }
@@ -29,4 +32,12 @@ export class Program {
   getUniformLocation(name: string): UniformLoc;
   programId(): ProgramId;
   use(): void;
+}
+
+export class Framebuffer {
+  constructor();
+  framebufferId(): FramebufferId;
+  bind(): void;
+  unbind(): void;
+  setOutputTexture(textureId: TextureId): void;
 }

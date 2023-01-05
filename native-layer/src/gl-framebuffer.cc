@@ -13,6 +13,8 @@ Napi::Object GlFramebuffer::Init(Napi::Env env, Napi::Object exports) {
       {
           GlFramebuffer::InstanceMethod("framebufferId", &GlFramebuffer::framebufferId),
           GlFramebuffer::InstanceMethod("bind", &GlFramebuffer::bind),
+          GlFramebuffer::InstanceMethod("unbind", &GlFramebuffer::unbind),
+          GlFramebuffer::InstanceMethod("setOutputTexture", &GlFramebuffer::setOutputTexture),
       });
 
   GlFramebuffer::constructor = Napi::Persistent(func);
@@ -40,6 +42,32 @@ NFUNC(GlFramebuffer::bind) {
   NBOILER();
 
   glBindFramebuffer(GL_FRAMEBUFFER, this->_framebuffer);
+
+  return env.Null();
+}
+
+NFUNC(GlFramebuffer::unbind) {
+  NBOILER();
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  return env.Null();
+}
+
+NFUNC(GlFramebuffer::setOutputTexture) {
+  NBOILER();
+
+  if (info.Length() < 1) {
+    throwJs(env, "usage: setOutputTexture(texture: number)");
+  }
+
+  if (!info[0].IsNumber()) {
+    throwJs(env, "argument 0 should be a number");
+  }
+
+  unsigned int texture_id = info[0].As<Napi::Number>().Uint32Value();
+
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
 
   return env.Null();
 }
