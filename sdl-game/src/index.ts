@@ -41,15 +41,17 @@ nativeLayer.configShaders(programTexture.programId());
 nat.glUniform1i(u_sampler, TextureUnit.BUTTON);
 
 while (nativeLayer.pollEvent()) {
+  nativeLayer.clear();
+
   fb.bind();
   programX.use();
-  nativeLayer.renderFrame();
+  nativeLayer.drawTriangles();
   fb.unbind();
 
   const buttonTexture = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
   programTexture.use();
   buttonTexture.bind(TextureUnit.BUTTON);
-  nativeLayer.renderFrame();
+  nativeLayer.drawTriangles();
 
   nativeLayer.swapWindow();
 }

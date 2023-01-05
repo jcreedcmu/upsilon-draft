@@ -22,7 +22,8 @@ public:
   Napi::Value finish(const Napi::CallbackInfo &);
   Napi::Value configShaders(const Napi::CallbackInfo &);
   Napi::Value pollEvent(const Napi::CallbackInfo &);
-  Napi::Value renderFrame(const Napi::CallbackInfo &);
+  Napi::Value drawTriangles(const Napi::CallbackInfo &);
+  Napi::Value clear(const Napi::CallbackInfo &);
   Napi::Value swapWindow(const Napi::CallbackInfo &);
 
   Napi::Value hello(Napi::Env);
@@ -134,14 +135,20 @@ Napi::Value NativeLayer::pollEvent(const Napi::CallbackInfo &info) {
   return Napi::Boolean::New(env, true);
 }
 
-Napi::Value NativeLayer::renderFrame(const Napi::CallbackInfo &info) {
+Napi::Value NativeLayer::clear(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
   glClear(GL_COLOR_BUFFER_BIT);
 
+  return env.Null();
+}
+
+Napi::Value NativeLayer::drawTriangles(const Napi::CallbackInfo &info) {
+  Napi::Env env = info.Env();
   glBindVertexArray(this->_vao);
   glDrawArrays(GL_TRIANGLES, 0, 6);
-  return Napi::Boolean::New(env, true);
+
+  return env.Null();
 }
 
 Napi::Value NativeLayer::swapWindow(const Napi::CallbackInfo &info) {
@@ -149,7 +156,8 @@ Napi::Value NativeLayer::swapWindow(const Napi::CallbackInfo &info) {
 
   SDL_GL_SwapWindow(this->_window);
   SDL_Delay(1);
-  return Napi::Boolean::New(env, true);
+
+  return env.Null();
 }
 
 Napi::Value NativeLayer::finish(const Napi::CallbackInfo &info) {
@@ -170,7 +178,8 @@ Napi::Object NativeLayer::Init(Napi::Env env, Napi::Object exports) {
           NativeLayer::InstanceMethod("configShaders",
                                       &NativeLayer::configShaders),
           NativeLayer::InstanceMethod("pollEvent", &NativeLayer::pollEvent),
-          NativeLayer::InstanceMethod("renderFrame", &NativeLayer::renderFrame),
+          NativeLayer::InstanceMethod("drawTriangles", &NativeLayer::drawTriangles),
+          NativeLayer::InstanceMethod("clear", &NativeLayer::clear),
           NativeLayer::InstanceMethod("swapWindow", &NativeLayer::swapWindow),
       });
 
