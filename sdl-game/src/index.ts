@@ -16,6 +16,7 @@ enum TextureUnit {
   BUTTON,
 }
 
+console.log(shader.fragPost);
 const button1 = new nat.Texture();
 button1.loadFile('public/assets/button-down.png');
 const button2 = new nat.Texture();
