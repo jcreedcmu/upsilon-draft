@@ -15,7 +15,7 @@ void main() {
 };
 `
 
-export const fragment = `
+export const fragmentTexture = `
 #version 300 es
 
 precision mediump float;
@@ -29,7 +29,7 @@ void main() {
 };
 `;
 
-export const fragmentX = `
+export const fragmentSynthetic = `
 #version 300 es
 
 precision mediump float;

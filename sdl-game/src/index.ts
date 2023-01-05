@@ -24,36 +24,31 @@ const fb = new nat.Framebuffer();
 fb.setOutputTexture(fbTexture.textureId());
 fb.unbind();
 
-const programX = new nat.Program(shader.vertex, shader.fragmentX);
+const programX = new nat.Program(shader.vertex, shader.fragmentSynthetic);
 nativeLayer.configShaders(programX.programId());
 nat.glUniform2f(programX.getUniformLocation("u_offset"), 0, 0);
 nat.glUniform2f(programX.getUniformLocation("u_size"), width, height);
 nat.glUniform2f(programX.getUniformLocation("u_viewport_size"), width, height);
 
-const program = new nat.Program(shader.vertex, shader.fragment);
+const programTexture = new nat.Program(shader.vertex, shader.fragmentTexture);
 
-nat.glUniform2f(program.getUniformLocation("u_offset"), width - 100, height - 75);
-nat.glUniform2f(program.getUniformLocation("u_size"), 100, 75);
-nat.glUniform2f(program.getUniformLocation("u_viewport_size"), width, height);
+nat.glUniform2f(programTexture.getUniformLocation("u_offset"), width - 100, height - 75);
+nat.glUniform2f(programTexture.getUniformLocation("u_size"), 100, 75);
+nat.glUniform2f(programTexture.getUniformLocation("u_viewport_size"), width, height);
 
-const u_sampler = program.getUniformLocation('u_sampler');
-nativeLayer.configShaders(program.programId());
+const u_sampler = programTexture.getUniformLocation('u_sampler');
+nativeLayer.configShaders(programTexture.programId());
 nat.glUniform1i(u_sampler, TextureUnit.BUTTON);
 
 while (nativeLayer.pollEvent()) {
-  const buttonTexture = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
   fb.bind();
   programX.use();
   nativeLayer.renderFrame();
-
   fb.unbind();
-  program.use();
-  if (0) {
-    buttonTexture.bind(TextureUnit.BUTTON);
-  }
-  else {
-    fbTexture.bind(TextureUnit.BUTTON);
-  }
+
+  const buttonTexture = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
+  programTexture.use();
+  buttonTexture.bind(TextureUnit.BUTTON);
   nativeLayer.renderFrame();
 
   nativeLayer.swapWindow();
