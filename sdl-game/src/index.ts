@@ -61,8 +61,6 @@ const u_sampler = program.getUniformLocation('u_sampler');
 nativeLayer.configShaders(program.programId());
 nat.glUniform1i(u_sampler, BUTTON_TEXTURE_UNIT);
 
-
-
 while (nativeLayer.pollEvent()) {
   const b = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
   program.use();
