@@ -356,3 +356,8 @@ though I think that would be separately fun.
 
 - Goal is to construct an object which grants root access to system.
 - Try to think of some story reason for needing this.
+
+=== 2023.01.05 META: (:id 5027f8a8-135e-42f4-b70c-de1921df86d0)
+
+Q: Framebuffer example?
+A: https://docs.gl/gl3/glBindFramebuffer

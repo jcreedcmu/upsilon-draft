@@ -10,6 +10,7 @@ public:
   NFUNC(textureId);
   NFUNC(bind);
   NFUNC(loadFile);
+  NFUNC(makeBlank);
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
   static Napi::FunctionReference constructor;

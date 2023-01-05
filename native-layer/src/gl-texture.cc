@@ -14,6 +14,7 @@ Napi::Object GlTexture::Init(Napi::Env env, Napi::Object exports) {
           GlTexture::InstanceMethod("textureId", &GlTexture::textureId),
           GlTexture::InstanceMethod("bind", &GlTexture::bind),
           GlTexture::InstanceMethod("loadFile", &GlTexture::loadFile),
+          GlTexture::InstanceMethod("makeBlank", &GlTexture::makeBlank),
       });
 
   GlTexture::constructor = Napi::Persistent(func);
@@ -27,11 +28,12 @@ Napi::Object GlTexture::Init(Napi::Env env, Napi::Object exports) {
  GlTexture::GlTexture(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   glGenTextures(1, &this->_texture);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, this->_texture);
 }
 
 NFUNC(GlTexture::loadFile) {
   NBOILER();
+
+  glBindTexture(GL_TEXTURE_2D, this->_texture);
 
   // XXX Maybe I should move argument checking into a js wrapper?
   if (info.Length() < 1) {
@@ -57,6 +59,36 @@ NFUNC(GlTexture::loadFile) {
     throwJs(env, "Failed to load texture");
   }
   stbi_image_free(data);
+
+  return env.Null();
+}
+
+NFUNC(GlTexture::makeBlank) {
+  NBOILER();
+
+  glBindTexture(GL_TEXTURE_2D, this->_texture);
+
+  // XXX Maybe I should move argument checking into a js wrapper?
+  if (info.Length() < 2) {
+    throwJs(env, "expected 2 arguments");
+  }
+
+  if (!info[0].IsNumber()) {
+    throwJs(env, "argument 0 should be a number");
+  }
+
+  if (!info[1].IsNumber()) {
+    throwJs(env, "argument 1 should be a number");
+  }
+
+  int width = info[0].As<Napi::Number>().Uint32Value();
+  int height = info[1].As<Napi::Number>().Uint32Value();
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+  // interpolation settings unnecessarily coupled to the loaded vs.
+  // uninitialized texture distinction
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   return env.Null();
 }

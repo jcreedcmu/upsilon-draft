@@ -21,6 +21,7 @@ export class Texture {
   constructor();
   loadFile(filename: string): void;
   bind(textureUnit: number): void;
+  makeBlank(width: number, height: number): void;
 }
 
 export class Program {

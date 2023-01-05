@@ -58,6 +58,9 @@ button1.loadFile('public/assets/button-down.png');
 const button2 = new nat.Texture();
 button2.loadFile('public/assets/button-up.png');
 
+const fbTexture = new nat.Texture();
+fbTexture.makeBlank(width, height);
+
 const programX = new nat.Program(vertexShader, fragmentShaderX);
 nativeLayer.configShaders(programX.programId());
 nat.glUniform2f(programX.getUniformLocation("u_offset"), 0, 0);
