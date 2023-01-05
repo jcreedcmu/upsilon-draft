@@ -1,5 +1,5 @@
-const nat = require('native-layer');
-const NativeLayer = nat.NativeLayer;
+import * as nat from 'native-layer';
+import { NativeLayer } from 'native-layer';
 
 const nativeLayer = new NativeLayer();
 
@@ -64,7 +64,7 @@ nat.glUniform1i(u_sampler, BUTTON_TEXTURE_UNIT);
 
 
 while (nativeLayer.pollEvent()) {
-  const b = (  Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
+  const b = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
   program.use();
   b.bind(BUTTON_TEXTURE_UNIT);
   nativeLayer.renderFrame();
