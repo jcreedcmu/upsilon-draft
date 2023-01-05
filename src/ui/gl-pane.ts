@@ -90,10 +90,10 @@ function getProgPost(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, vert
   gl.useProgram(prog);
 
   attributeSetFloats(gl, prog, "pos", 3, [
-    -2, 2, 0,
-    2, 2, 0,
-    -2, -2, 0,
-    2, -2, 0
+    -1, 1, 0,
+    1, 1, 0,
+    -1, -1, 0,
+    1, -1, 0
   ]);
 
   return prog;

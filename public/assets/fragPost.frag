@@ -1,6 +1,7 @@
 #version 300 es
 
 precision mediump float;
+in vec2 v_uv; // range is [0,1] x [0,1]
 out vec4 outputColor;
 
 const int ROWS = 18;
@@ -58,7 +59,7 @@ vec4 samp(vec2 pos) {
 }
 
 void main() {
-  vec2 pos = gl_FragCoord.xy;
+  vec2 pos = v_uv * windowSize;
   vec4 fade = vec4(vec3(u_fade / 1.8), 1.0);
   outputColor = fade * (samp(pos) + 0.5 * samp(pos + vec2(1.0, 0.1)) + 0.5 * samp(pos + vec2(-1.0, 0.1))) ;
 }
