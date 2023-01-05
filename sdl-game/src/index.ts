@@ -1,6 +1,9 @@
 import * as nat from 'native-layer';
 import { NativeLayer } from 'native-layer';
 
+const width = 800;
+const height = 600;
+
 const nativeLayer = new NativeLayer();
 
 const vertexShader = `
@@ -55,8 +58,16 @@ const button2 = new nat.Texture('public/assets/button-up.png');
 
 const programX = new nat.Program(vertexShader, fragmentShaderX);
 nativeLayer.configShaders(programX.programId());
+nat.glUniform2f(programX.getUniformLocation("u_offset"), 0, 0);
+nat.glUniform2f(programX.getUniformLocation("u_size"), width, height);
+nat.glUniform2f(programX.getUniformLocation("u_viewport_size"), width, height);
 
 const program = new nat.Program(vertexShader, fragmentShader);
+
+nat.glUniform2f(program.getUniformLocation("u_offset"), width - 100, height - 75);
+nat.glUniform2f(program.getUniformLocation("u_size"), 100, 75);
+nat.glUniform2f(program.getUniformLocation("u_viewport_size"), width, height);
+
 const u_sampler = program.getUniformLocation('u_sampler');
 nativeLayer.configShaders(program.programId());
 nat.glUniform1i(u_sampler, BUTTON_TEXTURE_UNIT);
@@ -64,7 +75,7 @@ nat.glUniform1i(u_sampler, BUTTON_TEXTURE_UNIT);
 while (nativeLayer.pollEvent()) {
   const buttonTexture = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
   programX.use();
-  //  buttonTexture.bind(BUTTON_TEXTURE_UNIT);
+  // buttonTexture.bind(BUTTON_TEXTURE_UNIT);
   nativeLayer.renderFrame();
   nativeLayer.swapWindow();
 }

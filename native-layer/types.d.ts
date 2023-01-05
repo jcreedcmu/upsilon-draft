@@ -15,6 +15,7 @@ export class NativeLayer {
 }
 
 export function glUniform1i(uniform: UniformLoc, value: number): void;
+export function glUniform2f(uniform: UniformLoc, value: number, value2: number): void;
 
 export class Texture {
   constructor(filename: string);

@@ -111,12 +111,6 @@ Napi::Value NativeLayer::configShaders(const Napi::CallbackInfo &info) {
   glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data),
                g_vertex_buffer_data, GL_STATIC_DRAW);
 
-  // Set some uniforms
-  glUniform2f(glGetUniformLocation(program, "u_offset"), width - 100,
-              height - 75);
-  glUniform2f(glGetUniformLocation(program, "u_size"), 100, 75);
-  glUniform2f(glGetUniformLocation(program, "u_viewport_size"), width, height);
-
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
 
@@ -215,6 +209,34 @@ NFUNC(wrap_glUniform1i) {
   return env.Null();
 }
 
+NFUNC(wrap_glUniform2f) {
+  NBOILER();
+
+  if (info.Length() < 3) {
+    throwJs(env,
+            "usage: glUniform2f(location: number, value: number, value2: number)");
+  }
+
+  if (!info[0].IsNumber()) {
+    return throwJs(env, "argument 0 should be a number");
+  }
+
+  if (!info[1].IsNumber()) {
+    return throwJs(env, "argument 1 should be a number");
+  }
+
+  if (!info[2].IsNumber()) {
+    return throwJs(env, "argument 2 should be a number");
+  }
+
+  glUniform2f(
+              info[0].As<Napi::Number>().Uint32Value(),
+              info[1].As<Napi::Number>().FloatValue(),
+              info[2].As<Napi::Number>().FloatValue()
+              );
+  return env.Null();
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
@@ -222,6 +244,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   GlProgram::Init(env, exports);
 
   exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));
+  exports.Set("glUniform2f", Napi::Function::New(env, wrap_glUniform2f));
   return exports;
 }
 
