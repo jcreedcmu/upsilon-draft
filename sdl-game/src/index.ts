@@ -33,6 +33,11 @@ nativeLayer.configShaders(programSynth.programId());
 nat.glUniform2f(programSynth.getUniformLocation("u_offset"), 0, 0);
 nat.glUniform2f(programSynth.getUniformLocation("u_size"), width, height);
 nat.glUniform2f(programSynth.getUniformLocation("u_viewport_size"), width, height);
+nat.glUniform1i(programSynth.getUniformLocation("u_screenTexture"), TextureUnit.FB);
+nat.glUniform1f(programSynth.getUniformLocation("u_time"), 0.0);
+nat.glUniform1f(programSynth.getUniformLocation("u_beamScale"), 1.0);
+nat.glUniform1f(programSynth.getUniformLocation("u_fade"), 1.0);
+nat.glUniform2f(programSynth.getUniformLocation("windowSize"), screen_width, screen_height);
 
 const programTexture = new nat.Program(shader.vertex, shader.fragmentTexture);
 nativeLayer.configShaders(programTexture.programId());
@@ -42,6 +47,7 @@ const u_sampler = programTexture.getUniformLocation('u_sampler');
 const programPost = new nat.Program(shader.vertex, shader.fragPost);
 nativeLayer.configShaders(programPost.programId());
 
+fbTexture.bind(TextureUnit.FB);
 
 while (nativeLayer.pollEvent()) {
   nativeLayer.clear();
@@ -53,12 +59,10 @@ while (nativeLayer.pollEvent()) {
   fb.unbind();
 
   // Draw screen postprocessing
-  programTexture.use();
-  nat.glUniform2f(programTexture.getUniformLocation("u_offset"), (width - screen_width) / 2, (height - screen_height) / 2);
-  nat.glUniform2f(programTexture.getUniformLocation("u_size"), screen_width, screen_height);
-  nat.glUniform2f(programTexture.getUniformLocation("u_viewport_size"), width, height);
-  nat.glUniform1i(u_sampler, TextureUnit.FB);
-  fbTexture.bind(TextureUnit.FB);
+  programPost.use();
+  nat.glUniform2f(programPost.getUniformLocation("u_offset"), (width - screen_width) / 2, (height - screen_height) / 2);
+  nat.glUniform2f(programPost.getUniformLocation("u_size"), screen_width, screen_height);
+  nat.glUniform2f(programPost.getUniformLocation("u_viewport_size"), width, height);
   nativeLayer.drawTriangles();
 
   // Draw power button

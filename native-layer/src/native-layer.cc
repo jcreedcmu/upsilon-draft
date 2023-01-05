@@ -218,6 +218,29 @@ NFUNC(wrap_glUniform1i) {
   return env.Null();
 }
 
+NFUNC(wrap_glUniform1f) {
+  NBOILER();
+
+  if (info.Length() < 2) {
+    throwJs(env,
+            "usage: glUniform1f(location: number, value: number)");
+  }
+
+  if (!info[0].IsNumber()) {
+    return throwJs(env, "argument 0 should be a number");
+  }
+
+  if (!info[1].IsNumber()) {
+    return throwJs(env, "argument 1 should be a number");
+  }
+
+  glUniform1f(
+              info[0].As<Napi::Number>().Uint32Value(),
+              info[1].As<Napi::Number>().FloatValue()
+              );
+  return env.Null();
+}
+
 NFUNC(wrap_glUniform2f) {
   NBOILER();
 
@@ -253,6 +276,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   GlProgram::Init(env, exports);
 
   exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));
+  exports.Set("glUniform1f", Napi::Function::New(env, wrap_glUniform1f));
   exports.Set("glUniform2f", Napi::Function::New(env, wrap_glUniform2f));
   return exports;
 }
