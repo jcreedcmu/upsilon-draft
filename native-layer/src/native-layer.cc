@@ -7,6 +7,7 @@
 
 #include "gl-program.hh"
 #include "gl-texture.hh"
+#include "gl-framebuffer.hh"
 #include "napi-helpers.hh"
 #include "vendor/stb_image.h"
 
@@ -217,6 +218,7 @@ NFUNC(wrap_glUniform1i) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
+  GlFramebuffer::Init(env, exports);
   GlProgram::Init(env, exports);
 
   exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));

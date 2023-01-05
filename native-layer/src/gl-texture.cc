@@ -67,7 +67,7 @@ NFUNC(GlTexture::bind) {
 
   if (info.Length() < 1) {
     throwJs(env,
-            "usage: getUniformLocation(texture unit: number)");
+            "usage: bind(texture unit: number)");
   }
 
   if (!info[0].IsNumber()) {
