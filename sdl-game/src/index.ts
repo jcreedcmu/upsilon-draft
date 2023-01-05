@@ -5,6 +5,10 @@ import * as shader from './shaders';
 const width = 800;
 const height = 600;
 
+const SCALE = 2;
+const screen_width = 48 * 6 * SCALE;
+const screen_height = 18 * 12 * SCALE;
+
 const nativeLayer = new NativeLayer();
 
 enum TextureUnit {
@@ -26,8 +30,8 @@ fb.unbind();
 
 const programX = new nat.Program(shader.vertex, shader.fragmentSynthetic);
 nativeLayer.configShaders(programX.programId());
-nat.glUniform2f(programX.getUniformLocation("u_offset"), 0, 0);
-nat.glUniform2f(programX.getUniformLocation("u_size"), width, height);
+nat.glUniform2f(programX.getUniformLocation("u_offset"), (width - screen_width) / 2, (height - screen_height) / 2);
+nat.glUniform2f(programX.getUniformLocation("u_size"), screen_width, screen_height);
 nat.glUniform2f(programX.getUniformLocation("u_viewport_size"), width, height);
 
 const programTexture = new nat.Program(shader.vertex, shader.fragmentTexture);
@@ -43,10 +47,10 @@ nat.glUniform1i(u_sampler, TextureUnit.BUTTON);
 while (nativeLayer.pollEvent()) {
   nativeLayer.clear();
 
-  fb.bind();
+  //fb.bind();
   programX.use();
   nativeLayer.drawTriangles();
-  fb.unbind();
+  //fb.unbind();
 
   const buttonTexture = (Math.floor(Date.now() / 1000) % 2 == 0) ? button1 : button2;
   programTexture.use();
