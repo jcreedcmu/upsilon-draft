@@ -4,9 +4,6 @@ precision mediump float;
 in vec2 v_uv; // range is [0,1] x [0,1]
 out vec4 outputColor;
 
-const int ROWS = 18;
-const int COLS = 48;
-
 uniform sampler2D u_screenTexture;
 
 uniform float u_time;
@@ -18,11 +15,7 @@ uniform float u_beamScale; // When u_beamScale is 1.0, show normal
 uniform float u_fade; // When u_fade is 1.0, show standard brightness.
                       // When 0.0, paint black.
 
-const int SCALE = 3; // how big a single pixel is
-// How big a glyph is in the font
-const ivec2 char_size = ivec2(6, 12);
-
-const vec2 windowSize = vec2(SCALE * COLS * char_size.x, SCALE * ROWS * char_size.y);
+uniform vec2 windowSize;
 
 vec2 warp(vec2 pos, vec2 amount){
   pos = pos * 2.0 - 1.0;

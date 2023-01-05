@@ -89,6 +89,9 @@ function getProgPost(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, vert
   const prog = shaderProgram(gl, vert, frag);
   gl.useProgram(prog);
 
+  const windowSize = gl.getUniformLocation(prog, 'windowSize');
+  gl.uniform2f(windowSize, canvas.width, canvas.height);
+
   attributeSetFloats(gl, prog, "pos", 3, [
     -1, 1, 0,
     1, 1, 0,
