@@ -1,10 +1,12 @@
 const { build } = require('esbuild');
+const glob = require('util').promisify(require('glob'));
 
 const args = process.argv.slice(2);
 
+
 (async () => {
   await build({
-	 entryPoints: ['./src/index.ts'],
+	 entryPoints: await glob('./src/*.ts'),
 	 minify: false,
 	 sourcemap: true,
 	 bundle: false,
