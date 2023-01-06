@@ -14,7 +14,7 @@ const screen_height = ROWS * 12 * SCALE;
 const nativeLayer = new NativeLayer();
 
 enum TextureUnit {
-  FB = 0,
+  FB = 1,
   BUTTON,
   FONT,
   TEXT_PAGE,
@@ -29,12 +29,15 @@ button2.loadFile('public/assets/button-up.png');
 
 const fbTexture = new nat.Texture();
 fbTexture.makeBlank(width, height);
+fbTexture.bind(TextureUnit.FB);
 
 const textPageTexture = new nat.Texture();
 textPageTexture.makeBlank(COLS, ROWS);
+textPageTexture.bind(TextureUnit.TEXT_PAGE);
 
 const fontTexture = new nat.Texture();
 fontTexture.loadFile('public/assets/vga.png');
+fontTexture.bind(TextureUnit.FONT);
 
 const fb = new nat.Framebuffer();
 fb.setOutputTexture(fbTexture.textureId());
@@ -50,7 +53,7 @@ nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FON
 nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
 nat.glUniform4fv(programText.getUniformLocation("u_palette"),
   [
-    1, 1, 1, 1,
+    1, 0, 1, 1,
     1, 1, 1, 1,
     1, 1, 1, 1,
     1, 1, 1, 1,
@@ -70,6 +73,7 @@ nat.glUniform4fv(programText.getUniformLocation("u_palette"),
     1, 1, 1, 1,
     1, 1, 1, 1,
   ]);
+nat.debug(programText.getUniformLocation("u_palette"), TextureUnit.TEXT_PAGE);
 
 const programSynth = new nat.Program(shader.vertex, shader.fragmentSynthetic);
 nativeLayer.configShaders(programSynth.programId());
@@ -92,7 +96,6 @@ nat.glUniform1i(programPost.getUniformLocation("u_screenTexture"), TextureUnit.F
 nat.glUniform1f(programPost.getUniformLocation("u_beamScale"), 1.0);
 nat.glUniform1f(programPost.getUniformLocation("u_fade"), 1.0);
 nat.glUniform2f(programPost.getUniformLocation("windowSize"), screen_width, screen_height);
-fbTexture.bind(TextureUnit.FB);
 
 const progStart = Date.now();
 function time(): number {

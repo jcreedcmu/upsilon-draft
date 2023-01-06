@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { paletteDataInt } from './palette';
+import { paletteDataFloat } from './palette';
 
 function genNativePalette() {
-  const data = paletteDataInt();
+  const data = paletteDataFloat();
   const contents = data.map(n => `   ${n},`).join('\n');
   const palette = `#pragma once
 
-unsigned char palette[] = {
+GLfloat palette[] = {
 ${contents}
 };
 `;

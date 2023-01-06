@@ -26,7 +26,7 @@ deploy:
 count:
 	ag -g 'cc$$|hh$$|ts$$|frag$$|vert$$' --ignore='tests' | xargs wc -l
 
-native-layer/src/gen/palette.h: src/ui/palette.ts
+native-layer/src/gen/palette.h: src/ui/palette.ts src/ui/gen-native-palette.ts
 	node build-gen.js
 	node gen/gen-native-palette.js
 

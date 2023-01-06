@@ -269,6 +269,70 @@ NFUNC(wrap_glUniform2f) {
   return env.Null();
 }
 
+#include "gen/palette.h"
+
+GLfloat bad_palette[] = {
+   1, 0, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+};
+
+NFUNC(debug) {
+  NBOILER();
+
+  if (info.Length() < 2) {
+    throwJs(env,
+            "usage: debug(palette_uniform_loc: number, text_page_texture_unit: number)");
+  }
+
+  if (!info[0].IsNumber()) {
+    return throwJs(env, "argument 0 should be a number");
+  }
+
+  if (!info[1].IsNumber()) {
+    return throwJs(env, "argument 1 should be a number");
+  }
+
+  unsigned int palette_uniform_loc = info[0].As<Napi::Number>().Uint32Value();
+  unsigned int text_page_texture_unit = info[0].As<Napi::Number>().Uint32Value();
+  glUniform4fv(palette_uniform_loc, 16, bad_palette);
+
+  glActiveTexture(GL_TEXTURE0 + text_page_texture_unit);
+
+  const int TEXT_WIDTH = 48; // XXX HARDCODE
+  const int TEXT_HEIGHT = 18; // XXX HARDCODE
+  unsigned char data[TEXT_WIDTH * TEXT_HEIGHT * 4];
+  for (int i = 0; i < TEXT_WIDTH; i++) {
+    for (int j = 0; j < TEXT_HEIGHT; j++) {
+      const int off = (j * TEXT_WIDTH + i) * 4;
+      data[off] = 65;
+      data[off+1] = 65;
+      data[off+2] = 65;
+      data[off+3] = 65;
+    }
+  }
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXT_WIDTH, TEXT_HEIGHT, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, data);
+
+  return env.Null();
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
@@ -278,6 +342,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));
   exports.Set("glUniform1f", Napi::Function::New(env, wrap_glUniform1f));
   exports.Set("glUniform2f", Napi::Function::New(env, wrap_glUniform2f));
+  exports.Set("debug", Napi::Function::New(env, debug));
   return exports;
 }
 
