@@ -1,7 +1,7 @@
 import { Fs, getFullContents, getItem, itemContents } from '../fs/fs';
 import { SpecialId } from '../fs/initial-fs';
 import { SoundEffect } from '../ui/sound';
-import { EnumData, Show, showAll } from './model';
+import { EnumData, Item, Show, showAll } from './model';
 import { KeyAction, keyActionReverse, keyActions } from "./key-actions";
 
 // A hook is an extra piece of code that should be run any time a
@@ -122,10 +122,15 @@ export function enumsOfFs(fs: Fs): EnumData {
     return {};
   }
   const rv: EnumData = {};
+  function getEnumValue(item: Item): string {
+    return (item.content.t == 'file' && item.content.text.length > 0)
+      ? item.content.text
+      : item.name;
+  }
   cont?.forEach(item => {
     let m;
     if (item.content.t == 'file') {
-      rv[item.name] = item.content.contents.map(childId => getItem(fs, childId).name);
+      rv[item.name] = item.content.contents.map(childId => getEnumValue(getItem(fs, childId)));
     }
   });
   return rv;

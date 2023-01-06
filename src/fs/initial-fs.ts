@@ -128,17 +128,27 @@ function errorDir(): ItemPlan {
 }
 
 function enumsDir(): ItemPlan {
-  type EnumItem = { name: string, values: string[] };
+  type EnumValue = string | { name: string, value: string };
+  type EnumItem = { name: string, values: EnumValue[] };
   const enums: EnumItem[] = [
     { name: 'option', values: ['a', 'b', 'c'] },
     { name: 'numeric', values: '0123456789abcdef'.split('').map(x => `[${x}]`) },
-    { name: 'boolean', values: ['{bred}{bg-red}[ ]', '{bgreen}{bg-green}[{checkmark}]'] },
+    {
+      name: 'boolean', values: [
+        { name: 'false', value: '{bred}{bg-red}[ ]' },
+        { name: 'true', value: '{bgreen}{bg-green}[{checkmark}]' },
+      ]
+    },
   ];
+  function planOfEnumValue(v: EnumValue): ItemPlan {
+    if (typeof v == 'string')
+      return { t: 'file', name: v };
+    return { t: 'file', name: v.name, content: { t: 'file', text: v.value, contents: [] } };
+  }
   function enumDir(key: EnumItem): ItemPlan {
     const { name, values } = key;
     return {
-      t: 'dir', name, contents: values.map(value =>
-        ({ t: 'file', name: value })), hooks: ['ENUM']
+      t: 'dir', name, contents: values.map(planOfEnumValue), hooks: ['ENUM']
     };
   }
   return {
