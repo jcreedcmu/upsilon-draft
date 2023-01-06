@@ -3,25 +3,12 @@ import { Point } from '../util/types';
 import { Screen } from './screen';
 import { TEXT_PAGE_H } from './ui-constants';
 import { TEXT_PAGE_W } from './ui-constants';
-import { char_size, COLS, rawPalette, ROWS, SCALE } from './ui-constants';
+import { char_size, COLS, ROWS, SCALE } from './ui-constants';
+import { paletteDataFloat } from './palette';
 
 const screen_size: Point = {
   x: char_size.x * COLS * SCALE,
   y: char_size.y * ROWS * SCALE
-}
-
-// returns an array of 16 * 4 floats, which are the rgba values for
-// the 16 palette entries.
-function paletteData(): number[] {
-  function valOfHex(hex: string) {
-    return parseInt(hex, 16) / 15;
-  }
-  const rv: number[] = [];
-  for (let i = 0; i < 16; i++) {
-    const [r, g, b] = [1, 2, 3].map(pos => valOfHex(rawPalette[i][pos]));
-    rv.splice(i * 4, 4, ...[r, g, b, 1.0]);
-  }
-  return rv;
 }
 
 // Make a new framebuffer object bound to a texture. The texture it's
@@ -115,7 +102,7 @@ function getProgText(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, vert
   gl.uniform2f(canvasSize, canvas.width, canvas.height);
 
   const palette = gl.getUniformLocation(prog, 'u_palette');
-  gl.uniform4fv(palette, paletteData());
+  gl.uniform4fv(palette, paletteDataFloat());
 
   const fontTexture = gl.createTexture();
   gl.activeTexture(gl.TEXTURE0);
