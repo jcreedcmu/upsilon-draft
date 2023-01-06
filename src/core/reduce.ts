@@ -5,7 +5,7 @@ import { nowTicks } from './clock';
 import { ConfigureViewState, putItemConfig, reduceConfigureView } from './configure';
 import { ErrorCode, ErrorInfo } from './errors';
 import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
-import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
+import { enumsOfFs, errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction, SignalAction } from './lines';
 import { isLinLog, startLinlog } from './linlog';
 import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
@@ -202,6 +202,7 @@ function processHook(state: GameState, hook: Hook): GameState {
     case 'KEY': return produce(state, s => { s._cached_keybindings = keybindingsOfFs(state.fs); });
     case 'SOUND': return produce(state, s => { s._cached_sounds = soundsOfFs(state.fs); });
     case 'ERROR': return produce(state, s => { s._cached_errors = errorsOfFs(state.fs); });
+    case 'ENUM': return produce(state, s => { s._cached_enums = enumsOfFs(state.fs); });
   }
 }
 

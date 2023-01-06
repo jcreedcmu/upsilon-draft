@@ -11,6 +11,7 @@ export type Hook =
   | 'KEY'
   | 'SOUND'
   | 'ERROR'
+  | 'ENUM'
   ;
 
 export function keybindingsOfFs(fs: Fs): Record<string, KeyAction> {
@@ -61,7 +62,7 @@ export function errorsOfFs(fs: Fs): Record<number, string> {
     cont = getFullContents(fs, SpecialId.errors);
   }
   catch (e) {
-    { };
+    return {};
   }
   const rv: Record<number, string> = {};
   cont?.forEach(item => {
@@ -107,6 +108,24 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
       if (content.t == 'sound') {
         rv[item.name] = content.effect;
       }
+    }
+  });
+  return rv;
+}
+
+export function enumsOfFs(fs: Fs): Record<string, string[]> {
+  let cont;
+  try {
+    cont = getFullContents(fs, SpecialId.enums);
+  }
+  catch (e) {
+    return {};
+  }
+  const rv: Record<string, string[]> = {};
+  cont?.forEach(item => {
+    let m;
+    if (item.content.t == 'file') {
+      rv[item.name] = item.content.contents.map(childId => getItem(fs, childId).name);
     }
   });
   return rv;

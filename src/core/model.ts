@@ -9,7 +9,7 @@ import { ClockState, mkClockState } from './clock';
 import { ConfigureViewState, ItemConfig } from './configure';
 import { ErrorCode } from './errors';
 import { cancelRecurꜝ, ExecutableName } from './executables';
-import { errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
+import { enumsOfFs, errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { KeyAction } from './key-actions';
 import { FullLine, getLines } from './lines';
 import { Linlog, LinlogContent } from './linlog';
@@ -198,6 +198,7 @@ export type GameState = {
   _cached_sounds: Record<string, SoundEffect>,
   _cached_show: Show,
   _cached_errors: Record<number, string>,
+  _cached_enums: Record<string, string[]>,
 };
 
 export function mkState(): State {
@@ -236,6 +237,7 @@ export function gameStateOfFs(fs: Fs): GameState {
     _cached_sounds: soundsOfFs(fs),
     _cached_show: showOfFs(fs),
     _cached_errors: errorsOfFs(fs),
+    _cached_enums: enumsOfFs(fs),
   };
 }
 

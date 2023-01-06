@@ -15,6 +15,7 @@ export enum SpecialId {
   sounds = '_sounds',
   lens = '_lens',
   errors = '_errors',
+  enums = '_enums',
   root = '_root',
   cursorMark = '_cursorMark', // XXX not really an ident in the same sense?
   tmpMark = '_tmpMark', // XXX this is like a caller-save register

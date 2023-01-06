@@ -114,6 +114,7 @@ const beforeState: GameState = {
     "info": true
   },
   _cached_errors: {},
+  _cached_enums: {},
   error: undefined,
 };
 
