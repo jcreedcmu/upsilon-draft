@@ -310,8 +310,9 @@ NFUNC(debug) {
   }
 
   unsigned int palette_uniform_loc = info[0].As<Napi::Number>().Uint32Value();
-  unsigned int text_page_texture_unit = info[0].As<Napi::Number>().Uint32Value();
-  glUniform4fv(palette_uniform_loc, 16, bad_palette);
+  unsigned int text_page_texture_unit = info[1].As<Napi::Number>().Uint32Value();
+  std::cout << "text_page_texture_unit" << text_page_texture_unit << "\n";
+  glUniform4fv(palette_uniform_loc, 16, palette);
 
   glActiveTexture(GL_TEXTURE0 + text_page_texture_unit);
 
@@ -321,10 +322,10 @@ NFUNC(debug) {
   for (int i = 0; i < TEXT_WIDTH; i++) {
     for (int j = 0; j < TEXT_HEIGHT; j++) {
       const int off = (j * TEXT_WIDTH + i) * 4;
-      data[off] = 65;
-      data[off+1] = 65;
-      data[off+2] = 65;
-      data[off+3] = 65;
+      data[off] = ((i % 2) ^ (j % 2) ? 4 : 32);
+      data[off+1] = 64 + 8 + 3;
+      data[off+2] = 0;
+      data[off+3] = 0;
     }
   }
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXT_WIDTH, TEXT_HEIGHT, 0, GL_RGBA,
