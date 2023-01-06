@@ -42,6 +42,7 @@ export function parseTagstr(str: string, init: Attr): AttrString[] {
       const entity = tag.toUpperCase();
       if (isEntity(entity)) {
         // XXX Maybe coalesce onto existing string if any
+        rv.push({ str: prefix, attr });
         rv.push({ str: Chars[entity], attr });
         str = str.substr(whole.length);
         continue;

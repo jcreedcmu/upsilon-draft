@@ -132,6 +132,7 @@ function enumsDir(): ItemPlan {
   const enums: EnumItem[] = [
     { name: 'option', values: ['a', 'b', 'c'] },
     { name: 'numeric', values: '0123456789abcdef'.split('').map(x => `[${x}]`) },
+    { name: 'boolean', values: ['{bred}{bg-red}[ ]', '{bgreen}{bg-green}[{checkmark}]'] },
   ];
   function enumDir(key: EnumItem): ItemPlan {
     const { name, values } = key;

@@ -1,5 +1,5 @@
 import { Item } from "../src/core/model";
-import { getLineOfItem } from "../src/core/lines";
+import { getLineOfItem, getRenderableLineOfItem } from "../src/core/lines";
 
 const item: Item = {
   name: 'treadmill',
@@ -22,7 +22,22 @@ const item: Item = {
     startTicks: 46,
     totalTicks: 50
   }
-}
+};
+
+const item2: Item = {
+  name: '{red}[{CHECKMARK}]{/}',
+  acls: {
+    exec: true,
+    pickup: true
+  },
+  content: {
+    t: 'file',
+    text: '',
+    contents: []
+  },
+  resources: {},
+  size: 1,
+};
 
 describe('rendering', () => {
   it('should show resources of in progress executables', () => {
@@ -33,5 +48,10 @@ describe('rendering', () => {
       throw 'failure';
     }
     expect(line.resources).toEqual({ cpu: 1, network: 0 });
+  });
+
+  it('should render entities in filenames correctly', () => {
+    const line = getRenderableLineOfItem('foo', item2, 0, {});
+    expect(line.str).toEqual('* {red}[{CHECKMARK}]{/}');
   });
 });

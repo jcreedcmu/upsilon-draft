@@ -11,6 +11,7 @@ import { Point } from '../util/types';
 import { int, invertAttr, mapval, maybeInvertAttr, repeat, zeropad } from '../util/util';
 import { vplus } from '../util/vutil';
 import { ImgData, tagStrOfImg } from './image';
+import { parseTagstrSafe } from './parse-tagstr';
 import { Attr, AttrString, BOXE, boxify, BOXW, Chars, Screen } from './screen';
 import { ColorCode as cc, COLS, ROWS } from './ui-constants';
 
@@ -176,6 +177,7 @@ function renderItemLine(screen: Screen, p: Point, len: number, line: ItemRendera
     return;
   }
 
+  // FIXME(#78): maybe should really be truncating as tagStr, not as str
   const str = truncate(line.str, FILE_COL_SIZE);
   const cpu = line.resources.cpu ?? 0;
   const network = line.resources.network ?? 0;

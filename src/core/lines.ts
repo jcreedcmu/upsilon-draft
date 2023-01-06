@@ -167,9 +167,10 @@ function enumContentAsStr(content: EnumContent, enumData: EnumData): string {
   const entry = record[content.value];
   if (entry == undefined)
     return '???';
-  return entry.substring(0, 3);
+  return entry; // XXX limit to three chars somehow?
 }
 
+// XXX ident is dead code?
 export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number, enumData: EnumData): RenderableLine {
   if (itemIsLabel(item)) {
     return {

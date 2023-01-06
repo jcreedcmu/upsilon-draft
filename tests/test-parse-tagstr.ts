@@ -22,10 +22,18 @@ describe('screen utilities', () => {
       { attr: { bg: 12, fg: 15 }, str: "hello world" },
       { attr: { bg: 0, fg: 15 }, str: "!" }
     ]);
+  });
 
+  test('should handle entities correctly', () => {
     expect(parse('{lock}!')).toEqual([
       { attr: { bg: 0, fg: 15 }, str: Chars.LOCK },
       { attr: { bg: 0, fg: 15 }, str: "!" },
     ]);
+
+    expect(parse('* {CHECKMARK}')).toEqual([
+      { attr: { bg: 0, fg: 15 }, str: "* " },
+      { attr: { bg: 0, fg: 15 }, str: Chars.CHECKMARK },
+    ]);
+
   });
 });
