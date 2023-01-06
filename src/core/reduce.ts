@@ -8,7 +8,7 @@ import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, schedul
 import { enumsOfFs, errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction, SignalAction } from './lines';
 import { isLinLog, startLinlog } from './linlog';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ, ItemContent } from './model';
 import { KeyAction } from "./key-actions";
 import { reduceTextEditView, TextEditViewState } from './text-edit';
 
@@ -120,16 +120,25 @@ export function toggleItem(state: GameState, ident: Ident): ReduceResult {
     [{ t: 'playAbstractSound', effect: 'toggle', loc: loc }]];
 }
 
-const INCREMENT_RANGE = 16;
-
 export function incrementItem(state: GameState, ident: Ident, amount: number): ReduceResult {
   const loc = getLocation(state.fs, ident);
+
+  const item = getItem(state.fs, ident);
+  const content = item.content;
+  if (content.t != 'enum')
+    throw new Error(`invariant violation, tried to increment a non-enum`);
+
+  const record = state._cached_enums[content.tp];
+  if (record == undefined) {
+    return withError(state, { code: 'badInputs' });
+  }
+  const incrementRange = record.length;
+
+  const newContent: ItemContent = { ...content, value: (content.value + incrementRange + amount) % incrementRange };
+
   state = produce(state, s => {
     modifyItemꜝ(s.fs, ident, item => {
-      const content = item.content;
-      if (content.t != 'enum')
-        throw new Error(`invariant violation, tried to increment a non-enum`);
-      content.value = (content.value + INCREMENT_RANGE + amount) % INCREMENT_RANGE;
+      item.content = newContent;
     });
   });
   state = processHooks(state, hooksOfLocation(state.fs, loc));
