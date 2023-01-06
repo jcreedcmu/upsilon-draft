@@ -51,7 +51,6 @@ export type EnumContent = { tp: string, value: number };
 export type ItemContent =
   // 'file' is inclusive of plain files and directories
   | { t: 'file', text: string, contents: Ident[] }
-  | { t: 'checkbox', checked: boolean }
   | { t: 'enum' } & EnumContent
   | { t: 'sound', effect: SoundEffect }
   | { t: 'image', data: ImgData }

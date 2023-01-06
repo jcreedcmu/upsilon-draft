@@ -189,7 +189,7 @@ export function itemOfPlan(plan: ItemPlan): Item {
     case 'checkbox': return {
       name: plan.name,
       acls: { pickup: true },
-      content: { t: 'checkbox', checked: plan.checked },
+      content: { t: 'enum', tp: 'boolean', value: plan.checked ? 1 : 0 },
       resources: {},
       size: 1,
     };

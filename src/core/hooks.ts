@@ -89,15 +89,15 @@ export function soundsOfFs(fs: Fs): Record<string, SoundEffect> {
   const rv: Record<string, SoundEffect> = {};
 
 
-  const ix = cont.findIndex(item => item.content.t == 'checkbox' && item.name == 'sounds');
+  const ix = cont.findIndex(item => item.content.t == 'enum' && item.name == 'sounds');
   if (ix == -1)
     return {};
   else {
     const content = cont[ix].content;
-    if (content.t != 'checkbox') {
-      throw new Error(`invariant violation, found checkbox but wasn't checkbox somehow?`);
+    if (content.t != 'enum') {
+      throw new Error(`invariant violation, found enum but wasn't enum somehow?`);
     }
-    if (!content.checked)
+    if (content.value == 0) // if checkbox not checked
       return {};
   }
 

@@ -70,7 +70,6 @@ export type ExecLineAction =
   | { t: 'error', code: ErrorCode }
   | { t: 'exec', ident: Ident }
   | { t: 'back' }
-  | { t: 'toggle', ident: Ident }
   | { t: 'increment', ident: Ident }
   | { t: 'play', ident: Ident } // as in: play audio
   ;
@@ -111,9 +110,6 @@ function execActionForItem(ident: Ident, item: Item): ExecLineAction {
   if (item.content.t == 'sound') {
     return { t: 'play', ident };
   }
-  else if (item.content.t == 'checkbox') {
-    return { t: 'toggle', ident };
-  }
   else if (item.content.t == 'enum') {
     return { t: 'increment', ident };
   }
@@ -149,7 +145,6 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
   switch (content.t) {
     case 'file': return { t: 'text', text: content.text };
     case 'image': return { t: 'image', data: content.data };
-    case 'checkbox': return undefined;
     case 'sound': return undefined;
     case 'inventorySlot': return undefined;
     case 'compressed': return undefined;
@@ -194,7 +189,6 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number,
     resources: item.resources,
     chargeNeeded: item.acls.exec ? 1 : 0,
     attr,
-    checked: item.content.t == 'checkbox' ? item.content.checked : undefined,
     valueStr: item.content.t == 'enum' ? enumContentAsStr(item.content, enumData) : undefined,
   }
 }

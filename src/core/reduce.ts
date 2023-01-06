@@ -105,21 +105,6 @@ export function addFutureꜝ(state: GameState, whenTicks: number, action: GameAc
   state.futures.sort((a, b) => a.whenTicks - b.whenTicks);
 }
 
-export function toggleItem(state: GameState, ident: Ident): ReduceResult {
-  const loc = getLocation(state.fs, ident);
-  state = produce(state, s => {
-    modifyItemꜝ(s.fs, ident, item => {
-      const content = item.content;
-      if (content.t != 'checkbox')
-        throw new Error(`invariant violation, tried to toggle a non-checkbox`);
-      content.checked = !content.checked;
-    });
-  });
-  state = processHooks(state, hooksOfLocation(state.fs, loc));
-  return [state,
-    [{ t: 'playAbstractSound', effect: 'toggle', loc: loc }]];
-}
-
 export function incrementItem(state: GameState, ident: Ident, amount: number): ReduceResult {
   const loc = getLocation(state.fs, ident);
 
@@ -198,7 +183,6 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): Redu
       return withError(state, { code: 'badExecutable', blame: actorId, loc });
     }
     case 'back': return ignoreError(reduceKeyAction(state, 'back'));
-    case 'toggle': return toggleItem(state, action.ident);
     case 'increment': return incrementItem(state, action.ident, 1);
     case 'play': return playAudioItem(state, action.ident);
   }
