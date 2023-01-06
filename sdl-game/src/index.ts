@@ -43,7 +43,7 @@ const fb = new nat.Framebuffer();
 fb.setOutputTexture(fbTexture.textureId());
 fb.unbind();
 
-const programText = new nat.Program(shader.vertex, shader.fragText);
+const programText = new nat.Program(shader.vertexFlip, shader.fragText);
 nativeLayer.configShaders(programText.programId());
 nat.glUniform2f(programText.getUniformLocation("u_offset"), 0, 0);
 nat.glUniform2f(programText.getUniformLocation("u_size"), width, height);

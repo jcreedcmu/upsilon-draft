@@ -1,6 +1,7 @@
 #version 300 es
 
 precision mediump float;
+in vec2 v_uv; // range is [0,1] x [0,1]
 out vec4 outputColor;
 
 // Size of the 'screen' in pixels, something like
@@ -25,11 +26,14 @@ uniform sampler2D u_textPageTexture;
 // Color codes index into this palette:
 uniform vec4 u_palette[16];
 
-const int SCALE = 3; // how big a single pixel is
-const int FCHAR_W = 32; // how many characters per row in font texture
-
 // How big a glyph is in the font
 const ivec2 char_size = ivec2(6, 12);
+
+int SCALE() {
+  return int(u_canvasSize.x / float(COLS * char_size.x) + 0.5); // how big a single pixel is
+}
+
+const int FCHAR_W = 32; // how many characters per row in font texture
 
 // Size of the font image
 const vec2 im_size = vec2(256.0, 256.0);
@@ -38,7 +42,9 @@ const vec2 im_size = vec2(256.0, 256.0);
 const vec4 bg = vec4(0.15, 0.15, 0.1, 1.0);
 
 vec2 getPixelPos() {
-  return vec2( gl_FragCoord.x, u_canvasSize.y -gl_FragCoord.y); // x ∈ [0.0, COLS * char_size.x * SCALE], y ∈ [0.0, ROWS * char_size.y * SCALE]
+// x ∈ [0.0, COLS * char_size.x * SCALE], y ∈ [0.0, ROWS * char_size.y * SCALE]
+  return vec2(v_uv.x * u_canvasSize.x, (1.-v_uv.y) * u_canvasSize.y);
+  return vec2( gl_FragCoord.x, u_canvasSize.y -gl_FragCoord.y);
 }
 
 ivec2 getChar(ivec2 char_pos) {
@@ -54,7 +60,7 @@ vec4 getColor() {
   vec2 pixel_pos = getPixelPos();
   if (pixel_pos.x < 0.0 || pixel_pos.y < 0.0)
 	 return bg;
-  ivec2 virtual_pixel_pos = ivec2(pixel_pos) / SCALE; // x ∈ [0, COLS * char_size.x], y ∈ [0, ROWS * char_size.y]
+  ivec2 virtual_pixel_pos = ivec2(pixel_pos) / SCALE(); // x ∈ [0, COLS * char_size.x], y ∈ [0, ROWS * char_size.y]
 
   ivec2 char_pos = virtual_pixel_pos / char_size; // x ∈ [0, COLS), y ∈ [0, ROWS)
   ivec2 pixel_within_char = virtual_pixel_pos - char_size * char_pos;
