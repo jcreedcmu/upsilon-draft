@@ -127,8 +127,8 @@ export function incrementItem(state: GameState, ident: Ident, amount: number): R
   state = produce(state, s => {
     modifyItemꜝ(s.fs, ident, item => {
       const content = item.content;
-      if (content.t != 'numeric')
-        throw new Error(`invariant violation, tried to increment a non-numeric`);
+      if (content.t != 'enum')
+        throw new Error(`invariant violation, tried to increment a non-enum`);
       content.value = (content.value + INCREMENT_RANGE + amount) % INCREMENT_RANGE;
     });
   });

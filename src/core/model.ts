@@ -46,11 +46,13 @@ export type Location =
 
 export type Value = number | string;
 
+export type EnumContent = { tp: string, value: number };
+
 export type ItemContent =
   // 'file' is inclusive of plain files and directories
   | { t: 'file', text: string, contents: Ident[] }
   | { t: 'checkbox', checked: boolean }
-  | { t: 'numeric', value: number }
+  | { t: 'enum' } & EnumContent
   | { t: 'sound', effect: SoundEffect }
   | { t: 'image', data: ImgData }
   | { t: 'inventorySlot' }

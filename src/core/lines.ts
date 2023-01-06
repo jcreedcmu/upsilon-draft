@@ -7,7 +7,7 @@ import { invertAttr, repeat, unreachable } from '../util/util';
 import { nowTicks } from './clock';
 import { ErrorCode } from './errors';
 import { itemIsLabel } from './labels';
-import { GameState, Ident, Item, ItemContent } from './model';
+import { EnumContent, GameState, Ident, Item, ItemContent } from './model';
 
 export type Action =
   | { t: 'back' }
@@ -114,7 +114,7 @@ function execActionForItem(ident: Ident, item: Item): ExecLineAction {
   else if (item.content.t == 'checkbox') {
     return { t: 'toggle', ident };
   }
-  else if (item.content.t == 'numeric') {
+  else if (item.content.t == 'enum') {
     return { t: 'increment', ident };
   }
   if (canExec(item))
@@ -153,16 +153,16 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
     case 'sound': return undefined;
     case 'inventorySlot': return undefined;
     case 'compressed': return undefined;
-    case 'numeric': return undefined;
+    case 'enum': return undefined;
     case 'linlog': return undefined;
   }
   // wouldn't get nonexhaustivity check otherwise because fallthrough would return undefined
   return unreachable(content);
 }
 
-function valueAsStr(value: number): string {
-  const digit = '0123456789abcdef'[value];
-  return `[${digit}]`;
+function enumContentAsStr(content: EnumContent): string {
+  // XXX Plumb through enum data
+  return (content.value + '').substring(0, 3);
 }
 
 export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): RenderableLine {
@@ -189,12 +189,12 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
     chargeNeeded: item.acls.exec ? 1 : 0,
     attr,
     checked: item.content.t == 'checkbox' ? item.content.checked : undefined,
-    valueStr: item.content.t == 'numeric' ? valueAsStr(item.content.value) : undefined,
+    valueStr: item.content.t == 'enum' ? enumContentAsStr(item.content) : undefined,
   }
 }
 
 function signalActionsForItem(ident: Ident, item: Item): Record<string, SignalAction> | undefined {
-  if (item.content.t == 'numeric') {
+  if (item.content.t == 'enum') {
     return { q: { t: 'decrement', ident } };
   }
   return undefined;

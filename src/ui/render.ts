@@ -199,7 +199,7 @@ function renderItemLine(screen: Screen, p: Point, len: number, line: ItemRendera
     screen.drawAttrStr(screen.at(chargeCol, y), output);
   }
 
-  if (show.size) {
+  if (show.size && line.valueStr == undefined) {
     if (line.sizeStr) {
       const sizeStr = line.sizeStr;
       const sizeAttr: Attr = { fg: cc.bblack, bg: cc.white };

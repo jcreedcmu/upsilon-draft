@@ -27,7 +27,7 @@ export type ItemPlan =
   | { t: 'file', name: string, content?: ItemContent, size?: number, resources?: Resources, forceId?: Ident }
   | { t: 'instr', name: string }
   | { t: 'checkbox', name: string, checked: boolean, forceId?: Ident }
-  | { t: 'numeric', name: string, value: number, forceId?: Ident }
+  | { t: 'enum', name: string, tp: string, value: number, forceId?: Ident }
   | { t: 'linlog', linlog: Linlog, forceId?: Ident, resources?: Resources }
   ;
 
@@ -194,10 +194,10 @@ export function itemOfPlan(plan: ItemPlan): Item {
       size: 1,
     };
 
-    case 'numeric': return {
+    case 'enum': return {
       name: plan.name,
       acls: { pickup: true },
-      content: { t: 'numeric', value: plan.value },
+      content: { t: 'enum', tp: plan.tp, value: plan.value },
       resources: {},
       size: 1,
     };
