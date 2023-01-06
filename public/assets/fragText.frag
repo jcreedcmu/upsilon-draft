@@ -9,6 +9,7 @@ const int COLS = 48;
 const int TEXT_PAGE_W = 48;
 const int TEXT_PAGE_H = 18;
 
+// XXX this is dead code, right?
 uniform sampler2D u_screenTexture;
 
 uniform sampler2D u_fontTexture;

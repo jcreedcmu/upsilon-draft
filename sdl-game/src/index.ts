@@ -4,16 +4,20 @@ import * as shader from './shaders';
 
 const width = 800;
 const height = 600;
+const ROWS = 18;
+const COLS = 48;
 
 const SCALE = 2;
-const screen_width = 48 * 6 * SCALE;
-const screen_height = 18 * 12 * SCALE;
+const screen_width = COLS * 6 * SCALE;
+const screen_height = ROWS * 12 * SCALE;
 
 const nativeLayer = new NativeLayer();
 
 enum TextureUnit {
   FB = 0,
   BUTTON,
+  FONT,
+  TEXT_PAGE,
 }
 
 const button1 = new nat.Texture();
@@ -21,12 +25,30 @@ button1.loadFile('public/assets/button-down.png');
 const button2 = new nat.Texture();
 button2.loadFile('public/assets/button-up.png');
 
+//  const buttonTexture = (Math.floor(time()) % 2 == 0) ? button1 : button2;
+
 const fbTexture = new nat.Texture();
 fbTexture.makeBlank(width, height);
+
+const textPageTexture = new nat.Texture();
+textPageTexture.makeBlank(COLS, ROWS);
+
+const fontTexture = new nat.Texture();
+fontTexture.loadFile('public/assets/vga.png');
 
 const fb = new nat.Framebuffer();
 fb.setOutputTexture(fbTexture.textureId());
 fb.unbind();
+
+const programText = new nat.Program(shader.vertex, shader.fragText);
+nativeLayer.configShaders(programText.programId());
+nat.glUniform2f(programText.getUniformLocation("u_offset"), 0, 0);
+nat.glUniform2f(programText.getUniformLocation("u_size"), width, height);
+nat.glUniform2f(programText.getUniformLocation("u_viewport_size"), width, height);
+nat.glUniform2f(programText.getUniformLocation("u_canvasSize"), width, height);
+nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FONT);
+nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
+// uniform vec4 u_palette[16];
 
 const programSynth = new nat.Program(shader.vertex, shader.fragmentSynthetic);
 nativeLayer.configShaders(programSynth.programId());
@@ -36,6 +58,7 @@ nat.glUniform2f(programSynth.getUniformLocation("u_viewport_size"), width, heigh
 
 const programTexture = new nat.Program(shader.vertex, shader.fragmentTexture);
 nativeLayer.configShaders(programTexture.programId());
+button1.bind(TextureUnit.BUTTON);
 
 const u_sampler = programTexture.getUniformLocation('u_sampler');
 
@@ -60,7 +83,7 @@ while (nativeLayer.pollEvent()) {
 
   // Draw underlying screen data to framebuffer
   fb.bind();
-  programSynth.use();
+  programText.use();
   nativeLayer.drawTriangles();
   fb.unbind();
 
@@ -70,13 +93,11 @@ while (nativeLayer.pollEvent()) {
   nativeLayer.drawTriangles();
 
   // Draw power button
-  const buttonTexture = (Math.floor(time()) % 2 == 0) ? button1 : button2;
   programTexture.use();
   nat.glUniform2f(programTexture.getUniformLocation("u_offset"), width - 100, height - 75);
   nat.glUniform2f(programTexture.getUniformLocation("u_size"), 100, 75);
   nat.glUniform2f(programTexture.getUniformLocation("u_viewport_size"), width, height);
   nat.glUniform1i(u_sampler, TextureUnit.BUTTON);
-  buttonTexture.bind(TextureUnit.BUTTON);
   nativeLayer.drawTriangles();
 
   nativeLayer.swapWindow();

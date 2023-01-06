@@ -2,6 +2,8 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 
 export const fragPost = readFileSync(path.join(__dirname, '../../public/assets/fragPost.frag'), 'utf8');
+export const fragText = readFileSync(path.join(__dirname, '../../public/assets/fragText.frag'), 'utf8');
+
 export const vertex = `
 #version 300 es
 in vec2 i_uv;
