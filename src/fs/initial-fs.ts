@@ -127,6 +127,27 @@ function errorDir(): ItemPlan {
   };
 }
 
+function enumsDir(): ItemPlan {
+  type EnumItem = { name: string, values: string[] };
+  const enums: EnumItem[] = [
+    { name: 'option', values: ['a', 'b', 'c'] },
+    { name: 'numeric', values: '0123456789abcdef'.split('').map(x => `[${x}]`) },
+  ];
+  function enumDir(key: EnumItem): ItemPlan {
+    const { name, values } = key;
+    return {
+      t: 'dir', name, contents: values.map(value =>
+        ({ t: 'file', name: value })), hooks: ['ENUM']
+    };
+  }
+  return {
+    t: 'dir', name: 'enum',
+    contents: enums.map(enumDir),
+    forceId: SpecialId.enums,
+    resources: { cpu: 4 }
+  };
+}
+
 function binDirs(): ItemPlan[] {
   return [{
     t: 'dir', name: 'bin', contents: [
@@ -203,6 +224,7 @@ function initialPlans(): GeneralItemPlan[] {
       t: 'dir', name: 'sys',
       contents: [
         keysDir(),
+        enumsDir(),
         soundsDir(),
         lensDir(),
         errorDir(),
