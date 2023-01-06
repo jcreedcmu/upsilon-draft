@@ -7,7 +7,7 @@ import { invertAttr, repeat, unreachable } from '../util/util';
 import { nowTicks } from './clock';
 import { ErrorCode } from './errors';
 import { itemIsLabel } from './labels';
-import { EnumContent, GameState, Ident, Item, ItemContent } from './model';
+import { EnumContent, EnumData, GameState, Ident, Item, ItemContent } from './model';
 
 export type Action =
   | { t: 'back' }
@@ -160,12 +160,17 @@ function renderInfoBox(content: ItemContent): InfoBox | undefined {
   return unreachable(content);
 }
 
-function enumContentAsStr(content: EnumContent): string {
-  // XXX Plumb through enum data
-  return (content.value + '').substring(0, 3);
+function enumContentAsStr(content: EnumContent, enumData: EnumData): string {
+  const record = enumData[content.tp];
+  if (record == undefined)
+    return '???';
+  const entry = record[content.value];
+  if (entry == undefined)
+    return '???';
+  return entry.substring(0, 3);
 }
 
-export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number): RenderableLine {
+export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number, enumData: EnumData): RenderableLine {
   if (itemIsLabel(item)) {
     return {
       t: 'special',
@@ -189,7 +194,7 @@ export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number)
     chargeNeeded: item.acls.exec ? 1 : 0,
     attr,
     checked: item.content.t == 'checkbox' ? item.content.checked : undefined,
-    valueStr: item.content.t == 'enum' ? enumContentAsStr(item.content) : undefined,
+    valueStr: item.content.t == 'enum' ? enumContentAsStr(item.content, enumData) : undefined,
   }
 }
 
@@ -200,9 +205,9 @@ function signalActionsForItem(ident: Ident, item: Item): Record<string, SignalAc
   return undefined;
 }
 
-export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number): FullLine {
+export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number, enumData: EnumData): FullLine {
   const line: FullLine = {
-    ...getRenderableLineOfItem(ident, item, ticks),
+    ...getRenderableLineOfItem(ident, item, ticks, enumData),
     actions: {
       exec: execActionForItem(ident, item),
       pickup: pickupActionForItem(item, loc, ix),
@@ -228,7 +233,7 @@ export function getLines(state: GameState, loc: Ident): FullLine[] {
 
   contents.forEach((ident, ix) => {
     const item = getItem(fs, ident);
-    const line = getLineOfItem(ident, item, loc, ix, nowTicks(state.clock));
+    const line = getLineOfItem(ident, item, loc, ix, nowTicks(state.clock), state._cached_enums);
 
     // Apply different attr if ident is currently recurring
     if (state.recurring[ident] != undefined) {

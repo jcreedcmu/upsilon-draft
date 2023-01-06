@@ -26,7 +26,7 @@ const item: Item = {
 
 describe('rendering', () => {
   it('should show resources of in progress executables', () => {
-    const line = getLineOfItem('item-id', item, 'loc-id', 0, 48);
+    const line = getLineOfItem('item-id', item, 'loc-id', 0, 48, {});
 
     if (line.t != 'item') {
       expect(line.t).toBe('item');

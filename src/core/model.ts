@@ -180,6 +180,8 @@ export function setCurIdꜝ(state: GameState, curid: Ident): void {
   getCursorMark(state).id = curid;
 }
 
+export type EnumData = Record<string, string[]>;
+
 export type GameState = {
   power: boolean, // are we powered on
   fs: Fs,
@@ -200,7 +202,7 @@ export type GameState = {
   _cached_sounds: Record<string, SoundEffect>,
   _cached_show: Show,
   _cached_errors: Record<number, string>,
-  _cached_enums: Record<string, string[]>,
+  _cached_enums: EnumData,
 };
 
 export function mkState(): State {

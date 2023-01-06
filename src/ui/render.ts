@@ -110,7 +110,7 @@ function getInventoryLines(state: GameState): RenderableLine[] {
     const id = getInventoryItem(state.fs, i);
     if (id != undefined) {
       const invItem = getItem(state.fs, id);
-      rv.push(getRenderableLineOfItem(id, invItem, nowTicks(state.clock)));
+      rv.push(getRenderableLineOfItem(id, invItem, nowTicks(state.clock), state._cached_enums));
     }
     else {
       rv.push(emptyRenderableLine());
