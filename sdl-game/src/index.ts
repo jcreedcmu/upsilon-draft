@@ -48,7 +48,28 @@ nat.glUniform2f(programText.getUniformLocation("u_viewport_size"), width, height
 nat.glUniform2f(programText.getUniformLocation("u_canvasSize"), width, height);
 nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FONT);
 nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
-// uniform vec4 u_palette[16];
+nat.glUniform4fv(programText.getUniformLocation("u_palette"),
+  [
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+    1, 1, 1, 1,
+  ]);
 
 const programSynth = new nat.Program(shader.vertex, shader.fragmentSynthetic);
 nativeLayer.configShaders(programSynth.programId());
