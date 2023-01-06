@@ -51,7 +51,7 @@ describe('rendering', () => {
   });
 
   it('should render entities in filenames correctly', () => {
-    const line = getRenderableLineOfItem('foo', item2, 0, {});
+    const line = getRenderableLineOfItem(item2, 0, {});
     expect(line.str).toEqual('* {red}[{CHECKMARK}]{/}');
   });
 });

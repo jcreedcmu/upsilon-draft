@@ -165,8 +165,7 @@ function enumContentAsStr(content: EnumContent, enumData: EnumData): string {
   return entry; // XXX limit to three chars somehow?
 }
 
-// XXX ident is dead code?
-export function getRenderableLineOfItem(ident: Ident, item: Item, ticks: number, enumData: EnumData): RenderableLine {
+export function getRenderableLineOfItem(item: Item, ticks: number, enumData: EnumData): RenderableLine {
   if (itemIsLabel(item)) {
     return {
       t: 'special',
@@ -202,7 +201,7 @@ function signalActionsForItem(ident: Ident, item: Item): Record<string, SignalAc
 
 export function getLineOfItem(ident: Ident, item: Item, loc: Ident, ix: number, ticks: number, enumData: EnumData): FullLine {
   const line: FullLine = {
-    ...getRenderableLineOfItem(ident, item, ticks, enumData),
+    ...getRenderableLineOfItem(item, ticks, enumData),
     actions: {
       exec: execActionForItem(ident, item),
       pickup: pickupActionForItem(item, loc, ix),
