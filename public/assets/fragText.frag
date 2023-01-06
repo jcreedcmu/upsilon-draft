@@ -2,6 +2,9 @@
 
 precision mediump float;
 out vec4 outputColor;
+
+// Size of the 'screen' in pixels, something like
+// vec2(SCALE * COLS * char_size.x, SCALE * ROWS * char_size.y)
 uniform vec2 u_canvasSize;
 
 const int ROWS = 18;
@@ -31,14 +34,11 @@ const ivec2 char_size = ivec2(6, 12);
 // Size of the font image
 const vec2 im_size = vec2(256.0, 256.0);
 
-// Size of the 'screen'
-const vec2 windowSize = vec2(SCALE * COLS * char_size.x, SCALE * ROWS * char_size.y);
-
 // Background color outside of the 'screen'
 const vec4 bg = vec4(0.15, 0.15, 0.1, 1.0);
 
 vec2 getPixelPos() {
-  return vec2( gl_FragCoord.x, windowSize.y -gl_FragCoord.y); // x ∈ [0.0, COLS * char_size.x * SCALE], y ∈ [0.0, ROWS * char_size.y * SCALE]
+  return vec2( gl_FragCoord.x, u_canvasSize.y -gl_FragCoord.y); // x ∈ [0.0, COLS * char_size.x * SCALE], y ∈ [0.0, ROWS * char_size.y * SCALE]
 }
 
 ivec2 getChar(ivec2 char_pos) {
@@ -93,7 +93,7 @@ float shade_of(float d) {
 void main() {
   vec4 color = getColor();
   vec2 pixel_pos = getPixelPos();
-  vec2 rel = pixel_pos / windowSize;
+  vec2 rel = pixel_pos / u_canvasSize;
   if (rel.x < 0.0 || rel.y < 0.0 || rel.x >= 1.0 || rel.y >= 1.0)
 	 outputColor = color;
   else {

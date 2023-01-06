@@ -48,7 +48,7 @@ nativeLayer.configShaders(programText.programId());
 nat.glUniform2f(programText.getUniformLocation("u_offset"), 0, 0);
 nat.glUniform2f(programText.getUniformLocation("u_size"), width, height);
 nat.glUniform2f(programText.getUniformLocation("u_viewport_size"), width, height);
-nat.glUniform2f(programText.getUniformLocation("u_canvasSize"), width, height);
+nat.glUniform2f(programText.getUniformLocation("u_canvasSize"), screen_width, screen_height);
 nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FONT);
 nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
 nat.glUniform4fv(programText.getUniformLocation("u_palette"),
