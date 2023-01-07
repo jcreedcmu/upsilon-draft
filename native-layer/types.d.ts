@@ -22,6 +22,7 @@ export function glUniform1i(uniform: UniformLoc, value: number): void;
 export function glUniform1f(uniform: UniformLoc, value: number): void;
 export function glUniform2f(uniform: UniformLoc, value: number, value2: number): void;
 export function glUniform4fv(uniform: UniformLoc, values: number[]): void;
+export function glTexImage2d(width: number, height: number, values: Uint8Array): void;
 export function debug(palette: UniformLoc, textPageTexture: number): void;
 
 export class Texture {

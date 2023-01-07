@@ -55,6 +55,15 @@ nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit
 nat.glUniform4fv(programText.getUniformLocation("u_palette"), palette.paletteDataFloat());
 
 nat.debug(programText.getUniformLocation("u_palette"), TextureUnit.TEXT_PAGE);
+const textPage = [];
+for (let x = 0; x < 48; x++) {
+  for (let y = 0; y < 18; y++) {
+    const off = (48 * y + x) * 4;
+    textPage[off] = 65 + x;
+    textPage[off + 1] = 15;
+  }
+}
+nat.glTexImage2d(48, 18, new Uint8Array(textPage));
 
 const programSynth = new nat.Program(shader.vertex, shader.fragmentSynthetic);
 nativeLayer.configShaders(programSynth.programId());

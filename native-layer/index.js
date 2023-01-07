@@ -11,3 +11,16 @@ module.exports.glUniform4fv = function(uniformLoc, values) {
   }
   bindings._glUniform4fv(uniformLoc, values.length, new Float32Array(values));
 }
+
+module.exports.glTexImage2d = function(width, height, data) {
+  if (typeof width !== 'number') {
+    throw new TypeError('argument 0 to glTexImage2d (width) should be a number');
+  }
+  if (typeof height !== 'number') {
+    throw new TypeError('argument 1 to glTexImage2d (height) should be an array');
+  }
+  if (!(data instanceof Uint8Array)) {
+    throw new TypeError('argument 2 to glTexImage2d (values) should be a Uint8array');
+  }
+  bindings._glTexImage2d(width, height, data);
+}
