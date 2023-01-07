@@ -1,14 +1,14 @@
-import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItemꜝ, removeFromInventory, removeId, setItemꜝ, setTextꜝ } from '../fs/fs';
+import { getInventoryItem, getItem, getLocation, getNumLines, hooksOfLocation, insertId, insertIntoInventory, modifyItem_imp, removeFromInventory, removeId, setItem_imp, setText_imp } from '../fs/fs';
 import { doAgain, logger } from '../util/debug';
 import { produce } from '../util/produce';
 import { nowTicks } from './clock';
 import { ConfigureViewState, putItemConfig, reduceConfigureView } from './configure';
 import { ErrorCode, ErrorInfo } from './errors';
-import { cancelRecurꜝ, executeInstructions, isExecutable, isRecurring, scheduleRecurꜝ, startExecutable, tryStartExecutable } from './executables';
+import { cancelRecur_imp, executeInstructions, isExecutable, isRecurring, scheduleRecur_imp, startExecutable, tryStartExecutable } from './executables';
 import { enumsOfFs, errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { DropLineAction, ExecLineAction, PickupLineAction, SignalAction } from './lines';
 import { isLinLog, startLinlog } from './linlog';
-import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, mkGameState, UiAction, SceneState, setCurIdꜝ, setCurLineꜝ, ItemContent } from './model';
+import { Action, cancelRecur, Effect, GameAction, GameState, getCurId, getCurLine, getSelectedId, getSelectedLine, Ident, isNearbyGame, mkGameState, UiAction, SceneState, setCurId_imp, setCurLine_imp, ItemContent } from './model';
 import { KeyAction } from "./key-actions";
 import { reduceTextEditView, TextEditViewState } from './text-edit';
 
@@ -65,7 +65,7 @@ function advanceLine(state: GameState, amount: number): GameState {
   const len = getNumLines(state.fs, getCurId(state));
   // XXX refactor to use forwardLocation somehow
   return produce(state, s => {
-    setCurLineꜝ(s, (getCurLine(state) + len + amount) % len);
+    setCurLine_imp(s, (getCurLine(state) + len + amount) % len);
   });
 
 }
@@ -77,7 +77,7 @@ function makeErrorBanner(state: GameState, code: ErrorCode): GameState {
     // cancel any pending clearError futures
     s.futures = state.futures.filter(f => f.action.t != 'clearError');
 
-    addFutureꜝ(s, now + 3, { t: 'clearError' });
+    addFuture_imp(s, now + 3, { t: 'clearError' });
   });
 }
 
@@ -95,7 +95,7 @@ export function withError(state: GameState, errorInfo: ErrorInfo): ReduceResult 
 }
 
 // imperatively updates state
-export function addFutureꜝ(state: GameState, whenTicks: number, action: GameAction, live?: boolean) {
+export function addFuture_imp(state: GameState, whenTicks: number, action: GameAction, live?: boolean) {
   state.futures.push({
     whenTicks,
     action,
@@ -122,7 +122,7 @@ export function incrementItem(state: GameState, ident: Ident, amount: number): R
   const newContent: ItemContent = { ...content, value: (content.value + incrementRange + amount) % incrementRange };
 
   state = produce(state, s => {
-    modifyItemꜝ(s.fs, ident, item => {
+    modifyItem_imp(s.fs, ident, item => {
       item.content = newContent;
     });
   });
@@ -155,8 +155,8 @@ export function reduceExecAction(state: GameState, action: ExecLineAction): Redu
       const selectedId = getSelectedId(state);
       const item = getItem(state.fs, selectedId);
       return [produce(state, s => {
-        setCurIdꜝ(s, selectedId);
-        setCurLineꜝ(s, item.stickyCurrentPos ?? 0);
+        setCurId_imp(s, selectedId);
+        setCurLine_imp(s, item.stickyCurrentPos ?? 0);
         s.path.push(item.name);
       }), [
         { t: 'playAbstractSound', effect: 'go-into', loc: undefined }
@@ -217,7 +217,7 @@ function reducePickupAction(state: GameState, action: PickupLineAction): ReduceR
       fs = insertIntoInventory(fs, ident, state.inventoryState.curSlot);
       state = produce(state, s => {
         s.fs = fs;
-        cancelRecurꜝ(s, ident); // automation doesn't play nice in inventory
+        cancelRecur_imp(s, ident); // automation doesn't play nice in inventory
       });
       state = processHooks(state, hooks);
       return [
@@ -333,11 +333,11 @@ export function reduceFsKeyAction(state: GameState, action: KeyAction): ReduceRe
       }
       else {
         return [produce(state, s => {
-          modifyItemꜝ(s.fs, getCurId(state), item => {
+          modifyItem_imp(s.fs, getCurId(state), item => {
             item.stickyCurrentPos = getCurLine(state);
           });
-          setCurIdꜝ(s, loc.id);
-          setCurLineꜝ(s, loc.pos);
+          setCurId_imp(s, loc.id);
+          setCurLine_imp(s, loc.pos);
           s.path.pop();
         }), [
           { t: 'playAbstractSound', effect: 'go-back', loc: undefined }
@@ -399,7 +399,7 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
 
       // deactivate item's progressbar
       state = produce(state, s => {
-        modifyItemꜝ(s.fs, action.actorId, item => { item.progress = undefined; });
+        modifyItem_imp(s.fs, action.actorId, item => { item.progress = undefined; });
       });
 
       if (error != undefined) {
@@ -413,7 +413,7 @@ export function reduceGameState(state: GameState, action: GameAction): ReduceRes
         // Schedule recurrent execution if appropriate
         if (isRecurring(state, action.actorId)) {
           state = produce(state, s => {
-            scheduleRecurꜝ(s, action.actorId);
+            scheduleRecur_imp(s, action.actorId);
           });
         }
         return [state, effects, undefined];

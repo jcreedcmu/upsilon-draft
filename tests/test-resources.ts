@@ -1,7 +1,7 @@
 import { getItem, insertPlans, mkFs } from '../src/fs/fs';
 import { SpecialId } from '../src/fs/initial-fs';
 import { produce } from '../src/util/produce';
-import { getResource, modifyResourceꜝ, Resources, resourcesPlus } from '../src/fs/resources';
+import { getResource, modifyResource_imp, Resources, resourcesPlus } from '../src/fs/resources';
 
 const fs = (() => {
   let fs = mkFs();
@@ -22,7 +22,7 @@ describe('getResource', () => {
 describe('modifyResource', () => {
   test('should work correctly', () => {
     const fs2 = produce(fs, fs => {
-      modifyResourceꜝ(getItem(fs, 'bar'), 'cpu', x => x + 10);
+      modifyResource_imp(getItem(fs, 'bar'), 'cpu', x => x + 10);
     });
     expect(getResource(getItem(fs2, 'bar'), 'cpu')).toEqual(20);
   });

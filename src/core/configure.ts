@@ -1,4 +1,4 @@
-import { setItemꜝ } from '../fs/fs';
+import { setItem_imp } from '../fs/fs';
 import { Chars } from '../ui/screen';
 import { produce } from '../util/produce';
 import { KeyAction } from './key-actions';
@@ -67,7 +67,7 @@ export function reduceConfigureView(state: GameState, vs: ConfigureViewState, ac
           // invariant violations if the type of the config we're
           // trying to set is no longer compatible with the item
           // in its current state.
-          setItemꜝ(s.fs, vs.target, putItemConfig(result.item, result.config));
+          setItem_imp(s.fs, vs.target, putItemConfig(result.item, result.config));
         }),
         [{ t: 'playAbstractSound', effect: 'success', loc: undefined }]
       ]);

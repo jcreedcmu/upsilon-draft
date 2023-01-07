@@ -283,19 +283,19 @@ export function modifyItem(fs: Fs, ident: Ident, f: (x: Item) => Item): Fs {
 
 // Imperatively modifies item with ident `ident`, using imperative
 // function f.
-export function modifyItemꜝ(fs: Fs, ident: Ident, f: (x: Item) => void): void {
+export function modifyItem_imp(fs: Fs, ident: Ident, f: (x: Item) => void): void {
   const item = getItem(fs, ident);
   f(item);
   fs.idToItem[ident] = item;
 }
 
 // Imperatively replaces item with ident `ident` with item `item`.
-export function setItemꜝ(fs: Fs, ident: Ident, item: Item): void {
+export function setItem_imp(fs: Fs, ident: Ident, item: Item): void {
   fs.idToItem[ident] = item;
 }
 
-export function setTextꜝ(fs: Fs, ident: Ident, txt: string): void {
-  modifyItemꜝ(fs, ident, x => {
+export function setText_imp(fs: Fs, ident: Ident, txt: string): void {
+  modifyItem_imp(fs, ident, x => {
     x.content = { t: 'file', contents: [], text: txt }; // XXX erases contents!
   });
 }

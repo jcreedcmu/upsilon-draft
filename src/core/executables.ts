@@ -1,6 +1,6 @@
-import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItemꜝ, moveIdForward, moveIdToRelMark, reifyId, setMark, textContent } from "../fs/fs";
+import { createAndInsertItem, Fs, getItem, getItemIdsAfter, getItemIdsBefore, getLocation, maybeGetItem, modifyItem_imp, moveIdForward, moveIdToRelMark, reifyId, setMark, textContent } from "../fs/fs";
 import { SpecialId } from "../fs/initial-fs";
-import { getResource, modifyResourceꜝ, Resource } from "../fs/resources";
+import { getResource, modifyResource_imp, Resource } from "../fs/resources";
 import { produce } from "../util/produce";
 import { nowTicks } from "./clock";
 import { getItemConfig } from "./configure";
@@ -8,7 +8,7 @@ import { ErrorCodeException, ErrorInfo } from "./errors";
 import { toggleLabel } from "./labels";
 import { canPickup } from "./lines";
 import { Effect, GameAction, GameState, Ident, Item, Location, nextLocation } from "./model";
-import { addFutureꜝ, processHooks, reduceGameState, ReduceResult, ReduceResultErr, withError } from "./reduce";
+import { addFuture_imp, processHooks, reduceGameState, ReduceResult, ReduceResultErr, withError } from "./reduce";
 
 export const RECURRENCE_LENGTH = 10;
 
@@ -135,8 +135,8 @@ function movResource(state: GameState, targets: Ident[], resource: Resource, amo
   fs = reifyId(fs, targets[1]);
   state = produce(state, s => { s.fs = fs; });
   return [produce(state, s => {
-    modifyResourceꜝ(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
-    modifyResourceꜝ(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);
+    modifyResource_imp(getItem(s.fs, targets[0]), 'cpu', x => x - actualAmount);
+    modifyResource_imp(getItem(s.fs, targets[1]), 'cpu', x => x + actualAmount);
   }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
 }
 
@@ -148,14 +148,14 @@ export function isRecurring(state: GameState, ident: Ident): boolean {
   return !!state.recurring[ident];
 }
 
-export function scheduleRecurꜝ(state: GameState, ident: Ident) {
-  addFutureꜝ(state, nowTicks(state.clock) + RECURRENCE_LENGTH, { t: 'recur', ident }, true);
+export function scheduleRecur_imp(state: GameState, ident: Ident) {
+  addFuture_imp(state, nowTicks(state.clock) + RECURRENCE_LENGTH, { t: 'recur', ident }, true);
   // NOTE: this periodTicks data is currently unused, but it feels right to me
   // that it should be introspectable.
   state.recurring[ident] = { periodTicks: RECURRENCE_LENGTH };
 }
 
-export function cancelRecurꜝ(state: GameState, ident: Ident) {
+export function cancelRecur_imp(state: GameState, ident: Ident) {
   state.futures = state.futures.filter(item => !(item.action.t == 'recur' && item.action.ident == ident));
   delete state.recurring[ident];
 }
@@ -218,9 +218,9 @@ export function executeInstructions(state: GameState, instr: ExecutableName, id:
     const later = nowTicks(state.clock) + 1;
     state = produce(state, s => {
       if (targetIds.length > 0)
-        addFutureꜝ(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
+        addFuture_imp(s, later, { t: 'none' }, true); // XXX maybe instead of 'none', clear .flashUntilTick for action.targetIds.
       targetIds.forEach(targetId => {
-        modifyItemꜝ(s.fs, targetId, item => { item.flashUntilTick = later; });
+        modifyItem_imp(s.fs, targetId, item => { item.flashUntilTick = later; });
       });
     });
   }
@@ -244,7 +244,7 @@ function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): R
   }
 
   state = produce(state, s => {
-    modifyResourceꜝ(getItem(s.fs, id), 'cpu', x => x - cpuCost);
+    modifyResource_imp(getItem(s.fs, id), 'cpu', x => x - cpuCost);
   });
 
   const action: GameAction = {
@@ -265,13 +265,13 @@ function startExecutableWe(state: GameState, id: Ident, name: ExecutableName): R
     // defer execution
     const now = nowTicks(state.clock);
     state = produce(state, s => {
-      modifyItemꜝ(s.fs, id, item => {
+      modifyItem_imp(s.fs, id, item => {
         item.progress = {
           startTicks: now,
           totalTicks: cycles
         };
       });
-      addFutureꜝ(s, now + cycles, action, true);
+      addFuture_imp(s, now + cycles, action, true);
     });
     return [state, [{ t: 'playAbstractSound', effect: 'execute', loc }], undefined];
   }
@@ -345,9 +345,9 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
 
 
     case executables.charge:
-      return withModifiedTarget(tgt => { modifyResourceꜝ(tgt, 'cpu', x => x + 1); });
+      return withModifiedTarget(tgt => { modifyResource_imp(tgt, 'cpu', x => x + 1); });
     case executables.treadmill:
-      return withModifiedTarget(tgt => { modifyResourceꜝ(tgt, 'cpu', x => x + 1); });
+      return withModifiedTarget(tgt => { modifyResource_imp(tgt, 'cpu', x => x + 1); });
 
     case executables.toggleUnlock:
       return withModifiedTarget(tgt => { tgt.acls.unlock = !tgt.acls.unlock; });
@@ -449,10 +449,10 @@ export function executeInstructionsWithTargets(state: GameState, instr: Executab
       const target = targetIds[0];
       return [produce(state, s => {
         if (target in state.recurring) {
-          cancelRecurꜝ(s, target);
+          cancelRecur_imp(s, target);
         }
         else {
-          scheduleRecurꜝ(s, target);
+          scheduleRecur_imp(s, target);
         }
       }), [{ t: 'playAbstractSound', effect: 'success', loc }], undefined];
 

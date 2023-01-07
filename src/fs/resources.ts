@@ -10,7 +10,7 @@ export function getResource(item: Item, resource: Resource): number {
   return item.resources[resource] ?? 0;
 }
 
-export function modifyResourceꜝ(item: Item, resource: Resource, f: (x: number) => number): void {
+export function modifyResource_imp(item: Item, resource: Resource, f: (x: number) => number): void {
   item.resources[resource] = f(item.resources[resource] ?? 0);
 }
 

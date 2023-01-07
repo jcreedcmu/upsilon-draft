@@ -1,4 +1,4 @@
-import { setTextꜝ } from '../fs/fs';
+import { setText_imp } from '../fs/fs';
 import { produce } from '../util/produce';
 import { Point } from '../util/types';
 import { KeyAction } from './key-actions';
@@ -48,7 +48,7 @@ export function reduceTextEditView(state: GameState, vs: TextEditViewState, acti
         return noError([
           produce(state, s => {
             s.viewState = vs.back;
-            setTextꜝ(s.fs, vs.target, vs.state.text);
+            setText_imp(s.fs, vs.target, vs.state.text);
           }),
           [{ t: 'playAbstractSound', effect: 'go-back', loc: undefined }]
         ]);

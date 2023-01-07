@@ -8,7 +8,7 @@ import { produce } from '../util/produce';
 import { ClockState, mkClockState } from './clock';
 import { ConfigureViewState, ItemConfig } from './configure';
 import { ErrorCode } from './errors';
-import { cancelRecurꜝ, ExecutableName } from './executables';
+import { cancelRecur_imp, ExecutableName } from './executables';
 import { enumsOfFs, errorsOfFs, Hook, keybindingsOfFs, showOfFs, soundsOfFs } from './hooks';
 import { KeyAction } from './key-actions';
 import { FullLine, getLines } from './lines';
@@ -167,7 +167,7 @@ export function getCurLine(state: GameState): number {
   return getCursorMark(state).pos;
 }
 
-export function setCurLineꜝ(state: GameState, curline: number): void {
+export function setCurLine_imp(state: GameState, curline: number): void {
   getCursorMark(state).pos = curline;
 }
 
@@ -175,7 +175,7 @@ export function getCurId(state: GameState): Ident {
   return getCursorMark(state).id;
 }
 
-export function setCurIdꜝ(state: GameState, curid: Ident): void {
+export function setCurId_imp(state: GameState, curid: Ident): void {
   getCursorMark(state).id = curid;
 }
 
@@ -276,7 +276,7 @@ export function nextLocation(loc: Location): Location {
 
 export function cancelRecur(state: GameState, id: Ident): GameState {
   return produce(state, s => {
-    cancelRecurꜝ(s, id);
+    cancelRecur_imp(s, id);
   });
 }
 
