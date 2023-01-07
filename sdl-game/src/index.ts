@@ -2,16 +2,16 @@ import * as nat from 'native-layer';
 import { NativeLayer } from 'native-layer';
 import * as shader from './shaders';
 
-const width = 800;
-const height = 600;
+const width = 1280;
+const height = 800;
 const ROWS = 18;
 const COLS = 48;
 
-const SCALE = 2;
+const SCALE = 3;
 const screen_width = COLS * 6 * SCALE;
 const screen_height = ROWS * 12 * SCALE;
 
-const nativeLayer = new NativeLayer();
+const nativeLayer = new NativeLayer(width, height);
 
 enum TextureUnit {
   FB = 1,

@@ -13,8 +13,6 @@
 
 typedef enum t_attrib_id { attrib_uv } t_attrib_id;
 
-static const int width = 800;
-static const int height = 600;
 
 class NativeLayer : public Napi::ObjectWrap<NativeLayer> {
 public:
@@ -37,6 +35,7 @@ public:
   static Napi::FunctionReference constructor;
 
 private:
+  int _width, _height;
   SDL_Window *_window;
   SDL_GLContext _context;
   GLuint _vao, _vbo;
@@ -45,6 +44,23 @@ private:
 Napi::FunctionReference NativeLayer::constructor;
 
 NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
+  Napi::Env env = info.Env();
+
+  if (info.Length() < 1) {
+    throwJs(env, "usage: NativeLayer(width, height: number)");
+  }
+
+  if (!info[0].IsNumber()) {
+    throwJs(env, "argument 0 should be a number");
+  }
+
+  if (!info[1].IsNumber()) {
+    throwJs(env, "argument 1 should be a number");
+  }
+
+  this->_width = info[0].As<Napi::Number>().Uint32Value();
+  this->_height = info[1].As<Napi::Number>().Uint32Value();
+
   SDL_Init(SDL_INIT_VIDEO);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -59,7 +75,7 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 
   SDL_Window *window =
       SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+                       this->_width, this->_height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
   SDL_GLContext context = SDL_GL_CreateContext(window);
 
   printf("GL VERSION [%s]\n", glGetString(GL_VERSION));
@@ -86,7 +102,7 @@ Napi::Value NativeLayer::configShaders(const Napi::CallbackInfo &info) {
   glDisable(GL_DEPTH_TEST);
   // #877a6a
   glClearColor(0x87 / 255., 0x7a / 255., 0x6a / 255., 1.);
-  glViewport(0, 0, width, height);
+  glViewport(0, 0, this->_width, this->_height);
 
   glGenVertexArrays(1, &this->_vao);
   glGenBuffers(1, &this->_vbo);
@@ -323,7 +339,7 @@ NFUNC(debug) {
     for (int j = 0; j < TEXT_HEIGHT; j++) {
       const int off = (j * TEXT_WIDTH + i) * 4;
       data[off] = ((i % 2) ^ (j % 2) ? 4 : 32);
-      data[off+1] = 64 + 8 + 3;
+      data[off+1] = 64 + 3;
       data[off+2] = 0;
       data[off+3] = 0;
     }
