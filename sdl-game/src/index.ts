@@ -4,6 +4,8 @@ import * as shader from './shaders';
 import * as palette from '../../src/ui/palette';
 import { Screen } from '../../src/ui/screen';
 import { ColorCode } from '../../src/ui/ui-constants';
+import { Action, Effect, GameState, getConcreteSound, isNearby, mkGameState, mkState, SceneState, State } from "../../src/core/model";
+import { finalRender, getRenderable, render } from '../../src/ui/render';
 
 const width = 1280;
 const height = 800;
@@ -56,8 +58,8 @@ nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FON
 nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
 nat.glUniform4fv(programText.getUniformLocation("u_palette"), palette.paletteDataFloat());
 
-const screen = new Screen();
-screen.drawTagStr(screen.at(1, 1), '{red}{bg-white}Hello!', { bg: ColorCode.bblack, fg: ColorCode.black });
+const state = mkGameState();
+const screen = render(state);
 
 nat.glActiveTexture(TextureUnit.TEXT_PAGE);
 nat.glTexImage2d(48, 18, screen.imdat.data);
