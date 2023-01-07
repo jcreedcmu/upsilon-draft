@@ -5,8 +5,12 @@ const args = process.argv.slice(2);
 
 
 (async () => {
+  const entryPoints = [
+    ...await glob('../src/**/*.ts'),
+    ...await glob('./src/*.ts'),
+  ];
   await build({
-	 entryPoints: await glob('./src/*.ts'),
+	 entryPoints: entryPoints,
 	 minify: false,
 	 sourcemap: true,
 	 bundle: false,

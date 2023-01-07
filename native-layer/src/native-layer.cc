@@ -285,29 +285,23 @@ NFUNC(wrap_glUniform2f) {
   return env.Null();
 }
 
+NFUNC(wrap_glUniform4fv) {
+  NBOILER();
+
+  // This method is unsafe by itself if called with ill-typed
+  // arguments. It relies on javascript wrapper function glUniform4fv
+  // in index.js to check argument types.
+
+  glUniform4fv(
+              info[0].As<Napi::Number>().Uint32Value(),
+              info[1].As<Napi::Number>().Uint32Value(),
+              info[2].As<Napi::TypedArrayOf<float>>().Data()
+              );
+
+  return env.Null();
+}
+
 #include "gen/palette.h"
-
-GLfloat bad_palette[] = {
-   1, 0, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-};
 
 NFUNC(debug) {
   NBOILER();
@@ -325,10 +319,10 @@ NFUNC(debug) {
     return throwJs(env, "argument 1 should be a number");
   }
 
-  unsigned int palette_uniform_loc = info[0].As<Napi::Number>().Uint32Value();
+  //  unsigned int palette_uniform_loc = info[0].As<Napi::Number>().Uint32Value();
   unsigned int text_page_texture_unit = info[1].As<Napi::Number>().Uint32Value();
   std::cout << "text_page_texture_unit" << text_page_texture_unit << "\n";
-  glUniform4fv(palette_uniform_loc, 16, palette);
+  //  glUniform4fv(palette_uniform_loc, 16, palette);
 
   glActiveTexture(GL_TEXTURE0 + text_page_texture_unit);
 
@@ -359,6 +353,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));
   exports.Set("glUniform1f", Napi::Function::New(env, wrap_glUniform1f));
   exports.Set("glUniform2f", Napi::Function::New(env, wrap_glUniform2f));
+  exports.Set("_glUniform4fv", Napi::Function::New(env, wrap_glUniform4fv));
   exports.Set("debug", Napi::Function::New(env, debug));
   return exports;
 }

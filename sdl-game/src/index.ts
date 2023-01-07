@@ -1,6 +1,7 @@
 import * as nat from 'native-layer';
 import { NativeLayer } from 'native-layer';
 import * as shader from './shaders';
+import * as palette from '../../src/ui/palette';
 
 const width = 1280;
 const height = 800;
@@ -51,28 +52,8 @@ nat.glUniform2f(programText.getUniformLocation("u_viewport_size"), width, height
 nat.glUniform2f(programText.getUniformLocation("u_canvasSize"), screen_width, screen_height);
 nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FONT);
 nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
-nat.glUniform4fv(programText.getUniformLocation("u_palette"),
-  [
-    1, 0, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
+nat.glUniform4fv(programText.getUniformLocation("u_palette"), palette.paletteDataFloat());
 
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-    1, 1, 1, 1,
-  ]);
 nat.debug(programText.getUniformLocation("u_palette"), TextureUnit.TEXT_PAGE);
 
 const programSynth = new nat.Program(shader.vertex, shader.fragmentSynthetic);

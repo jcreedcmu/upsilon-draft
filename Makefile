@@ -34,7 +34,7 @@ native:
 	make native-layer/src/gen/palette.h
 	cd native-layer && npm run build
 	cd sdl-game && node build.js
-	node sdl-game/out/index.js
+	node sdl-game/out/sdl-game/src/index.js
 
 docker-build: docker/Dockerfile
 	docker build . -t dev-env -f docker/Dockerfile
