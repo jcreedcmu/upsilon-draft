@@ -217,7 +217,9 @@ export class Pane {
         gl.useProgram(progText);
 
         gl.activeTexture(gl.TEXTURE1);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen.imdat);
+        // XXX this cast is unfortunate. Maybe it'd go away if I had a
+        // proper abstraction layer for OpenGL/WebGL stuff.
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, (screen.imdat as any) as ImageData);
 
         // Render to framebuffer first
         gl.bindFramebuffer(gl.FRAMEBUFFER, fb);

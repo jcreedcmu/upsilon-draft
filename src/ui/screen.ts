@@ -2,6 +2,7 @@ import { Char, COLS, ROWS, ColorCode, TEXT_PAGE_W, TEXT_PAGE_H } from './ui-cons
 import { Point } from '../util/types';
 import { invertAttr, repeat } from '../util/util';
 import { parseTagstrSafe as parseTagstr } from './parse-tagstr';
+import { ImageDat } from './image-dat';
 
 export type Attr = { fg: ColorCode, bg: ColorCode };
 export type Rect = { x: number, y: number, w: number, h: number };
@@ -95,13 +96,13 @@ function attrOfCode(code: number): Attr {
 }
 
 export class Screen {
-/* private */ imdat: ImageData;
+/* private */ imdat: ImageDat;
 
   rows: number = ROWS;
   cols: number = COLS;
 
   constructor(attr?: Attr) {
-    this.imdat = new ImageData(TEXT_PAGE_W, TEXT_PAGE_H);
+    this.imdat = new ImageDat(TEXT_PAGE_W, TEXT_PAGE_H);
     {
       for (let n = 0; n < TEXT_PAGE_W * TEXT_PAGE_H; n++) {
         this.imdat.data[4 * n] = 0;
