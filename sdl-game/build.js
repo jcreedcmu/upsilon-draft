@@ -7,6 +7,7 @@ const args = process.argv.slice(2);
 (async () => {
   const entryPoints = [
     ...await glob('../src/**/*.ts'),
+    '../src/ui/image-dat.js',
     ...await glob('./src/*.ts'),
   ];
   await build({

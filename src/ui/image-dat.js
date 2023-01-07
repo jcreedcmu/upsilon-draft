@@ -4,4 +4,4 @@ class ImageDataPolyfill {
   }
 }
 
-export const ImageDat = if (typeof window === 'undefined') ? ImageDataPolyfill : ImageData;
+export const ImageDat = (typeof window === 'undefined') ? ImageDataPolyfill : ImageData;

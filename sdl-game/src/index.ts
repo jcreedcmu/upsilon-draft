@@ -2,6 +2,8 @@ import * as nat from 'native-layer';
 import { NativeLayer } from 'native-layer';
 import * as shader from './shaders';
 import * as palette from '../../src/ui/palette';
+import { Screen } from '../../src/ui/screen';
+import { ColorCode } from '../../src/ui/ui-constants';
 
 const width = 1280;
 const height = 800;
@@ -54,17 +56,11 @@ nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FON
 nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
 nat.glUniform4fv(programText.getUniformLocation("u_palette"), palette.paletteDataFloat());
 
-const textPage = [];
-for (let x = 0; x < 48; x++) {
-  for (let y = 0; y < 18; y++) {
-    const off = (48 * y + x) * 4;
-    textPage[off] = 65 + x;
-    textPage[off + 1] = 15;
-  }
-}
+const screen = new Screen();
+screen.drawTagStr(screen.at(1, 1), '{red}{bg-white}Hello!', { bg: ColorCode.bblack, fg: ColorCode.black });
 
 nat.glActiveTexture(TextureUnit.TEXT_PAGE);
-nat.glTexImage2d(48, 18, new Uint8Array(textPage));
+nat.glTexImage2d(48, 18, screen.imdat.data);
 
 const programSynth = new nat.Program(shader.vertex, shader.fragmentSynthetic);
 nativeLayer.configShaders(programSynth.programId());
