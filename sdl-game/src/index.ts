@@ -54,7 +54,6 @@ nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FON
 nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
 nat.glUniform4fv(programText.getUniformLocation("u_palette"), palette.paletteDataFloat());
 
-nat.debug(programText.getUniformLocation("u_palette"), TextureUnit.TEXT_PAGE);
 const textPage = [];
 for (let x = 0; x < 48; x++) {
   for (let y = 0; y < 18; y++) {
@@ -63,6 +62,8 @@ for (let x = 0; x < 48; x++) {
     textPage[off + 1] = 15;
   }
 }
+
+nat.glActiveTexture(TextureUnit.TEXT_PAGE);
 nat.glTexImage2d(48, 18, new Uint8Array(textPage));
 
 const programSynth = new nat.Program(shader.vertex, shader.fragmentSynthetic);

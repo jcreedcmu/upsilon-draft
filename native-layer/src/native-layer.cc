@@ -285,6 +285,26 @@ NFUNC(wrap_glUniform2f) {
   return env.Null();
 }
 
+NFUNC(wrap_glActiveTexture) {
+  NBOILER();
+
+  if (info.Length() < 1) {
+    throwJs(env,
+            "usage: glActiveTexture(texture_unit: number)");
+  }
+
+  if (!info[0].IsNumber()) {
+    return throwJs(env, "argument 0 should be a number");
+  }
+
+  unsigned int texture_unit = info[0].As<Napi::Number>().Uint32Value();
+
+  glActiveTexture(GL_TEXTURE0 + texture_unit);
+
+
+  return env.Null();
+}
+
 // !!!!!!!!!!!!! BEGIN UNSAFE
 
 // The following functions are unsafe to call directly
@@ -318,18 +338,6 @@ NFUNC(wrap_glTexImage2d) {
 
 // !!!!!!!!!!!!! END UNSAFE
 
-NFUNC(debug) {
-  NBOILER();
-
-  //  unsigned int palette_uniform_loc = info[0].As<Napi::Number>().Uint32Value();
-  unsigned int text_page_texture_unit = info[1].As<Napi::Number>().Uint32Value();
-
-  glActiveTexture(GL_TEXTURE0 + text_page_texture_unit);
-
-
-  return env.Null();
-}
-
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
@@ -339,9 +347,10 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));
   exports.Set("glUniform1f", Napi::Function::New(env, wrap_glUniform1f));
   exports.Set("glUniform2f", Napi::Function::New(env, wrap_glUniform2f));
+  exports.Set("glActiveTexture", Napi::Function::New(env, wrap_glActiveTexture));
+
   exports.Set("_glUniform4fv", Napi::Function::New(env, wrap_glUniform4fv));
   exports.Set("_glTexImage2d", Napi::Function::New(env, wrap_glTexImage2d));
-  exports.Set("debug", Napi::Function::New(env, debug));
   return exports;
 }
 
