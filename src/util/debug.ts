@@ -1,4 +1,4 @@
-export const isDev = globalThis['location'] != undefined && !!globalThis['location'].host.match(/localhost/);
+export const isDev = globalThis['window'] == undefined || (globalThis['location'] != undefined && !!globalThis['location'].host.match(/localhost/));
 
 export const DEBUG = {
   glTiming: false,
