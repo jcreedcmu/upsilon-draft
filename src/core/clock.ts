@@ -7,7 +7,7 @@ export const MILLISECONDS_PER_TICK = 200;
 
 export type ClockState = {
   originEpochMs: number,
-  timeoutId: number | undefined,
+  timeoutId: number | undefined | NodeJS.Timeout,
 }
 
 export function mkClockState(): ClockState {
