@@ -1,16 +1,15 @@
-import { produce } from "./util/produce";
-import { DEBUG, logger } from './util/debug';
-import { Buffer, buffer } from './util/dutil';
-import { DrawParams, make_pane } from './ui/gl-pane';
-import { key } from './ui/key';
-import { clockedNextWake, ClockState, delayUntilTickMs, MILLISECONDS_PER_TICK, nowTicks, WakeTime } from './core/clock';
+import { initAssets } from "./core/assets";
+import { clockedNextWake, ClockState, delayUntilTickMs, nowTicks, WakeTime } from './core/clock';
 import { Action, Effect, GameState, getConcreteSound, isNearby, mkState, SceneState, State } from "./core/model";
 import { reduce } from './core/reduce';
+import { animatePowerState, drawParamsOfState } from './ui/draw-params';
+import { make_pane } from './ui/gl-pane';
+import { key } from './ui/key';
 import { render } from "./ui/render";
-import { initSound, playSound } from './ui/sound';
-import { lerp } from "./util/util";
 import { Screen } from "./ui/screen";
-import { initAssets } from "./core/assets";
+import { initSound, playSound } from './ui/sound';
+import { DEBUG, logger } from './util/debug';
+import { produce } from "./util/produce";
 
 type CanvasBundle = { c: HTMLCanvasElement, d: CanvasRenderingContext2D };
 
@@ -65,17 +64,6 @@ function equalWake(a: WakeTime, b: WakeTime): boolean {
     case 'infinite': return b.t == 'infinite';
     case 'tick': return b.t == 'tick' && b.tick == a.tick;
   }
-}
-
-function drawParamsOfState(state: State): DrawParams {
-  const ga = state.globalAnimationState;
-  if (ga.shrinkFade == 1.0) {
-    return { beamScale: 1.0, fade: 1.0 };
-  }
-  return {
-    beamScale: ga.shrinkFade + 0.001,
-    fade: Math.pow(ga.shrinkFade, 2),
-  };
 }
 
 function powerButtonImageOfState(state: SceneState): string {
@@ -181,14 +169,7 @@ async function go() {
     }
     pane.draw(screen, drawParamsOfState(state[0]));
 
-    const ga = state[0].globalAnimationState;
-    const nextShrinkFade = (state[0].sceneState.gameState.power) ?
-      (Math.min(lerp(ga.shrinkFade, 1.05, 0.01), 1.0)) :
-      (Math.max(lerp(ga.shrinkFade, -0.05, 0.05), 0.0));
-
-    state[0] = produce(state[0], s => {
-      s.globalAnimationState.shrinkFade = nextShrinkFade;
-    });
+    state[0] = animatePowerState(state[0]);
 
     requestAnimationFrame(repaint);
   }

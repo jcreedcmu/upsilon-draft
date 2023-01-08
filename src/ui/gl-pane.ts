@@ -1,10 +1,9 @@
 import { DEBUG } from '../util/debug';
 import { Point } from '../util/types';
-import { Screen } from './screen';
-import { TEXT_PAGE_H } from './ui-constants';
-import { TEXT_PAGE_W } from './ui-constants';
-import { char_size, COLS, ROWS, SCALE } from './ui-constants';
+import { DrawParams } from './draw-params';
 import { paletteDataFloat } from './palette';
+import { Screen } from './screen';
+import { char_size, COLS, ROWS, SCALE } from './ui-constants';
 
 const screen_size: Point = {
   x: char_size.x * COLS * SCALE,
@@ -185,11 +184,6 @@ function getImage(url: string): Promise<HTMLImageElement> {
       res(image);
     });
   });
-}
-
-export type DrawParams = {
-  beamScale: number,
-  fade: number,
 }
 
 export class Pane {

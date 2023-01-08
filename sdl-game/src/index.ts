@@ -1,14 +1,10 @@
-import * as nat from 'native-layer';
-import { NativeLayer } from 'native-layer';
-import * as shader from './shaders';
-import * as palette from '../../src/ui/palette';
-import { Screen } from '../../src/ui/screen';
-import { ColorCode } from '../../src/ui/ui-constants';
-import { Action, Effect, GameState, getConcreteSound, isNearby, mkGameState, mkState, SceneState, State } from "../../src/core/model";
-import { finalRender, render } from '../../src/ui/render';
-import { nativeLayer, paintFrame, updateTextPage } from './graphics';
+import { Action, mkState, SceneState, State } from '../../src/core/model';
 import { reduce } from '../../src/core/reduce';
+import { animatePowerState, drawParamsOfState } from '../../src/ui/draw-params';
+import { render } from '../../src/ui/render';
+import { Screen } from '../../src/ui/screen';
 import { produce } from '../../src/util/produce';
+import { nativeLayer, paintFrame, updateTextPage } from './graphics';
 
 const state: State[] = [mkState()];
 
@@ -28,7 +24,7 @@ function repaint() {
     prevSceneState = state[0].sceneState;
     updateTextPage(render(prevSceneState));
   }
-  paintFrame();
+  paintFrame(drawParamsOfState(state[0]));
 }
 
 function convertSdlKey(key: string): string {
@@ -47,6 +43,7 @@ while (1) {
     dispatch({ t: 'key', code: convertSdlKey(key) });
   }
   repaint();
+  state[0] = animatePowerState(state[0]);
 }
 
 nativeLayer.finish();

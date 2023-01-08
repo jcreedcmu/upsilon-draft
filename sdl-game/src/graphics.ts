@@ -5,6 +5,7 @@ import * as palette from '../../src/ui/palette';
 import { render } from '../../src/ui/render';
 import * as shader from './shaders';
 import { Screen } from '../../src/ui/screen';
+import { DrawParams } from '../../src/ui/ui-constants';
 
 const width = 1280;
 const height = 800;
@@ -81,8 +82,6 @@ nat.glUniform2f(programPost.getUniformLocation("u_offset"), (width - screen_widt
 nat.glUniform2f(programPost.getUniformLocation("u_size"), screen_width, screen_height);
 nat.glUniform2f(programPost.getUniformLocation("u_viewport_size"), width, height);
 nat.glUniform1i(programPost.getUniformLocation("u_screenTexture"), TextureUnit.FB);
-nat.glUniform1f(programPost.getUniformLocation("u_beamScale"), 1.0);
-nat.glUniform1f(programPost.getUniformLocation("u_fade"), 1.0);
 nat.glUniform2f(programPost.getUniformLocation("windowSize"), screen_width, screen_height);
 
 const progStart = Date.now();
@@ -90,7 +89,9 @@ function time(): number {
   return (Date.now() - progStart) / 1000;
 }
 
-export function paintFrame() {
+// XXX do the same optimization I do in gl-pane where I don't even
+// draw the framebuffer if I don't need to.
+export function paintFrame(drawParams: DrawParams) {
   nativeLayer.clear();
 
   // Draw underlying screen data to framebuffer
@@ -101,6 +102,8 @@ export function paintFrame() {
 
   // Draw screen postprocessing
   programPost.use();
+  nat.glUniform1f(programPost.getUniformLocation("u_beamScale"), drawParams.beamScale);
+  nat.glUniform1f(programPost.getUniformLocation("u_fade"), drawParams.fade);
   nat.glUniform1f(programPost.getUniformLocation("u_time"), time());
   nativeLayer.drawTriangles();
 
