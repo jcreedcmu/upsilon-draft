@@ -4,9 +4,11 @@ import { mkGameState } from "../../src/core/model";
 import * as palette from '../../src/ui/palette';
 import { render } from '../../src/ui/render';
 import * as shader from './shaders';
+import { Screen } from '../../src/ui/screen';
 
 const width = 1280;
 const height = 800;
+// XXX HARDCODED
 const ROWS = 18;
 const COLS = 48;
 
@@ -56,11 +58,10 @@ nat.glUniform1i(programText.getUniformLocation("u_fontTexture"), TextureUnit.FON
 nat.glUniform1i(programText.getUniformLocation("u_textPageTexture"), TextureUnit.TEXT_PAGE);
 nat.glUniform4fv(programText.getUniformLocation("u_palette"), palette.paletteDataFloat());
 
-const state = mkGameState();
-const screen = render(state);
-
-nat.glActiveTexture(TextureUnit.TEXT_PAGE);
-nat.glTexImage2d(48, 18, screen.imdat.data);
+export function updateTextPage(screen: Screen) {
+  nat.glActiveTexture(TextureUnit.TEXT_PAGE);
+  nat.glTexImage2d(COLS, ROWS, screen.imdat.data);
+}
 
 const programSynth = new nat.Program(shader.vertex, shader.fragmentSynthetic);
 nativeLayer.configShaders(programSynth.programId());
@@ -90,6 +91,8 @@ function time(): number {
 }
 
 export function paintFrame() {
+  nativeLayer.clear();
+
   // Draw underlying screen data to framebuffer
   fb.bind();
   programText.use();
