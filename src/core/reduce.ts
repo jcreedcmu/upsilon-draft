@@ -270,7 +270,6 @@ function reduceDropAction(state: GameState, action: DropLineAction): ReduceResul
 }
 
 function reduceActions(state: GameState, actions: GameAction[]): ReduceResult {
-  console.log('reduceActions', actions.map(a => a.t));
   let effects: Effect[] = [];
   for (const action of actions) {
     let moreEffects;
