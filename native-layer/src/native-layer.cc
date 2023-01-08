@@ -142,13 +142,12 @@ Napi::Value NativeLayer::pollEvent(const Napi::CallbackInfo &info) {
 
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
-    case SDL_KEYUP:
-      if (event.key.keysym.sym == SDLK_ESCAPE || event.key.keysym.sym == SDLK_q)
-        return Napi::Boolean::New(env, false);
+    case SDL_KEYDOWN:
+      return Napi::String::New(env, SDL_GetKeyName(event.key.keysym.sym));
       break;
     }
   }
-  return Napi::Boolean::New(env, true);
+  return env.Null();
 }
 
 Napi::Value NativeLayer::clear(const Napi::CallbackInfo &info) {
@@ -171,7 +170,7 @@ Napi::Value NativeLayer::swapWindow(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
 
   SDL_GL_SwapWindow(this->_window);
-  SDL_Delay(1);
+  //  SDL_Delay(1);
 
   return env.Null();
 }

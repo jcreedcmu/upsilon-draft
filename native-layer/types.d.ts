@@ -11,7 +11,7 @@ export class TextureId { private _TextureId(): void }
 export class NativeLayer {
   constructor(width: number, height: number);
   configShaders(program: ProgramId): void;
-  pollEvent(): boolean;
+  pollEvent(): string | null;
   drawTriangles(): void;
   clear(): void;
   swapWindow(): void;
