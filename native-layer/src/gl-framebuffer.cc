@@ -11,10 +11,12 @@ Napi::Object GlFramebuffer::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func = DefineClass(
       env, "Framebuffer",
       {
-          GlFramebuffer::InstanceMethod("framebufferId", &GlFramebuffer::framebufferId),
+          GlFramebuffer::InstanceMethod("framebufferId",
+                                        &GlFramebuffer::framebufferId),
           GlFramebuffer::InstanceMethod("bind", &GlFramebuffer::bind),
           GlFramebuffer::InstanceMethod("unbind", &GlFramebuffer::unbind),
-          GlFramebuffer::InstanceMethod("setOutputTexture", &GlFramebuffer::setOutputTexture),
+          GlFramebuffer::InstanceMethod("setOutputTexture",
+                                        &GlFramebuffer::setOutputTexture),
       });
 
   GlFramebuffer::constructor = Napi::Persistent(func);
@@ -25,7 +27,8 @@ Napi::Object GlFramebuffer::Init(Napi::Env env, Napi::Object exports) {
   return exports;
 }
 
-GlFramebuffer::GlFramebuffer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
+GlFramebuffer::GlFramebuffer(const Napi::CallbackInfo &info)
+    : ObjectWrap(info) {
   NBOILER_UNUSED();
 
   glGenFramebuffers(1, &this->_framebuffer);
@@ -67,7 +70,8 @@ NFUNC(GlFramebuffer::setOutputTexture) {
 
   unsigned int texture_id = info[0].As<Napi::Number>().Uint32Value();
 
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                         texture_id, 0);
 
   return env.Null();
 }

@@ -25,6 +25,9 @@ export function glActiveTexture(textureUnit: number): void;
 export function glUniform4fv(uniform: UniformLoc, values: number[]): void;
 export function glTexImage2d(width: number, height: number, values: Uint8Array): void;
 
+export function initSound(): void;
+export function playSound(): void; // debugging for now
+
 export class Texture {
   constructor();
   loadFile(filename: string): void;

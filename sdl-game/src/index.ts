@@ -7,6 +7,7 @@ import { Screen } from '../../src/ui/screen';
 import { logger } from '../../src/util/debug';
 import { produce } from '../../src/util/produce';
 import { nativeLayer, paintFrame, updateTextPage } from './graphics';
+import * as nat from 'native-layer';
 
 function nextWake(state: GameState): WakeTime {
   // XXX we could check times and be more optimal here
@@ -108,12 +109,15 @@ function convertSdlKey(key: string): string {
   return lower.length == 1 ? lower : `<${lower}>`;
 }
 
-function go() {
+function mainLoop() {
   const key = nativeLayer.pollEvent();
   if (key != null) {
     if (key == 'Q' || key == 'Escape') {
       nativeLayer.finish();
       return;
+    }
+    if (key == '2') {
+      nat.playSound();
     }
     if (key == '1') {
       dispatch({ t: 'boot' });
@@ -123,7 +127,12 @@ function go() {
   repaint();
   state[0] = animatePowerState(state[0]);
 
-  setTimeout(go, 0);
+  setTimeout(mainLoop, 0);
 }
 
-go();
+function startup() {
+  nat.initSound();
+  mainLoop();
+}
+
+startup();

@@ -12,7 +12,8 @@ Napi::Object GlProgram::Init(Napi::Env env, Napi::Object exports) {
       env, "Program",
       {
           GlProgram::InstanceMethod("programId", &GlProgram::programId),
-          GlProgram::InstanceMethod("getUniformLocation", &GlProgram::getUniformLocation),
+          GlProgram::InstanceMethod("getUniformLocation",
+                                    &GlProgram::getUniformLocation),
           GlProgram::InstanceMethod("use", &GlProgram::use),
       });
 
@@ -91,13 +92,11 @@ NFUNC(GlProgram::programId) {
   return Napi::Number::New(env, this->_program);
 }
 
-
 NFUNC(GlProgram::getUniformLocation) {
   NBOILER();
 
   if (info.Length() < 1) {
-    throwJs(env,
-            "usage: getUniformLocation(name: string)");
+    throwJs(env, "usage: getUniformLocation(name: string)");
   }
 
   if (!info[0].IsString()) {

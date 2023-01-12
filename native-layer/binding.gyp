@@ -15,8 +15,10 @@
     ],
     'libraries': [
       '-lSDL2',
+      '-lSDL2_mixer',
       '-lGL',
-      '-lGLU'
+      '-lGLU',
+      '-lm'
     ],
     'dependencies': [
       "<!(node -p \"require('node-addon-api').gyp\")"

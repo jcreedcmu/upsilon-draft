@@ -1,18 +1,19 @@
 #include <iostream>
 #include <napi.h>
+#include <math.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_opengl.h>
 #include <SDL2/SDL_opengl_glext.h>
 
+#include "gl-framebuffer.hh"
 #include "gl-program.hh"
 #include "gl-texture.hh"
-#include "gl-framebuffer.hh"
 #include "napi-helpers.hh"
 #include "vendor/stb_image.h"
 
 typedef enum t_attrib_id { attrib_uv } t_attrib_id;
-
 
 class NativeLayer : public Napi::ObjectWrap<NativeLayer> {
 public:
@@ -61,7 +62,16 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   this->_width = info[0].As<Napi::Number>().Uint32Value();
   this->_height = info[1].As<Napi::Number>().Uint32Value();
 
-  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+
+  if (Mix_OpenAudio(48000, AUDIO_S32SYS, 1, 1024) == -1) {
+    printf("SDL2_mixer could not be initialized!\n"
+           "SDL_Error: %s\n",
+           SDL_GetError());
+    throwJs(env, "error in audio initialization");
+    return;
+  }
+
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
   SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -73,9 +83,9 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-  SDL_Window *window =
-      SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                       this->_width, this->_height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+  SDL_Window *window = SDL_CreateWindow(
+      "", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, this->_width,
+      this->_height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
   SDL_GLContext context = SDL_GL_CreateContext(window);
 
   printf("GL VERSION [%s]\n", glGetString(GL_VERSION));
@@ -193,7 +203,8 @@ Napi::Object NativeLayer::Init(Napi::Env env, Napi::Object exports) {
           NativeLayer::InstanceMethod("configShaders",
                                       &NativeLayer::configShaders),
           NativeLayer::InstanceMethod("pollEvent", &NativeLayer::pollEvent),
-          NativeLayer::InstanceMethod("drawTriangles", &NativeLayer::drawTriangles),
+          NativeLayer::InstanceMethod("drawTriangles",
+                                      &NativeLayer::drawTriangles),
           NativeLayer::InstanceMethod("clear", &NativeLayer::clear),
           NativeLayer::InstanceMethod("swapWindow", &NativeLayer::swapWindow),
       });
@@ -214,8 +225,7 @@ NFUNC(wrap_glUniform1i) {
   NBOILER();
 
   if (info.Length() < 2) {
-    throwJs(env,
-            "usage: glUniform1i(location: number, value: number)");
+    throwJs(env, "usage: glUniform1i(location: number, value: number)");
   }
 
   if (!info[0].IsNumber()) {
@@ -226,10 +236,8 @@ NFUNC(wrap_glUniform1i) {
     return throwJs(env, "argument 1 should be a number");
   }
 
-  glUniform1i(
-              info[0].As<Napi::Number>().Uint32Value(),
-              info[1].As<Napi::Number>().Uint32Value()
-              );
+  glUniform1i(info[0].As<Napi::Number>().Uint32Value(),
+              info[1].As<Napi::Number>().Uint32Value());
   return env.Null();
 }
 
@@ -237,8 +245,7 @@ NFUNC(wrap_glUniform1f) {
   NBOILER();
 
   if (info.Length() < 2) {
-    throwJs(env,
-            "usage: glUniform1f(location: number, value: number)");
+    throwJs(env, "usage: glUniform1f(location: number, value: number)");
   }
 
   if (!info[0].IsNumber()) {
@@ -249,10 +256,8 @@ NFUNC(wrap_glUniform1f) {
     return throwJs(env, "argument 1 should be a number");
   }
 
-  glUniform1f(
-              info[0].As<Napi::Number>().Uint32Value(),
-              info[1].As<Napi::Number>().FloatValue()
-              );
+  glUniform1f(info[0].As<Napi::Number>().Uint32Value(),
+              info[1].As<Napi::Number>().FloatValue());
   return env.Null();
 }
 
@@ -260,8 +265,9 @@ NFUNC(wrap_glUniform2f) {
   NBOILER();
 
   if (info.Length() < 3) {
-    throwJs(env,
-            "usage: glUniform2f(location: number, value: number, value2: number)");
+    throwJs(
+        env,
+        "usage: glUniform2f(location: number, value: number, value2: number)");
   }
 
   if (!info[0].IsNumber()) {
@@ -276,11 +282,9 @@ NFUNC(wrap_glUniform2f) {
     return throwJs(env, "argument 2 should be a number");
   }
 
-  glUniform2f(
-              info[0].As<Napi::Number>().Uint32Value(),
+  glUniform2f(info[0].As<Napi::Number>().Uint32Value(),
               info[1].As<Napi::Number>().FloatValue(),
-              info[2].As<Napi::Number>().FloatValue()
-              );
+              info[2].As<Napi::Number>().FloatValue());
   return env.Null();
 }
 
@@ -288,8 +292,7 @@ NFUNC(wrap_glActiveTexture) {
   NBOILER();
 
   if (info.Length() < 1) {
-    throwJs(env,
-            "usage: glActiveTexture(texture_unit: number)");
+    throwJs(env, "usage: glActiveTexture(texture_unit: number)");
   }
 
   if (!info[0].IsNumber()) {
@@ -299,7 +302,6 @@ NFUNC(wrap_glActiveTexture) {
   unsigned int texture_unit = info[0].As<Napi::Number>().Uint32Value();
 
   glActiveTexture(GL_TEXTURE0 + texture_unit);
-
 
   return env.Null();
 }
@@ -313,11 +315,9 @@ NFUNC(wrap_glActiveTexture) {
 NFUNC(wrap_glUniform4fv) {
   NBOILER();
 
-  glUniform4fv(
-              info[0].As<Napi::Number>().Uint32Value(),
-              info[1].As<Napi::Number>().Uint32Value(),
-              info[2].As<Napi::TypedArrayOf<float>>().Data()
-              );
+  glUniform4fv(info[0].As<Napi::Number>().Uint32Value(),
+               info[1].As<Napi::Number>().Uint32Value(),
+               info[2].As<Napi::TypedArrayOf<float>>().Data());
 
   return env.Null();
 }
@@ -337,6 +337,43 @@ NFUNC(wrap_glTexImage2d) {
 
 // !!!!!!!!!!!!! END UNSAFE
 
+// Sound stuff
+const int BUF_LEN = 2000;
+int *sine_buffer;
+Mix_Chunk *sine;
+
+#define WAVE "/tmp/a.wav"
+NFUNC(playSound) {
+  NBOILER();
+
+  if (Mix_PlayChannel(-1, sine, 0) == -1) {
+    printf("Waves sound could not be played!\n"
+           "SDL_Error: %s\n",
+           SDL_GetError());
+    Mix_FreeChunk(sine);
+    free(sine_buffer);
+    return throwJs(env, "couldn't play sound");
+  }
+  return env.Null();
+}
+
+NFUNC(initSound) {
+  NBOILER();
+
+  sine_buffer = (int *)malloc(BUF_LEN * 4);
+  for (int i = 0; i < BUF_LEN; i++) {
+    sine_buffer[i] =  32768 * 6400 * sin(2 * 3.1415926535 * 440.0 * (i / 44100.0));
+  }
+  sine = Mix_QuickLoad_RAW((Uint8 *)sine_buffer, BUF_LEN * 4);
+  if (!sine) {
+    printf(".WAV sound '%s' could not be loaded!\n"
+           "SDL_Error: %s\n",
+           WAVE, SDL_GetError());
+    return throwJs(env, "couldn't init sound");
+  }
+  return env.Null();
+}
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   NativeLayer::Init(env, exports);
   GlTexture::Init(env, exports);
@@ -346,10 +383,13 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));
   exports.Set("glUniform1f", Napi::Function::New(env, wrap_glUniform1f));
   exports.Set("glUniform2f", Napi::Function::New(env, wrap_glUniform2f));
-  exports.Set("glActiveTexture", Napi::Function::New(env, wrap_glActiveTexture));
+  exports.Set("glActiveTexture",
+              Napi::Function::New(env, wrap_glActiveTexture));
 
   exports.Set("_glUniform4fv", Napi::Function::New(env, wrap_glUniform4fv));
   exports.Set("_glTexImage2d", Napi::Function::New(env, wrap_glTexImage2d));
+  exports.Set("playSound", Napi::Function::New(env, playSound));
+  exports.Set("initSound", Napi::Function::New(env, initSound));
   return exports;
 }
 

@@ -25,7 +25,7 @@ Napi::Object GlTexture::Init(Napi::Env env, Napi::Object exports) {
   return exports;
 }
 
- GlTexture::GlTexture(const Napi::CallbackInfo &info) : ObjectWrap(info) {
+GlTexture::GlTexture(const Napi::CallbackInfo &info) : ObjectWrap(info) {
   glGenTextures(1, &this->_texture);
   glActiveTexture(GL_TEXTURE0);
 }
@@ -84,7 +84,8 @@ NFUNC(GlTexture::makeBlank) {
   int width = info[0].As<Napi::Number>().Uint32Value();
   int height = info[1].As<Napi::Number>().Uint32Value();
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, NULL);
   // interpolation settings unnecessarily coupled to the loaded vs.
   // uninitialized texture distinction
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -102,8 +103,7 @@ NFUNC(GlTexture::bind) {
   NBOILER();
 
   if (info.Length() < 1) {
-    throwJs(env,
-            "usage: bind(texture unit: number)");
+    throwJs(env, "usage: bind(texture unit: number)");
   }
 
   if (!info[0].IsNumber()) {
