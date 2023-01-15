@@ -8,8 +8,8 @@ export function maybeInvertAttr(attr: Attr, doInvert: boolean): Attr {
   return doInvert ? { bg: attr.fg, fg: attr.bg } : attr;
 }
 
-export function mapval<T, U>(m: { [k: string]: T }, f: (x: T) => U): { [k: string]: U } {
-  return Object.fromEntries(Object.entries(m).map(([k, v]) => [k, f(v)]));
+export function mapval<T, U>(m: { [k: string]: T }, f: (x: T, k?: string) => U): { [k: string]: U } {
+  return Object.fromEntries(Object.entries(m).map(([k, v]) => [k, f(v, k)]));
 }
 
 export class Rand {

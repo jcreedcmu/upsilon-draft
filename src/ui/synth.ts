@@ -1,4 +1,4 @@
-import { mlerp } from "../util/util";
+import { mapval, mlerp } from "../util/util";
 
 export const SAMPLE_RATE = 44100; // samples/s
 const BEEP_LENGTH = 30000; // samples
@@ -37,7 +37,7 @@ function specWithDefaults(spec: Partial<SoundEffectSpec>): SoundEffectSpec {
   }
 };
 
-export type AllSounds = { [K in SoundEffect]: AudioBuffer };
+export type AllSounds<T> = { [K in SoundEffect]: T };
 
 function adsr(t: number, len: number, attack: number, decay: number, sustain: number, release: number): number {
   if (t < attack) {
@@ -54,13 +54,10 @@ function adsr(t: number, len: number, attack: number, decay: number, sustain: nu
   }
 }
 
-function makeStartupSound(): AudioBuffer {
+function makeStartupSound(): Float32Array {
   const len = 5; // seconds
   const samples = len * SAMPLE_RATE;
-  const buf = new AudioBuffer({
-    length: samples, sampleRate: SAMPLE_RATE, numberOfChannels: 1
-  });
-  const data = buf.getChannelData(0);
+  const data = new Float32Array(samples);
   const FREQS = 30;
   const freq: number[] = [];
   const phase: number[] = [];
@@ -79,18 +76,17 @@ function makeStartupSound(): AudioBuffer {
     }
     data[frame] = sample;
   }
-  return buf;
+  return data;
 }
 
 function square(phase: number) {
   return 0.5 * ((phase % (2 * Math.PI) < Math.PI) ? 1 : -1);
 }
 
-function makeBeep(partialSpec: Partial<SoundEffectSpec>): AudioBuffer {
+function makeBeep(partialSpec: Partial<SoundEffectSpec>): Float32Array {
   const spec = specWithDefaults(partialSpec);
   const dur_frame = Math.floor(spec.duration_s * SAMPLE_RATE);
-  const beep = new AudioBuffer({ length: dur_frame, sampleRate: SAMPLE_RATE, numberOfChannels: 1 });
-  const data = beep.getChannelData(0);
+  const data = new Float32Array(dur_frame);
   let phase = 0;
   for (let i = 0; i < dur_frame; i++) {
     const freq = mlerp(spec.startFreq, spec.endFreq, i / dur_frame);
@@ -98,10 +94,10 @@ function makeBeep(partialSpec: Partial<SoundEffectSpec>): AudioBuffer {
     const base = square(phase);
     data[i] = 0.1 * base * adsr(i / SAMPLE_RATE, dur_frame / SAMPLE_RATE, spec.attack_s, spec.decay_s, spec.sustain, spec.release_s);
   }
-  return beep;
+  return data;
 }
 
-export function makeSounds(): AllSounds {
+export function makeSounds(): AllSounds<Float32Array> {
   return {
     startup: makeStartupSound(),
     ping: makeBeep({
@@ -120,4 +116,8 @@ export function makeSounds(): AllSounds {
     drop: makeBeep({ startFreq: 440, endFreq: 55 }),
     error: makeBeep({ startFreq: 220, duration_s: 0.3 }),
   }
+}
+
+export function mapSounds<T, U>(f: (x: T) => U, allSounds: AllSounds<T>): AllSounds<U> {
+  return mapval(allSounds, f) as AllSounds<U>;
 }

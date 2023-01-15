@@ -1,4 +1,4 @@
-import { AllSounds, makeSounds, SAMPLE_RATE, SoundEffect } from "./synth";
+import { AllSounds, makeSounds, mapSounds, SAMPLE_RATE, SoundEffect } from "./synth";
 export { SoundEffect } from './synth';
 
 export const allAbstractSoundEffects = [
@@ -17,9 +17,8 @@ export const allAbstractSoundEffects = [
 
 export type Sound = {
   d: AudioContext,
-  sounds: AllSounds,
+  sounds: AllSounds<AudioBuffer>,
 }
-
 
 export type AbstractSoundEffect = (typeof allAbstractSoundEffects)[number];
 
@@ -31,8 +30,17 @@ export function initSound(): Sound {
   const context = new AudioContext({ sampleRate: SAMPLE_RATE });
   return {
     d: context,
-    sounds: makeSounds()
+    sounds: mapSounds(makeBuffer, makeSounds())
   };
+}
+
+function makeBuffer(data: Float32Array, name?: string): AudioBuffer {
+  console.log(name, data.length);
+  const buf = new AudioBuffer({
+    length: data.length, sampleRate: SAMPLE_RATE, numberOfChannels: 1
+  });
+  buf.getChannelData(0).set(data);
+  return buf;
 }
 
 export function playSound(sound: Sound, which: SoundEffect) {
