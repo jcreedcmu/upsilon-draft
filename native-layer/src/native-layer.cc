@@ -11,6 +11,7 @@
 #include "gl-program.hh"
 #include "gl-texture.hh"
 #include "napi-helpers.hh"
+#include "sample.hh"
 #include "vendor/stb_image.h"
 
 typedef enum t_attrib_id { attrib_uv } t_attrib_id;
@@ -64,7 +65,7 @@ NativeLayer::NativeLayer(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
-  if (Mix_OpenAudio(48000, AUDIO_S32SYS, 1, 1024) == -1) {
+  if (Mix_OpenAudio(44100, AUDIO_S16SYS, 1, 1024) == -1) {
     printf("SDL2_mixer could not be initialized!\n"
            "SDL_Error: %s\n",
            SDL_GetError());
@@ -380,6 +381,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   GlTexture::Init(env, exports);
   GlFramebuffer::Init(env, exports);
   GlProgram::Init(env, exports);
+  Sample::Init(env, exports);
 
   exports.Set("glUniform1i", Napi::Function::New(env, wrap_glUniform1i));
   exports.Set("glUniform1f", Napi::Function::New(env, wrap_glUniform1f));

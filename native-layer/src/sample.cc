@@ -23,7 +23,8 @@ Sample::Sample(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 
   // We rely on the javascript wrapper for two things:
   // - typechecking arguments to this constructor
-  // - keeping a reference to the typed array around so the audio data isn't deallocated
+  // - keeping a reference to the typed array around so the audio data isn't
+  // deallocated
 
   int16_t *data = info[0].As<Napi::TypedArrayOf<int16_t>>().Data();
   this->buffer = data;
@@ -42,7 +43,6 @@ Sample::Sample(const Napi::CallbackInfo &info) : ObjectWrap(info) {
 }
 
 Sample::~Sample() {
-  std::cerr << "destructed\n";
   Mix_FreeChunk(this->chunk);
 }
 

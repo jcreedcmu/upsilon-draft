@@ -17,7 +17,7 @@ void printShaderLog(GLuint shader) {
     glGetShaderInfoLog(shader, maxLength, &infoLogLength, infoLog);
     if (infoLogLength > 0) {
       // Print Log
-      printf("%s\n", infoLog);
+      printf("gl-utils.hh: %s\n", infoLog);
     }
 
     // Deallocate string

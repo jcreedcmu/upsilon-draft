@@ -26,7 +26,6 @@ module.exports.glTexImage2d = function(width, height, data) {
 }
 
 module.exports.Sample = function(buffer) {
-  console.log(typeof buffer);
   if (!(buffer instanceof Int16Array)) {
     throw new TypeError('argument 0 to Sample constructor (buffer) should be an Int16array');
   }

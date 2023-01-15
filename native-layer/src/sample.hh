@@ -17,6 +17,6 @@ public:
   static Napi::FunctionReference constructor;
 
 private:
-   short *buffer;
-   Mix_Chunk *chunk;
+  short *buffer;
+  Mix_Chunk *chunk;
 };
