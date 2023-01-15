@@ -24,3 +24,16 @@ module.exports.glTexImage2d = function(width, height, data) {
   }
   bindings._glTexImage2d(width, height, data);
 }
+
+module.exports.Sample = function(buffer) {
+  console.log(typeof buffer);
+  if (!(buffer instanceof Int16Array)) {
+    throw new TypeError('argument 0 to Sample constructor (buffer) should be an Int16array');
+  }
+  this._sample = new bindings._Sample(buffer, buffer.length);
+  this._buffer = buffer;
+}
+
+module.exports.Sample.prototype.play = function() {
+  this._sample.play();
+}

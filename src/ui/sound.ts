@@ -57,9 +57,11 @@ function specWithDefaults(spec: Partial<SoundEffectSpec>): SoundEffectSpec {
   }
 };
 
+export type AllSounds = { [K in SoundEffect]: AudioBuffer };
+
 export type Sound = {
   d: AudioContext,
-  sounds: { [K in SoundEffect]: AudioBuffer },
+  sounds: AllSounds,
 }
 
 function adsr(t: number, len: number, attack: number, decay: number, sustain: number, release: number): number {
@@ -124,28 +126,32 @@ function makeBeep(partialSpec: Partial<SoundEffectSpec>): AudioBuffer {
   return beep;
 }
 
+export function makeSounds(): AllSounds {
+  return {
+    startup: makeStartupSound(),
+    ping: makeBeep({
+      startFreq: 660, endFreq: 675,
+      attack_s: 0.05, decay_s: 0.05, sustain: 0.1, release_s: 0.25, duration_s: 0.5
+    }),
+    rising: makeBeep({ startFreq: 220, endFreq: 440 }),
+    falling: makeBeep({ startFreq: 440, endFreq: 220 }),
+    high: makeBeep({
+      startFreq: 1000, duration_s: 0.01 + 0.03,
+      attack_s: 0.01, decay_s: 0.00, sustain: 1, release_s: 0.03
+    }),
+    low: makeBeep({ startFreq: 220 }),
+    med: makeBeep({ startFreq: 330, duration_s: 0.2 }),
+    pickup: makeBeep({ startFreq: 55, endFreq: 440 }),
+    drop: makeBeep({ startFreq: 440, endFreq: 55 }),
+    error: makeBeep({ startFreq: 220, duration_s: 0.3 }),
+  }
+}
+
 export function initSound(): Sound {
   const context = new AudioContext({ sampleRate: SAMPLE_RATE });
   return {
     d: context,
-    sounds: {
-      startup: makeStartupSound(),
-      ping: makeBeep({
-        startFreq: 660, endFreq: 675,
-        attack_s: 0.05, decay_s: 0.05, sustain: 0.1, release_s: 0.25, duration_s: 0.5
-      }),
-      rising: makeBeep({ startFreq: 220, endFreq: 440 }),
-      falling: makeBeep({ startFreq: 440, endFreq: 220 }),
-      high: makeBeep({
-        startFreq: 1000, duration_s: 0.01 + 0.03,
-        attack_s: 0.01, decay_s: 0.00, sustain: 1, release_s: 0.03
-      }),
-      low: makeBeep({ startFreq: 220 }),
-      med: makeBeep({ startFreq: 330, duration_s: 0.2 }),
-      pickup: makeBeep({ startFreq: 55, endFreq: 440 }),
-      drop: makeBeep({ startFreq: 440, endFreq: 55 }),
-      error: makeBeep({ startFreq: 220, duration_s: 0.3 }),
-    }
+    sounds: makeSounds()
   };
 }
 

@@ -7,6 +7,7 @@ import { Screen } from '../../src/ui/screen';
 import { logger } from '../../src/util/debug';
 import { produce } from '../../src/util/produce';
 import { nativeLayer, paintFrame, updateTextPage } from './graphics';
+import { initSounds } from './audio';
 import * as nat from 'native-layer';
 
 function nextWake(state: GameState): WakeTime {

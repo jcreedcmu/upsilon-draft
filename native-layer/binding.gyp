@@ -9,6 +9,7 @@
       "src/gl-texture.cc",
       "src/gl-framebuffer.cc",
       "src/gl-program.cc",
+      "src/sample.cc",
     ],
     'include_dirs': [
       "<!@(node -p \"require('node-addon-api').include\")"

@@ -36,6 +36,11 @@ export class Texture {
   makeBlank(width: number, height: number): void;
 }
 
+export class Sample {
+  constructor(buffer: Int16Array);
+  play();
+}
+
 export class Program {
   constructor(vertexShader: string, fragmentShader: string);
   getUniformLocation(name: string): UniformLoc;

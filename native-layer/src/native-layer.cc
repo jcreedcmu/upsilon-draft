@@ -1,6 +1,6 @@
 #include <iostream>
-#include <napi.h>
 #include <math.h>
+#include <napi.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
@@ -362,7 +362,8 @@ NFUNC(initSound) {
 
   sine_buffer = (int *)malloc(BUF_LEN * 4);
   for (int i = 0; i < BUF_LEN; i++) {
-    sine_buffer[i] =  32768 * 6400 * sin(2 * 3.1415926535 * 440.0 * (i / 44100.0));
+    sine_buffer[i] =
+        32768 * 6400 * sin(2 * 3.1415926535 * 440.0 * (i / 44100.0));
   }
   sine = Mix_QuickLoad_RAW((Uint8 *)sine_buffer, BUF_LEN * 4);
   if (!sine) {
