@@ -54,6 +54,15 @@ export function prefixForItem(item: Item): string {
 }
 
 function attrForItem(item: Item): Attr {
+  if (item.content.t == 'sound') {
+    return { fg: ColorCode.bcyan, bg: ColorCode.blue };
+  }
+  if (item.content.t == 'image') {
+    return { fg: ColorCode.bblack, bg: ColorCode.blue };
+  }
+  if (item.content.t == 'linlog') {
+    return { fg: ColorCode.bmagenta, bg: ColorCode.blue };
+  }
   const locked = { fg: ColorCode.bblack, bg: ColorCode.blue };
   const instr = { fg: ColorCode.cyan, bg: ColorCode.blue };
   if (item.acls.instr)
