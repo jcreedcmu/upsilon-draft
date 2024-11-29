@@ -41,12 +41,12 @@ function reschedule(dispatch: (a: Action) => void, state: GameState): ClockState
       () => {
         const now = nowTicks(clock);
         if (now < whenTicks) {
-          throw new Error(`I didn't expect nowTicks ${nowTicks(clock)} < whenTicks ${whenTicks}`);
+          console.error(`I didn't expect nowTicks ${now} < whenTicks ${whenTicks}`);
         }
-        else {
-          logger('clockUpdate', `reschedule dispatching clock update now`);
-          dispatch({ t: 'clockUpdate', tick: now });
-        }
+
+        logger('clockUpdate', `reschedule dispatching clock update now`);
+        dispatch({ t: 'clockUpdate', tick: now });
+
       },
       delayMs
     );
@@ -106,6 +106,7 @@ async function go() {
     }
   }
 
+  // This gets called after every dispatch
   function maybeRescheduleGame(priorState: GameState, state: GameState): GameState {
     if (!equalWake(nextWake(priorState), nextWake(state))) {
       const newClock = reschedule(dispatch, state);
@@ -116,6 +117,7 @@ async function go() {
     else return state;
   }
 
+  // This gets called after every dispatch
   function maybeReschedule(priorState: SceneState, state: SceneState): SceneState {
     if (state.t == 'game' && priorState.t == 'game') {
       return { t: 'game', gameState: maybeRescheduleGame(priorState.gameState, state.gameState), revision: state.revision };

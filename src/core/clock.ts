@@ -24,7 +24,7 @@ export function nowTicks(clock: ClockState): number {
 export type WakeTime =
   | { t: 'live' } // there's something actively updating itself in the UI:
   // do updates as often as possible
-  | { t: 'infinite' } // there's active updates. Don't update until this fact changes.
+  | { t: 'infinite' } // there are no active updates. Don't update until this fact changes.
   | { t: 'tick', tick: number }; // the next active update is at tick `tick`.
 
 export function clockedNextWake(clock: ClockState, nextWake: WakeTime): number {
