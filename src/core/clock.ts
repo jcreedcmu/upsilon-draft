@@ -18,7 +18,7 @@ export function mkClockState(): ClockState {
 }
 
 export function nowTicks(clock: ClockState): number {
-  return Math.floor((Date.now() - clock.originEpochMs) / MILLISECONDS_PER_TICK);
+  return Math.round((Date.now() - clock.originEpochMs) / MILLISECONDS_PER_TICK);
 }
 
 export type WakeTime =
