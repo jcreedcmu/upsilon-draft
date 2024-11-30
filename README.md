@@ -1,17 +1,7 @@
 upsilon-draft
 =============
 
-This is a prototype of a game idea drawing some inspiration from
-
- - [factorio](https://en.wikipedia.org/wiki/Factorio)
- - [TIS-100](https://en.wikipedia.org/wiki/TIS-100) & other zachtronics games
- - [Orteil's "Nested"](https://orteil.dashnet.org/nested)
- - [Quadrilateral Cowboy](https://en.wikipedia.org/wiki/Quadrilateral_Cowboy)
- - [smalltalk](https://en.wikipedia.org/wiki/Smalltalk)-style reflection
- - [uxn](https://100r.co/site/uxn.html)
- - [Baba is You](https://hempuli.com/baba/)
-
-Thanks to @dwrensha and @tom7 for ideas.
+Game prototype. See [DESIGN.md](DESIGN.md) for design doc.
 
 Demo
 ----
