@@ -37,6 +37,21 @@ Thanks to @dwrensha and @tom7 for ideas.
 - Their properties include a name, some resources that live on them,
   acls.
 
+- Resources feel like quota that can be spent
+  constructing things or acting in some way.
+  There are perhaps generic ones like:
+    - cpu cycles
+    - filesystem space
+    - ram space
+    - network bandwidth
+  and maybe more specific ones, like
+    - cpu cycles for:
+      file type conversion, model training, rendering, (de)compilation
+    - filesystem or ram space for:
+      text files, graphics files, executables, etc.
+    - "privilege points"
+    - local vs. internet bandwidth quota
+
 ### Player Movement
 
 - There's a notion of current directory, and current selected file.
