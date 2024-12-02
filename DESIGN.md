@@ -52,6 +52,19 @@ Thanks to @dwrensha and @tom7 for ideas.
     - "privilege points"
     - local vs. internet bandwidth quota
 
+- Resources only exist on files and directories.
+
+- The player's inventory consists of, optionally, one file.
+
+- Later in the game this may be expanded to multiple files.
+
+- Some files are too large ("heavy") to be picked up, but can be moved
+  incrementally by executables.
+
+- Executables can draw cpu-quota from the directory they're
+  immediately in. This is sort of like powering cells with power
+  poles.
+
 ### Player Movement
 
 - There's a notion of current directory, and current selected file.
